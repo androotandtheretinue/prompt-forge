@@ -1663,13 +1663,44 @@
       ]
     };
 
-    Object.entries(categoryExpansions).forEach(([key, additions]) => {
-      const seen = new Set(categories[key].options);
-      additions.forEach(option => {
-        if (!seen.has(option)) {
-          categories[key].options.push(option);
-          seen.add(option);
-        }
+    // v5.2 vocabulary expansion. The forge could name a hundred and twenty-eight
+    // ways to make a still image and not one way to make an image that moves.
+    // Claymation, rotoscoping and the rest of the frame-by-frame family were
+    // absent entirely, as was the pre-cinema motion study that produced them.
+    // Added alongside: the historical print and photographic processes that the
+    // v4 pass reached past on its way to the instrument bench.
+    const motionExpansions = {
+      medium: [
+        // Image in motion — frame by frame
+        'Claymation', 'Stop Motion', 'Puppet Animation', 'Cutout Animation',
+        'Silhouette Animation', 'Pixilation', 'Sand Animation', 'Paint-on-Glass Animation',
+        'Pinscreen Animation',
+        // Image in motion — drawn
+        'Cel Animation', 'Rotoscoping', 'Rubber Hose Animation',
+        // Image in motion — computed and captured
+        'Machinima', 'Motion Capture Animation',
+        // Pre-cinema and motion study
+        'Zoetrope Strip', 'Flip Book Sequence', 'Chronophotography',
+        'Slit-Scan Photography', 'Stroboscopic Exposure', 'Time-Lapse Composite',
+        // Historical printmaking
+        'Mezzotint', 'Aquatint', 'Drypoint', 'Silverpoint',
+        // Historical photographic processes
+        'Autochrome', 'Albumen Print', 'Gum Bichromate Print', 'Platinum Palladium Print',
+        'Camera Obscura Study',
+        // Surface and inlay traditions
+        'Reverse Glass Painting', 'Sgraffito Plaster', 'Pietra Dura Inlay'
+      ]
+    };
+
+    [categoryExpansions, motionExpansions].forEach(expansion => {
+      Object.entries(expansion).forEach(([key, additions]) => {
+        const seen = new Set(categories[key].options);
+        additions.forEach(option => {
+          if (!seen.has(option)) {
+            categories[key].options.push(option);
+            seen.add(option);
+          }
+        });
       });
     });
 

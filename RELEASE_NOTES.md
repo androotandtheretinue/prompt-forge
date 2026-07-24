@@ -1,8 +1,8 @@
-# Prompt Forge 5.2.0 — Signal Rig
+# Prompt Forge 5.2.0 — Signal Rig and Images in Motion
 
-Sixteen strings. You do not play all sixteen on every song.
+Sixteen strings. You do not play all sixteen on every song — and one of them was missing half its notes.
 
-Prompt Forge 5.1 made the board playable. 5.2 makes it configurable before you play: choose which axes are in the instrument, and the rest go quiet and stay quiet.
+Prompt Forge 5.1 made the board playable. 5.2 does two things to it. The **Signal Rig** makes the board configurable before you play: choose which axes are in the instrument, and the rest go quiet and stay quiet. The **medium axis** grows from 128 to 160 and learns, for the first time, that images move.
 
 ## The Signal Rig
 
@@ -63,6 +63,25 @@ Two smaller corrections to the same problem:
 - Every cluster button is prefixed with **⟳**. The labels were nouns; the action is a verb.
 - **Hovering a scope outlines the rows it will change**, in both the board and the rig strip, before the click commits. The button titles list their member axes and are generated from the actual cluster definition, so a label cannot drift from what it does.
 
+## The medium axis learns that images move
+
+The forge could name 128 ways to make a still image and not one way to make an image that moves. No Claymation, no Rotoscoping, no Stop Motion — an absence wide enough that you could not ask for the look of a Švankmajer short or a Fleischer cartoon at all.
+
+Twenty mediums close it, grouped the way the techniques actually divide:
+
+| Group | Mediums |
+| --- | --- |
+| **Frame by frame** | Claymation, Stop Motion, Puppet Animation, Cutout Animation, Silhouette Animation, Pixilation, Sand Animation, Paint-on-Glass Animation, Pinscreen Animation |
+| **Drawn** | Cel Animation, Rotoscoping, Rubber Hose Animation |
+| **Computed and captured** | Machinima, Motion Capture Animation |
+| **Pre-cinema and motion study** | Zoetrope Strip, Flip Book Sequence, Chronophotography, Slit-Scan Photography, Stroboscopic Exposure, Time-Lapse Composite |
+
+The last group is the one that makes the rest work as *image* prompts rather than *video* prompts. Chronophotography and slit-scan are how motion has always been made to hold still on a single surface — they give the axis a way to say "moving" to an image model without asking it for a film.
+
+Twelve more fill gaps the v4 expansion reached past on its way to the instrument bench: **Mezzotint, Aquatint, Drypoint, Silverpoint** in printmaking; **Autochrome, Albumen Print, Gum Bichromate Print, Platinum Palladium Print, Camera Obscura Study** in historical photography; **Reverse Glass Painting, Sgraffito Plaster, Pietra Dura Inlay** in surface and inlay work.
+
+Medium goes from 128 to 160, matching Action and Setting. The forge goes from 2,000 to 2,032. Every axis remains a multiple of sixteen — the convention is now enforced by the audit rather than merely observed.
+
 ## Repo catches up to the code
 
 5.2 is also the release where the project's release discipline rejoins reality.
@@ -78,7 +97,7 @@ The signal counts held anyway. They held unwatched.
 
 ## Verified
 
-2,000 unique signals across 16 axes and 20 Forge Cards in the canonical banks, with every preset and prompt-order reference resolving. The running app carries more than that — the v5 layer's `installDarpaCard()` appends its vocabulary to the built-in pools on load, so the live board reports **2,039 signals and 21 Forge Cards**. Both numbers are correct; they count different things, and the audit measures the source.
+2,032 unique signals across 16 axes and 20 Forge Cards in the canonical banks, with every preset and prompt-order reference resolving, no duplicates inside any axis, and every axis a multiple of sixteen. The running app carries more than that — the v5 layer's `installDarpaCard()` appends its vocabulary to the built-in pools on load, so the live board reports **2,071 signals and 21 Forge Cards**. Both numbers are correct; they count different things, and the audit measures the source.
 
 Muted axes were driven through randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, page reload, and a Blueprint round-trip, and stayed blank through all of it. The merged file was also opened directly from disk over `file://`, with no server and no network, and ran clean.
 

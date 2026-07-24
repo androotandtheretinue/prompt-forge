@@ -1,7 +1,7 @@
 {
   "name": "prompt-forge",
   "version": "5.2.0",
-  "description": "A public-domain, user-extensible visual prompt instrument with 2,000+ signals, 16 creative axes, drag-strumming, custom pools, and a three-state signal rig.",
+  "description": "A public-domain, user-extensible visual prompt instrument with 2,032 signals across 16 creative axes, still and motion mediums, drag-strumming, custom pools, and a three-state signal rig.",
   "private": true,
   "type": "module",
   "scripts": {

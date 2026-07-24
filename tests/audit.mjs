@@ -89,13 +89,22 @@ const total = Object.values(audit.counts).reduce((sum, count) => sum + count, 0)
 const duplicateCount = Object.values(audit.duplicates).reduce((sum, values) => sum + values.length, 0);
 
 if (Object.keys(audit.counts).length !== 16) fail(`Expected 16 axes; found ${Object.keys(audit.counts).length}.`);
-if (total !== 2000) fail(`Expected 2,000 signals; found ${total}.`);
+if (total !== 2032) fail(`Expected 2,032 signals; found ${total}.`);
 if (duplicateCount) fail(`Found ${duplicateCount} duplicate signals.`);
 if (audit.cardCount !== 20) fail(`Expected 20 Forge Cards; found ${audit.cardCount}.`);
 if (audit.presetErrors.length) fail(`Broken Forge Card values: ${JSON.stringify(audit.presetErrors)}`);
 if (audit.missingMeta.length) fail(`Forge Cards missing metadata: ${audit.missingMeta.join(', ')}`);
 if (audit.missingFromOrder.length || audit.extraInOrder.length) fail('Prompt order does not match the category registry.');
 if (audit.clusterErrors.length) fail(`Broken cluster references: ${JSON.stringify(audit.clusterErrors)}`);
+
+/*
+ * Every axis is sized to a multiple of sixteen. That has been true since the v4
+ * expansion brought each legacy bank to a round target, but it was a convention
+ * held by hand and nothing caught a drift. v5.2 took medium from 128 to 160 and
+ * the rule is now checked.
+ */
+const offGrid = Object.entries(audit.counts).filter(([, count]) => count % 16 !== 0);
+if (offGrid.length) fail(`Axes not sized to a multiple of 16: ${offGrid.map(([key, count]) => `${key} (${count})`).join(', ')}`);
 
 /*
  * Reroll scopes must partition the axes. Overlapping scopes are what made the
@@ -116,10 +125,19 @@ const badStates = audit.rigStates.filter(({ observed }) =>
   observed.muted !== 'muted');
 if (badStates.length) fail(`Rig state derivation is wrong for: ${badStates.map(entry => entry.key).join(', ')}`);
 
-// Prompt Forge is one file. Nothing may reintroduce an external dependency.
-const externalScripts = [...html.matchAll(/<script\s[^>]*src=["']([^"']+)["']/g)].map(match => match[1]);
-const localScripts = externalScripts.filter(src => !/^(https?:)?\/\//.test(src));
-if (localScripts.length) fail(`index.html is not self-contained; it loads ${localScripts.join(', ')}.`);
+/*
+ * Prompt Forge is one file. Nothing may reintroduce a local dependency.
+ *
+ * Stylesheets are checked as well as scripts. v5.2's notes claimed this guard
+ * already covered both; it only ever matched <script src>, so a local .css
+ * reference would have passed silently. Claiming a check is the reason to have
+ * one.
+ */
+const localRefs = [
+  ...[...html.matchAll(/<script\s[^>]*src=["']([^"']+)["']/g)].map(match => ({ tag: 'script', ref: match[1] })),
+  ...[...html.matchAll(/<link\s[^>]*href=["']([^"']+)["']/g)].map(match => ({ tag: 'stylesheet', ref: match[1] }))
+].filter(({ ref }) => !/^(https?:)?\/\//.test(ref) && !/^(data|#)/.test(ref));
+if (localRefs.length) fail(`index.html is not self-contained; it loads ${localRefs.map(entry => `${entry.ref} (${entry.tag})`).join(', ')}.`);
 
 if (!process.exitCode) {
   console.log('Prompt Forge audit passed.');
@@ -127,5 +145,6 @@ if (!process.exitCode) {
   console.log(`  ${total.toLocaleString()} unique signals`);
   console.log(`  ${audit.cardCount} valid Forge Cards`);
   console.log(`  ${audit.clusterNames.length} reroll scopes partitioning all ${audit.categoryKeys.length} axes`);
-  console.log(`  ${blocks.length} inline script blocks, all parsing, no local script dependencies`);
+  console.log(`  every axis sized to a multiple of 16 (medium ${audit.counts.medium})`);
+  console.log(`  ${blocks.length} inline script blocks, all parsing, no local script or stylesheet dependencies`);
 }

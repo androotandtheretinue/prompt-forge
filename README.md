@@ -1,6 +1,6 @@
 # Prompt Forge DARPA v5
 
-**A public-domain, user-extensible visual prompt instrument: 2,000+ signals, 16 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
+**A public-domain, user-extensible visual prompt instrument: 2,032 signals, 16 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
 
 [Launch Prompt Forge](https://androotandtheretinue.github.io/prompt-forge/) · [Read the v5.2.0 release notes](RELEASE_NOTES.md)
 
@@ -12,7 +12,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 
 ## What is inside
 
-- **2,000+ signals** across **16 axes**.
+- **2,032 signals** across **16 axes**, including a **160-medium** bank that covers still images and images in motion — Claymation, Rotoscoping, Stop Motion, Cel Animation, Machinima, and the pre-cinema motion studies they came from.
 - **21 Forge Cards**, including the new **DARPA** card for phosphor-terminal, scan-line, telemetry, and retro-defense-interface aesthetics.
 - **Drag Strum**: hold and sweep across category labels to repeatedly randomize unlocked axes.
 - **Shift + Drag Step Strum**: advance each crossed category through its pool.
@@ -145,4 +145,4 @@ Wild additions are welcome. Please read [CONTRIBUTING.md], run `npm test`, and k
 
 ## Version
 
-Current release: **5.2.0 — Signal Rig**. See [CHANGELOG.md](CHANGELOG.md).
+Current release: **5.2.0 — Signal Rig and Images in Motion**. See [CHANGELOG.md](CHANGELOG.md).

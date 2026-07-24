@@ -2,6 +2,9 @@ Changelog
 All notable changes to Prompt Forge are documented here.
 [5.2.0] — 2026-07-24
 Added
+Added 32 mediums, taking the axis from 128 to 160 and the forge from 2,000 to 2,032 signals.
+Added an image-in-motion bank of 20: Claymation, Stop Motion, Puppet Animation, Cutout Animation, Silhouette Animation, Pixilation, Sand Animation, Paint-on-Glass Animation, Pinscreen Animation, Cel Animation, Rotoscoping, Rubber Hose Animation, Machinima, Motion Capture Animation, Zoetrope Strip, Flip Book Sequence, Chronophotography, Slit-Scan Photography, Stroboscopic Exposure, and Time-Lapse Composite. The forge could previously name 128 ways to make a still image and no way to make an image that moves.
+Added 12 historical processes the v4 expansion reached past: Mezzotint, Aquatint, Drypoint, Silverpoint, Autochrome, Albumen Print, Gum Bichromate Print, Platinum Palladium Print, Camera Obscura Study, Reverse Glass Painting, Sgraffito Plaster, and Pietra Dura Inlay.
 Added the Signal Rig: a sixteen-chip strip that sets which axes are in play before forging.
 Added three named signal states — live, pinned, and muted — read from the lock and value the forge already stored.
 Added a per-row mute control that blanks an axis and holds it blank in a single tap, replacing the undiscoverable clear-then-lock sequence.
@@ -21,6 +24,7 @@ Fixed the audit harness, which had silently verified nothing since v5 shipped. I
 Folded `v5.js` back into `index.html` as a second inline script block. The project described itself as single-file for two releases while shipping two files; it is now one file again, and the audit fails if a local script or stylesheet reference is reintroduced.
 Removed `dist/` and the build step. With `index.html` self-contained there is nothing left to mirror, which retires the drift that produced the stale distribution in the first place.
 Validated
+2,032 unique signals across 16 axes, with no duplicates within any axis and every axis a multiple of 16.
 Reroll scopes are disjoint and cover all sixteen axes.
 The three rig states derive correctly from lock and value for every axis.
 Every inline script block parses, and `index.html` references no local script file.
