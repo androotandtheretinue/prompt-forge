@@ -28,7 +28,7 @@ Validated
 Reroll scopes are disjoint and cover all sixteen axes.
 The three rig states derive correctly from lock and value for every axis.
 Every inline script block parses, and `index.html` references no local script file.
-The merged file opens and runs correctly straight from disk over `file://` with no server and no network.
+The merged file opens and runs correctly straight from disk over `file://` with no server. Tailwind and the two webfonts are still fetched from public CDNs, so an offline copy runs fully but renders with fallback styling.
 Muted axes survive randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, and Option Radar, and persist across reload and Blueprint round-trips.
 [5.1.0] — 2026-07-24
 Added

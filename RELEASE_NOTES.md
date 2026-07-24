@@ -99,7 +99,7 @@ The signal counts held anyway. They held unwatched.
 
 2,032 unique signals across 16 axes and 20 Forge Cards in the canonical banks, with every preset and prompt-order reference resolving, no duplicates inside any axis, and every axis a multiple of sixteen. The running app carries more than that — the v5 layer's `installDarpaCard()` appends its vocabulary to the built-in pools on load, so the live board reports **2,071 signals and 21 Forge Cards**. Both numbers are correct; they count different things, and the audit measures the source.
 
-Muted axes were driven through randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, page reload, and a Blueprint round-trip, and stayed blank through all of it. The merged file was also opened directly from disk over `file://`, with no server and no network, and ran clean.
+Muted axes were driven through randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, page reload, and a Blueprint round-trip, and stayed blank through all of it. The merged file was also opened directly from disk over `file://`, with no server, and ran clean. It is self-contained in code, not in presentation: Tailwind and the two webfonts still come from public CDNs, so a genuinely offline copy runs with fallback styling. The audit enforces the code half — no local script or stylesheet reference may reappear.
 
 ## Why CC0
 
