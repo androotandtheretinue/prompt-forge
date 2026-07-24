@@ -11,7 +11,7 @@
 (() => {
   'use strict';
 
-  const PF_VERSION = '5.0';
+  const PF_VERSION = '5.1';
   const CUSTOM_STORAGE_KEY = 'promptForgeCustomOptionsV1';
 
   const customOptions = Object.fromEntries(
@@ -22,7 +22,10 @@
   let strumActive = false;
   let strumPointerId = null;
   let strumMode = 'random';
-  let strummedRows = new Set();
+  let lastStrumKey = null;
+  let lastStrumX = null;
+  let lastStrumY = null;
+  const SAME_ROW_STRUM_DISTANCE = 24;
 
   const darpaVocabulary = {
     medium: [
@@ -316,25 +319,39 @@
     return true;
   }
 
-  function strumRow(row) {
+  function strumRow(row, event) {
     const key = row?.dataset?.categoryKey;
 
-    if (
-      !key ||
-      strummedRows.has(key) ||
-      !categories[key] ||
-      categories[key].locked
-    ) {
+    if (!key || !categories[key] || categories[key].locked) {
       return;
     }
 
-    strummedRows.add(key);
+    const sameRow = key === lastStrumKey;
+
+    if (
+      sameRow &&
+      event &&
+      lastStrumX != null &&
+      lastStrumY != null
+    ) {
+      const dx = event.clientX - lastStrumX;
+      const dy = event.clientY - lastStrumY;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance < SAME_ROW_STRUM_DISTANCE) {
+        return;
+      }
+    }
 
     if (strumMode === 'step') {
       stepCategory(key, 1);
     } else {
       pickRandomOption(key);
     }
+
+    lastStrumKey = key;
+    lastStrumX = event?.clientX ?? null;
+    lastStrumY = event?.clientY ?? null;
 
     updatePreview();
   }
@@ -351,12 +368,14 @@
     strumActive = true;
     strumPointerId = event.pointerId;
     strumMode = event.shiftKey ? 'step' : 'random';
-    strummedRows = new Set();
+    lastStrumKey = null;
+    lastStrumX = null;
+    lastStrumY = null;
 
     document.body.classList.add('strumming');
     event.currentTarget.setPointerCapture?.(event.pointerId);
 
-    strumRow(row);
+    strumRow(row, event);
     event.preventDefault();
   }
 
@@ -367,7 +386,7 @@
       .elementFromPoint(event.clientX, event.clientY)
       ?.closest('.category-row');
 
-    if (row) strumRow(row);
+    if (row) strumRow(row, event);
   }
 
   function endStrum(event) {
@@ -380,7 +399,9 @@
 
     strumActive = false;
     strumPointerId = null;
-    strummedRows.clear();
+    lastStrumKey = null;
+    lastStrumX = null;
+    lastStrumY = null;
     document.body.classList.remove('strumming');
   }
 
@@ -709,7 +730,6 @@
 
     presets.DARPA = {
       medium: 'Vector Graphics',
-      action: 'Monitoring Telemetry',
       texture: 'DARPA Scan Lines',
       style: 'DARPA Interface',
       lighting: 'Phosphor Monitor Glow',
@@ -717,9 +737,6 @@
       mood: 'Cold War Paranoia',
       palette: 'Phosphor Green',
       quality: 'Archive Display Fidelity',
-      setting: 'Defense Research Operations Center',
-      weather: 'Static-Charged Interior Air',
-      wardrobe: 'Systems Operator Utility Wear',
       fx: 'Telemetry Overlay',
       composition: 'HUD-Dominant Overlay',
       colorlogic: 'Monochrome Authority Signal',
@@ -970,7 +987,7 @@
 
       hint.innerHTML =
         '<span class="text-cyan-400">🎸 STRUM:</span> ' +
-        'press and drag across row labels to randomize each unlocked row once. ' +
+        'press and drag across row labels to randomize unlocked rows repeatedly as you move. ' +
         'Hold <span class="text-yellow-400">Shift</span> to advance each pool by one.';
 
       categoriesPanel.before(hint);
@@ -1070,7 +1087,7 @@
 
     if (footer) {
       footer.textContent =
-        'FORGED WITH hop.e 💫 | DARPA v5.0 · ' +
+        'FORGED WITH hop.e 💫 | DARPA v5.1 · ' +
         'User-Extensible Prompt Instrument';
     }
 
