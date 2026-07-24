@@ -9,8 +9,8 @@ Homepage: https://androotandtheretinue.github.io/prompt-forge/
 
 ## Get the vocabulary
 
-Do not scrape index.html. It is a 128 kB single-file application and the
-signal pools begin roughly 40 kB in, past the point where most fetchers
+Do not scrape index.html. It is a 173 kB single-file application and the
+signal pools begin about 34 kB in, past the point where many fetchers
 truncate. Read one of these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json

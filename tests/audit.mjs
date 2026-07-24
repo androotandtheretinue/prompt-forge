@@ -185,9 +185,29 @@ for (const { file, expected } of published) {
 }
 
 // The front door has to point at files that exist, or it is worse than absent.
+const llms = fs.readFileSync(new URL('../llms.txt', import.meta.url), 'utf8');
 for (const ref of ['vocabulary.json', 'vocabulary.txt']) {
-  if (!fs.readFileSync(new URL('../llms.txt', import.meta.url), 'utf8').includes(ref)) {
-    fail(`llms.txt does not reference ${ref}.`);
+  if (!llms.includes(ref)) fail(`llms.txt does not reference ${ref}.`);
+}
+
+/*
+ * llms.txt argues from two numbers — how large index.html is and how far into
+ * it the pools start — and those numbers are the reason it tells readers not to
+ * scrape the page. They were wrong on first write (carried over from before the
+ * v5.2 expansion) and they grow every time a signal is added. Checked with a
+ * tolerance, so ordinary growth passes and genuine staleness does not.
+ */
+const htmlKb = Buffer.byteLength(html, 'utf8') / 1024;
+const poolKb = Buffer.byteLength(html.slice(0, html.indexOf(APP_MARKER)), 'utf8') / 1024;
+const claims = [
+  { label: 'total size', actual: htmlKb, claimed: (llms.match(/It is a (\d+) kB/) || [])[1] },
+  { label: 'pool offset', actual: poolKb, claimed: (llms.match(/begin about (\d+) kB in/) || [])[1] }
+];
+for (const { label, actual, claimed } of claims) {
+  if (claimed === undefined) {
+    fail(`llms.txt no longer states the ${label} of index.html in the expected form.`);
+  } else if (Math.abs(Number(claimed) - actual) > Math.max(8, actual * 0.1)) {
+    fail(`llms.txt claims ${claimed} kB for ${label}; index.html measures ${actual.toFixed(0)} kB.`);
   }
 }
 if (!/<link\s[^>]*rel=["']alternate["'][^>]*href=["']vocabulary\.json["']/.test(html)) {
