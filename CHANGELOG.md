@@ -1,5 +1,15 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
+[Unreleased]
+Added
+Added `llms.txt`, a plain-text front door for machine readers: what Prompt Forge is, the sixteen axes, where the vocabulary lives, and the operating instruction.
+Added `vocabulary.json` and `vocabulary.txt`, the complete 2,032-signal vocabulary published as data so nothing has to scrape the application. Both are generated from `index.html` by `npm run vocabulary`.
+Added a `<link rel="alternate">` and an `ai-vocabulary` meta tag to the first few hundred bytes of the `<head>`, so a truncated fetch still lands on a pointer to the vocabulary. `index.html` is ~175 kB and the signal pools begin around 40 kB in, past where many fetchers stop.
+Added `.nojekyll` so GitHub Pages serves the repository verbatim rather than running it through a static-site build.
+Added audit checks that the published vocabulary files match the live `categories` object, that `llms.txt` references both, and that the `<head>` pointer is present.
+Fixed
+Corrected `<head>` metadata that was two versions stale: the page title and Open Graph title still said DARPA v4, and the description still claimed 2,000 signals. This is the region a truncating fetcher is most likely to read, so it was the worst place in the file to be wrong.
+Narrowed the self-containment check to `rel="stylesheet"`. It previously rejected any local `<link href>`, which would have failed the new `rel="alternate"` vocabulary pointer — a data reference the page does not need in order to render.
 [5.2.0] — 2026-07-24
 Added
 Added 32 mediums, taking the axis from 128 to 160 and the forge from 2,000 to 2,032 signals.

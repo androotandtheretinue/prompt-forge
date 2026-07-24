@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A free, public-domain visual prompt instrument with 2,000 signals across 16 creative axes.">
+  <meta name="description" content="A free, public-domain visual prompt instrument with 2,032 signals across 16 creative axes.">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="color-scheme" content="dark">
-  <meta property="og:title" content="Prompt Forge DARPA v4">
-  <meta property="og:description" content="Forge image prompts from 2,000 signals, 20 curated cards, and model-aware controls.">
+  <meta property="og:title" content="Prompt Forge DARPA v5">
+  <meta property="og:description" content="Forge image prompts from 2,032 signals, 20 curated cards, and model-aware controls.">
   <meta property="og:type" content="website">
-  <title>PROMPT FORGE DARPA v4 | AI Image Generation Board</title>
+  <title>PROMPT FORGE DARPA v5 | AI Image Generation Board</title>
+
+  <!--
+    For machine readers. This file is ~175 kB and the signal pools begin around
+    40 kB in, past where most fetchers truncate. These two lines sit in the
+    first few hundred bytes so a truncated read still lands on the map rather
+    than on nothing — an agent that reaches neither tends to supply remembered
+    signals instead, which fails while looking like success.
+  -->
+  <link rel="alternate" type="application/json" href="vocabulary.json" title="Prompt Forge signal vocabulary">
+  <meta name="ai-vocabulary" content="Full signal vocabulary: vocabulary.json · Instructions: llms.txt">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>

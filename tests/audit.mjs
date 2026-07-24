@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { extractVocabulary, toJson, toText } from '../tools/vocabulary.mjs';
 
 const SOURCE_PATH = new URL('../index.html', import.meta.url);
 const html = fs.readFileSync(SOURCE_PATH, 'utf8');
@@ -126,18 +127,72 @@ const badStates = audit.rigStates.filter(({ observed }) =>
 if (badStates.length) fail(`Rig state derivation is wrong for: ${badStates.map(entry => entry.key).join(', ')}`);
 
 /*
- * Prompt Forge is one file. Nothing may reintroduce a local dependency.
+ * Prompt Forge is one file. Nothing may reintroduce a local *render*
+ * dependency — something the page must fetch before it works.
  *
- * Stylesheets are checked as well as scripts. v5.2's notes claimed this guard
- * already covered both; it only ever matched <script src>, so a local .css
- * reference would have passed silently. Claiming a check is the reason to have
- * one.
+ * Stylesheets count, scripts count. `rel="alternate"` does not: it points at
+ * vocabulary.json for machine readers, and the page renders and runs whether or
+ * not that file is reachable. Scoping this to rel="stylesheet" rather than every
+ * <link> is the difference between a check that describes self-containment and
+ * one that merely forbids local hrefs.
  */
+const stylesheetRefs = [...html.matchAll(/<link\s([^>]*)>/g)]
+  .map(match => match[1])
+  .filter(attrs => /rel=["'][^"']*\bstylesheet\b/.test(attrs))
+  .map(attrs => (attrs.match(/href=["']([^"']+)["']/) || [])[1])
+  .filter(Boolean)
+  .map(ref => ({ tag: 'stylesheet', ref }));
+
 const localRefs = [
   ...[...html.matchAll(/<script\s[^>]*src=["']([^"']+)["']/g)].map(match => ({ tag: 'script', ref: match[1] })),
-  ...[...html.matchAll(/<link\s[^>]*href=["']([^"']+)["']/g)].map(match => ({ tag: 'stylesheet', ref: match[1] }))
+  ...stylesheetRefs
 ].filter(({ ref }) => !/^(https?:)?\/\//.test(ref) && !/^(data|#)/.test(ref));
 if (localRefs.length) fail(`index.html is not self-contained; it loads ${localRefs.map(entry => `${entry.ref} (${entry.tag})`).join(', ')}.`);
+
+/*
+ * The published vocabulary files must match the application exactly.
+ *
+ * vocabulary.json and vocabulary.txt exist so machine readers do not have to
+ * scrape a 175 kB single-file app whose signal pools start past most fetch
+ * truncation limits. That only helps if they are true. A stale vocabulary file
+ * is worse than no vocabulary file: it is authoritative-looking, publicly
+ * cached, and wrong in a way nobody notices until a prompt references a signal
+ * the forge does not have.
+ *
+ * Regenerate with `npm run vocabulary` after changing any pool.
+ */
+const version = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
+const published = [
+  { file: 'vocabulary.json', expected: () => toJson(extractVocabulary(html), version) },
+  { file: 'vocabulary.txt', expected: () => toText(extractVocabulary(html), version) }
+];
+
+// Compare content, not line endings. git's autocrlf rewrites these files on
+// checkout under its default Windows configuration, which would otherwise fail
+// this check on a clean clone and make the suite look broken to a new
+// contributor before they had changed anything.
+const normalize = text => text.replace(/\r\n/g, '\n');
+
+for (const { file, expected } of published) {
+  const path = new URL(`../${file}`, import.meta.url);
+  if (!fs.existsSync(path)) {
+    fail(`${file} is missing. Run \`npm run vocabulary\`.`);
+    continue;
+  }
+  if (normalize(fs.readFileSync(path, 'utf8')) !== normalize(expected())) {
+    fail(`${file} does not match index.html. Run \`npm run vocabulary\`.`);
+  }
+}
+
+// The front door has to point at files that exist, or it is worse than absent.
+for (const ref of ['vocabulary.json', 'vocabulary.txt']) {
+  if (!fs.readFileSync(new URL('../llms.txt', import.meta.url), 'utf8').includes(ref)) {
+    fail(`llms.txt does not reference ${ref}.`);
+  }
+}
+if (!/<link\s[^>]*rel=["']alternate["'][^>]*href=["']vocabulary\.json["']/.test(html)) {
+  fail('index.html <head> is missing the vocabulary.json pointer that survives truncated fetches.');
+}
 
 if (!process.exitCode) {
   console.log('Prompt Forge audit passed.');
@@ -147,4 +202,5 @@ if (!process.exitCode) {
   console.log(`  ${audit.clusterNames.length} reroll scopes partitioning all ${audit.categoryKeys.length} axes`);
   console.log(`  every axis sized to a multiple of 16 (medium ${audit.counts.medium})`);
   console.log(`  ${blocks.length} inline script blocks, all parsing, no local script or stylesheet dependencies`);
+  console.log(`  vocabulary.json and vocabulary.txt match the application, and llms.txt points at both`);
 }

@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/audit.mjs"
+    "test": "node tests/audit.mjs",
+    "vocabulary": "node tools/generate-vocabulary.mjs"
   },
   "license": "CC0-1.0",
   "homepage": "https://androotandtheretinue.github.io/prompt-forge/",

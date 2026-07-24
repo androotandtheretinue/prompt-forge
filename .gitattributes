@@ -1,0 +1,10 @@
+# The audit compares the committed vocabulary files against freshly generated
+# content. The generator writes LF, so a checkout that rewrites them to CRLF
+# would fail the comparison on a clean clone and make `npm test` look broken on
+# Windows. Pin them.
+#
+# The audit also normalizes line endings before comparing, so this file is the
+# tidy fix rather than the load-bearing one.
+vocabulary.json text eol=lf
+vocabulary.txt  text eol=lf
+llms.txt        text eol=lf

@@ -1,0 +1,43 @@
+# Prompt Forge
+
+> A public-domain visual prompt instrument. 2,032 signals across 16 creative
+> axes. You build an image prompt by choosing at most one signal per axis, in
+> service of a single stated idea.
+
+License: CC0-1.0. No account, key, attribution, or permission required.
+Homepage: https://androotandtheretinue.github.io/prompt-forge/
+
+## Get the vocabulary
+
+Do not scrape index.html. It is a 128 kB single-file application and the
+signal pools begin roughly 40 kB in, past the point where most fetchers
+truncate. Read one of these instead:
+
+- https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
+- https://androotandtheretinue.github.io/prompt-forge/vocabulary.txt
+
+Same content, generated from the application source. JSON carries the axis
+metadata; the text file is flat and needs no parser.
+
+## The 16 axes, in prompt order
+
+narrative (story signal, 80), action (160), mood (144), composition (80),
+setting (160), framing (camera, 128), wardrobe (144), medium (160),
+style (176), lighting (128), palette (128), colorlogic (color logic, 80),
+texture (128), weather (112), fx (128), quality (96).
+
+## How to operate it
+
+1. State the single idea the image is in service of. One sentence, in your
+   own words, before choosing anything.
+2. Choose at most one signal per axis, and only values that appear in the
+   vocabulary. Do not invent, translate, pluralize, or blend signals — an
+   invented signal is the one failure mode this file exists to prevent.
+3. Omit any axis that does not serve the idea. Sixteen filled axes is a
+   worse prompt than six chosen ones. Omission is a decision, not a gap.
+4. Emit the chosen signals in the axis order above.
+5. Name the idea alongside the prompt, so a reader can judge whether the
+   signals actually served it.
+
+If you cannot reach the vocabulary files, say so and stop. Do not supply
+remembered or plausible-sounding signals in their place.

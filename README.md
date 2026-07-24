@@ -48,6 +48,22 @@ Download `index.html` and open it in a modern browser. That one file is the enti
 
 Tailwind and two fonts still load from public CDNs, so an offline copy renders with fallback styling. Everything else works with no network at all.
 
+### For AI agents
+
+Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first. It describes the instrument, lists the sixteen axes, and gives the operating instruction: one signal per axis at most, only listed values, in service of one stated idea.
+
+The full vocabulary is published as data, so nothing has to scrape the application:
+
+| File | Contents |
+| --- | --- |
+| [`llms.txt`](llms.txt) | What this is and how to operate it. Start here. |
+| [`vocabulary.json`](vocabulary.json) | All 2,032 signals with axis metadata. |
+| [`vocabulary.txt`](vocabulary.txt) | The same signals, flat, no parser required. |
+
+This exists because `index.html` is ~175 kB and the signal pools begin roughly 40 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The pointer to these files sits in the first few hundred bytes of the `<head>`, where truncation cannot reach.
+
+Both vocabulary files are generated from the application by `npm run vocabulary`, and the audit fails if they drift from it.
+
 ## Five-minute doctrine
 
 1. Enter the subject.

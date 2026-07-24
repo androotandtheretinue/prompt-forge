@@ -13,12 +13,21 @@ Open an issue with:
 
 ## Editing the app
 
-Prompt Forge is one file. `index.html` is the whole program: signal banks, styles, application, and interaction layer. There is no build step and no distribution copy to keep in sync.
+Prompt Forge is one file. `index.html` is the whole program: signal banks, styles, application, and interaction layer. There is no build step and no distribution copy of the app to keep in sync.
 
 1. Fork the repository.
 2. Edit `index.html`.
-3. Run `npm test`.
-4. Open a pull request describing the creative capability added or the failure removed.
+3. If you changed any signal pool, run `npm run vocabulary`.
+4. Run `npm test`.
+5. Open a pull request describing the creative capability added or the failure removed.
+
+### The published vocabulary
+
+`vocabulary.json` and `vocabulary.txt` are generated from `index.html` and committed, because GitHub Pages serves files rather than running scripts, and machine readers need the vocabulary as data.
+
+This is a deliberate and narrow exception to the rule that killed `dist/`. That directory duplicated the entire application and drifted silently for two releases. These files duplicate only the signal pools, and `npm test` regenerates them in memory and compares — so drift is a failing test, not a quiet inaccuracy. Regenerate rather than hand-edit; a hand-maintained copy of 2,032 strings is a copy that will eventually lie.
+
+A stale vocabulary file is worse than none. It looks authoritative, gets cached publicly, and produces prompts referencing signals the forge does not have.
 
 ### The two script blocks
 
@@ -52,7 +61,9 @@ A Forge Card is a doctrine, not a random sample. Its selections should reinforce
 - Every category appears once in prompt order.
 - Every category appears in exactly one reroll cluster. Clusters must partition the axes: overlapping scopes make the cluster buttons indistinguishable, and an uncovered axis is one no cluster button can reach.
 - Locked categories remain unchanged by every automated operation, whether they are pinned at a value or muted blank.
-- `index.html` loads no local script or stylesheet file. It must stay a single self-contained document.
+- `index.html` loads no local script or stylesheet file. It must stay a single self-contained document. The `rel="alternate"` pointer to `vocabulary.json` is not a render dependency and does not violate this.
+- `vocabulary.json` and `vocabulary.txt` match `index.html` exactly, and `llms.txt` points at both.
+- Every axis is sized to a multiple of sixteen.
 - No analytics or prompt-upload behavior is introduced without conspicuous disclosure and community discussion.
 
 ## Licensing contributions
