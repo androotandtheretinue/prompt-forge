@@ -11,7 +11,7 @@
 (() => {
   'use strict';
 
-  const PF_VERSION = '5.1';
+  const PF_VERSION = '5.2';
   const CUSTOM_STORAGE_KEY = 'promptForgeCustomOptionsV1';
 
   const customOptions = Object.fromEntries(
@@ -775,6 +775,7 @@
       const builtIns = getBuiltInOptions(key);
       const customs = customOptions[key] || [];
       const signalCount = getCombinedOptions(key).length;
+      const state = categoryStateOf(category);
 
       const row = document.createElement('div');
 
@@ -783,7 +784,8 @@
       row.className =
         'category-row p-4 flex flex-col md:flex-row md:items-center ' +
         'gap-3 border-b border-gray-800 last:border-b-0 ' +
-        `${category.locked ? 'locked' : ''}`;
+        `${category.locked ? 'locked' : ''} ` +
+        `${state === 'muted' ? 'muted' : ''}`;
 
       row.title =
         'Drag across row labels to random-strum. ' +
@@ -846,11 +848,18 @@
           >＋</button>
 
           <button
-            class="btn btn-lock ${category.locked ? 'active' : ''}"
+            class="btn btn-lock ${state === 'pinned' ? 'active' : ''}"
             id="lock-${key}"
             onclick="toggleLock('${key}')"
-            title="Lock"
-          >${category.locked ? '🔐' : '🔒'}</button>
+            title="${escapeAttribute(LOCK_BUTTON_TITLES[state])}"
+          >${LOCK_BUTTON_GLYPHS[state]}</button>
+
+          <button
+            class="btn btn-mute ${state === 'muted' ? 'active' : ''}"
+            id="mute-${key}"
+            onclick="muteCategory('${key}')"
+            title="${escapeAttribute(MUTE_BUTTON_TITLES[state])}"
+          >🚫</button>
 
           <button
             class="btn btn-random"
@@ -868,6 +877,10 @@
 
       panel.appendChild(row);
     });
+
+    // The Signal Rig mirrors these rows; keep the two redrawn together.
+    renderRig();
+    syncClusterButtons();
   };
 
   // ------------------------------------------------------------

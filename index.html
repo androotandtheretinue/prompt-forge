@@ -20,6 +20,7 @@
       --dark-bg: #0a0a0f;
       --panel-bg: #12121a;
       --panel-border: #1e1e2e;
+      --signal-muted: #7c8aa8;
     }
 
     * {
@@ -166,6 +167,129 @@
     .btn-clear:hover {
       color: #ff4444;
       border-color: #ff4444;
+    }
+
+    /* ---- Signal Rig: live / pinned / muted ---------------------------- */
+
+    .btn-mute {
+      color: #666;
+      border-color: #333;
+    }
+
+    .btn-mute:hover {
+      color: var(--signal-muted);
+      border-color: var(--signal-muted);
+      box-shadow: 0 0 10px rgba(124, 138, 168, 0.35);
+    }
+
+    .btn-mute.active {
+      color: var(--signal-muted);
+      border-color: var(--signal-muted);
+      background: rgba(124, 138, 168, 0.18);
+    }
+
+    /* A muted row is a locked row with no value; it must not read as gold. */
+    .category-row.locked.muted,
+    .category-row.locked.muted:hover {
+      background: rgba(124, 138, 168, 0.07);
+      border-left-color: var(--signal-muted);
+    }
+
+    .category-row.muted .category-label,
+    .category-row.muted select {
+      opacity: 0.5;
+    }
+
+    .locked.muted select {
+      border-color: var(--signal-muted);
+      box-shadow: none;
+    }
+
+    .locked.muted .category-label {
+      color: var(--signal-muted);
+    }
+
+    .locked.muted .status-dot {
+      background: var(--signal-muted);
+      box-shadow: 0 0 8px rgba(124, 138, 168, 0.6);
+    }
+
+    /* Cluster hover preview: show the blast radius before committing. */
+    .cluster-btn.previewing {
+      color: var(--neon-magenta);
+      border-color: var(--neon-magenta);
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+
+    .category-row.cluster-preview {
+      background: rgba(255, 0, 255, 0.08);
+      border-left-color: var(--neon-magenta);
+    }
+
+    .category-row.locked.cluster-preview {
+      background: rgba(255, 0, 255, 0.05);
+      border-left-color: #7a3a7a;
+    }
+
+    .rig-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid #333;
+      background: #1a1a24;
+      color: #888;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .rig-chip:hover {
+      transform: translateY(-1px);
+    }
+
+    .rig-chip .rig-chip-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+      flex: none;
+    }
+
+    .rig-chip.live {
+      color: var(--neon-cyan);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .rig-chip.pinned {
+      color: var(--neon-gold);
+      border-color: var(--neon-gold);
+      background: rgba(255, 215, 0, 0.12);
+    }
+
+    .rig-chip.muted {
+      color: var(--signal-muted);
+      border-color: #333;
+      background: #14141c;
+      opacity: 0.65;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+
+    .rig-chip.muted .rig-chip-dot {
+      box-shadow: none;
+      opacity: 0.6;
+    }
+
+    .rig-chip.previewing {
+      border-color: var(--neon-magenta);
+      box-shadow: 0 0 8px rgba(255, 0, 255, 0.35);
     }
 
     .btn-primary {
@@ -564,11 +688,12 @@
       </div>
       <p class="text-xs text-gray-600 mb-3">Randomize only the selected payload size; locked intelligence survives every operation.</p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <button class="btn btn-random text-xs" onclick="rerollCluster('structure')">🏗 STRUCTURE</button>
-        <button class="btn btn-random text-xs" onclick="rerollCluster('atmosphere')">🌫 ATMOSPHERE</button>
-        <button class="btn btn-random text-xs" onclick="rerollCluster('surface')">🧪 SURFACE</button>
-        <button class="btn btn-random text-xs" onclick="rerollCluster('story')">🗝 STORY</button>
+        <button class="btn btn-random text-xs cluster-btn" id="cluster-structure" onclick="rerollCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">⟳ 🏗 STRUCTURE</button>
+        <button class="btn btn-random text-xs cluster-btn" id="cluster-atmosphere" onclick="rerollCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">⟳ 🌫 ATMOSPHERE</button>
+        <button class="btn btn-random text-xs cluster-btn" id="cluster-surface" onclick="rerollCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">⟳ 🧪 SURFACE</button>
+        <button class="btn btn-random text-xs cluster-btn" id="cluster-story" onclick="rerollCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">⟳ 🗝 STORY</button>
       </div>
+      <p class="text-xs text-gray-600 mt-2" id="clusterHint">Hover a scope to outline the rows it rerolls. Muted and pinned rows are never touched.</p>
     </div>
 
     <!-- Chaos Dial & Output Mode -->
@@ -725,6 +850,28 @@
           >
           <button class="btn btn-clear" onclick="addNegative()">+ Add</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Signal Rig -->
+    <div class="panel p-4 mb-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="status-dot" style="background:var(--signal-muted); box-shadow:0 0 10px var(--signal-muted);"></div>
+        <span class="category-label">🎚️ SIGNAL RIG</span>
+        <span class="text-xs text-gray-500 ml-auto" id="rigReadout">16 live · 0 pinned · 0 muted</span>
+      </div>
+      <p class="text-xs text-gray-600 mb-3">
+        Choose which axes are in play before you forge. Tap a chip to cycle it:
+        <span class="text-cyan-400">live</span> → <span class="text-yellow-400">pinned</span> → <span style="color:var(--signal-muted);">muted</span>.
+        Pinned holds its value; muted stays blank. Both survive every reroll, card, strum, and randomize.
+      </p>
+      <div class="flex flex-wrap gap-2 mb-3" id="rigStrip">
+        <!-- Rig chips injected here -->
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-mute text-xs" onclick="muteEmptyCategories()" title="Mute every axis that is currently blank — lock in your blanks before you start">🚫 MUTE BLANKS</button>
+        <button class="btn btn-lock text-xs" onclick="pinFilledCategories()" title="Pin every axis that currently has a value">🔐 PIN FILLED</button>
+        <button class="btn btn-random text-xs" onclick="allCategoriesLive()" title="Return every axis to live (values are kept)">🔓 ALL LIVE</button>
       </div>
     </div>
 
@@ -1663,11 +1810,18 @@
       sref: '', styleWeight: '', profile: '', raw: false, tile: false, draft: false
     };
 
+    /*
+     * Reroll scopes. These partition the sixteen axes: every axis belongs to
+     * exactly one cluster, and no axis belongs to two. Before v5.2 the scopes
+     * overlapped — structure and story shared three of four rows — which made
+     * the buttons feel interchangeable because they nearly were. Keep this
+     * disjoint and complete; the audit enforces both.
+     */
     const categoryClusters = {
-      structure: ['action', 'framing', 'composition', 'setting'],
+      structure: ['composition', 'framing', 'setting'],
       atmosphere: ['lighting', 'mood', 'palette', 'weather'],
-      surface: ['medium', 'texture', 'style', 'quality', 'wardrobe', 'fx'],
-      story: ['action', 'composition', 'narrative', 'setting']
+      surface: ['medium', 'texture', 'style', 'quality', 'fx', 'colorlogic'],
+      story: ['narrative', 'action', 'wardrobe']
     };
 
     const promptOrder = [
@@ -2309,10 +2463,11 @@
 
       Object.entries(categories).forEach(([key, cat]) => {
         const validCount = cat.options.filter(option => !option.startsWith('—')).length;
+        const state = categoryStateOf(cat);
         const row = document.createElement('div');
         row.id = `row-${key}`;
-        row.className = `category-row p-4 flex flex-col md:flex-row md:items-center gap-3 border-b border-gray-800 last:border-b-0 ${cat.locked ? 'locked' : ''}`;
-        
+        row.className = `category-row p-4 flex flex-col md:flex-row md:items-center gap-3 border-b border-gray-800 last:border-b-0 ${cat.locked ? 'locked' : ''} ${state === 'muted' ? 'muted' : ''}`;
+
         row.innerHTML = `
           <div class="flex items-center gap-3 md:w-44">
             <div class="status-dot ${cat.locked ? '' : 'pulse'}" id="dot-${key}"></div>
@@ -2327,16 +2482,201 @@
             </select>
           </div>
           <div class="flex gap-2 justify-end">
-            <button class="btn btn-lock ${cat.locked ? 'active' : ''}" id="lock-${key}" onclick="toggleLock('${key}')" title="Lock">
-              ${cat.locked ? '🔐' : '🔒'}
+            <button class="btn btn-lock ${state === 'pinned' ? 'active' : ''}" id="lock-${key}" onclick="toggleLock('${key}')" title="${escapeAttribute(LOCK_BUTTON_TITLES[state])}">
+              ${LOCK_BUTTON_GLYPHS[state]}
             </button>
+            <button class="btn btn-mute ${state === 'muted' ? 'active' : ''}" id="mute-${key}" onclick="muteCategory('${key}')" title="${escapeAttribute(MUTE_BUTTON_TITLES[state])}">🚫</button>
             <button class="btn btn-random" onclick="randomizeCategory('${key}')" title="Randomize">🎲</button>
             <button class="btn btn-clear" onclick="clearCategory('${key}')" title="Clear">✕</button>
           </div>
         `;
-        
+
         panel.appendChild(row);
       });
+
+      renderRig();
+      syncClusterButtons();
+    }
+
+    // ============================================
+    // SIGNAL RIG — three states over the existing model
+    // ============================================
+
+    /*
+     * No new persisted fields. The three states are a reading of the two
+     * properties the forge already stores, which is why Blueprints, the
+     * localStorage cache, and every lock guard in v5 understand them for free:
+     *
+     *   live   = !locked                    — rerolls, cards and strums may move it
+     *   pinned =  locked && value !== ''    — frozen at a chosen value
+     *   muted  =  locked && value === ''    — frozen blank; contributes nothing
+     */
+    function categoryStateOf(cat) {
+      if (!cat || !cat.locked) return 'live';
+      return cat.value ? 'pinned' : 'muted';
+    }
+
+    const LOCK_BUTTON_GLYPHS = { live: '🔒', pinned: '🔐', muted: '🚫' };
+
+    const LOCK_BUTTON_TITLES = {
+      live: 'Live — click to pin this value',
+      pinned: 'Pinned — click to release',
+      muted: 'Muted — click to release'
+    };
+
+    const MUTE_BUTTON_TITLES = {
+      live: 'Mute — blank this axis and hold it blank',
+      pinned: 'Mute — discard this value and hold the axis blank',
+      muted: 'Unmute — return this axis to live'
+    };
+
+    function setCategoryState(key, state) {
+      const cat = categories[key];
+      if (!cat) return false;
+      if (state === 'muted') {
+        cat.value = '';
+        cat.locked = true;
+      } else if (state === 'pinned') {
+        if (!cat.value) return false;   // pinning a blank row would just be muting it
+        cat.locked = true;
+      } else {
+        cat.locked = false;
+      }
+      syncCategoryRow(key);
+      return true;
+    }
+
+    // Single place that reconciles a row's DOM with its state.
+    function syncCategoryRow(key) {
+      const cat = categories[key];
+      if (!cat) return;
+      const state = categoryStateOf(cat);
+      const row = document.getElementById(`row-${key}`);
+      const dot = document.getElementById(`dot-${key}`);
+      const select = document.getElementById(`select-${key}`);
+      const lockBtn = document.getElementById(`lock-${key}`);
+      const muteBtn = document.getElementById(`mute-${key}`);
+
+      if (select) {
+        select.value = cat.value;
+        select.disabled = cat.locked;
+      }
+      if (row) {
+        row.classList.toggle('locked', cat.locked);
+        row.classList.toggle('muted', state === 'muted');
+      }
+      if (dot) dot.classList.toggle('pulse', !cat.locked);
+      if (lockBtn) {
+        lockBtn.classList.toggle('active', state === 'pinned');
+        lockBtn.textContent = LOCK_BUTTON_GLYPHS[state];
+        lockBtn.title = LOCK_BUTTON_TITLES[state];
+      }
+      if (muteBtn) {
+        muteBtn.classList.toggle('active', state === 'muted');
+        muteBtn.title = MUTE_BUTTON_TITLES[state];
+      }
+    }
+
+    function rigChipTitle(key, state) {
+      const cat = categories[key];
+      const name = cat ? cat.label : key;
+      if (state === 'pinned') return `${name} · pinned at "${cat.value}" — tap to mute`;
+      if (state === 'muted') return `${name} · muted, contributes nothing — tap to return to live`;
+      return cat && cat.value
+        ? `${name} · live at "${cat.value}" — tap to pin`
+        : `${name} · live and blank — tap to mute`;
+    }
+
+    function renderRig() {
+      const strip = document.getElementById('rigStrip');
+      if (!strip) return;
+      strip.innerHTML = promptOrder.filter(key => categories[key]).map(key => {
+        const cat = categories[key];
+        const state = categoryStateOf(cat);
+        return `<button class="rig-chip ${state}" id="rig-${key}" onclick="cycleCategoryState('${key}')" title="${escapeAttribute(rigChipTitle(key, state))}"><span class="rig-chip-dot"></span>${escapeHtml(cat.label)}</button>`;
+      }).join('');
+      syncRig();
+    }
+
+    // Updates chips in place so keyboard focus survives a state change.
+    function syncRig() {
+      const readout = document.getElementById('rigReadout');
+      const tally = { live: 0, pinned: 0, muted: 0 };
+      Object.keys(categories).forEach(key => {
+        const state = categoryStateOf(categories[key]);
+        tally[state] += 1;
+        const chip = document.getElementById(`rig-${key}`);
+        if (!chip) return;
+        chip.classList.remove('live', 'pinned', 'muted');
+        chip.classList.add(state);
+        chip.title = rigChipTitle(key, state);
+      });
+      if (readout) readout.textContent = `${tally.live} live · ${tally.pinned} pinned · ${tally.muted} muted`;
+    }
+
+    function cycleCategoryState(key) {
+      const cat = categories[key];
+      if (!cat) return;
+      const state = categoryStateOf(cat);
+      // Pinning a blank row is indistinguishable from muting it, so skip that step.
+      const next = state === 'live' ? (cat.value ? 'pinned' : 'muted')
+        : state === 'pinned' ? 'muted'
+        : 'live';
+      setCategoryState(key, next);
+      updatePreview();
+    }
+
+    function muteCategory(key) {
+      if (!categories[key]) return;
+      setCategoryState(key, categoryStateOf(categories[key]) === 'muted' ? 'live' : 'muted');
+      updatePreview();
+    }
+
+    function muteEmptyCategories() {
+      Object.keys(categories).forEach(key => {
+        if (!categories[key].value) setCategoryState(key, 'muted');
+      });
+      updatePreview();
+    }
+
+    function pinFilledCategories() {
+      Object.keys(categories).forEach(key => {
+        if (categories[key].value) setCategoryState(key, 'pinned');
+      });
+      updatePreview();
+    }
+
+    function allCategoriesLive() {
+      Object.keys(categories).forEach(key => setCategoryState(key, 'live'));
+      updatePreview();
+    }
+
+    // ============================================
+    // CLUSTER SCOPES
+    // ============================================
+
+    function syncClusterButtons() {
+      Object.entries(categoryClusters).forEach(([name, keys]) => {
+        const btn = document.getElementById(`cluster-${name}`);
+        if (!btn) return;
+        const labels = keys.filter(key => categories[key]).map(key => categories[key].label);
+        btn.title = `Reroll ${labels.length} ${labels.length === 1 ? 'axis' : 'axes'}: ${labels.join(' · ')}`;
+      });
+    }
+
+    function previewCluster(name) {
+      clearClusterPreview();
+      const btn = document.getElementById(`cluster-${name}`);
+      if (btn) btn.classList.add('previewing');
+      (categoryClusters[name] || []).forEach(key => {
+        document.getElementById(`row-${key}`)?.classList.add('cluster-preview');
+        document.getElementById(`rig-${key}`)?.classList.add('previewing');
+      });
+    }
+
+    function clearClusterPreview() {
+      document.querySelectorAll('.cluster-preview').forEach(el => el.classList.remove('cluster-preview'));
+      document.querySelectorAll('.previewing').forEach(el => el.classList.remove('previewing'));
     }
 
     // ============================================
@@ -2350,25 +2690,10 @@
     }
 
     function toggleLock(key) {
-      categories[key].locked = !categories[key].locked;
-      
-      const row = document.getElementById(`row-${key}`);
-      const btn = document.getElementById(`lock-${key}`);
-      const dot = document.getElementById(`dot-${key}`);
-      const select = document.getElementById(`select-${key}`);
-      select.disabled = categories[key].locked;
-      
-      if (categories[key].locked) {
-        row.classList.add('locked');
-        btn.classList.add('active');
-        btn.textContent = '🔐';
-        dot.classList.remove('pulse');
-      } else {
-        row.classList.remove('locked');
-        btn.classList.remove('active');
-        btn.textContent = '🔒';
-        dot.classList.add('pulse');
-      }
+      const cat = categories[key];
+      if (!cat) return;
+      // Locking a row that holds a value pins it; locking a blank row mutes it.
+      setCategoryState(key, cat.locked ? 'live' : (cat.value ? 'pinned' : 'muted'));
       updatePreview();
     }
 
@@ -2436,6 +2761,13 @@
     }
 
     function rerollCluster(name) {
+      // Flash the scope so touch users, who never get a hover, see it too.
+      previewCluster(name);
+      setTimeout(() => {
+        const btn = document.getElementById(`cluster-${name}`);
+        if (btn && typeof btn.matches === 'function' && btn.matches(':hover')) return;
+        clearClusterPreview();
+      }, 900);
       (categoryClusters[name] || []).forEach(key => pickRandomOption(key));
       updatePreview();
     }
@@ -2462,19 +2794,7 @@
     function unlockAll() {
       subjectLocked = false;
       syncSubjectLockUI();
-      Object.keys(categories).forEach(key => {
-        categories[key].locked = false;
-        
-        const row = document.getElementById(`row-${key}`);
-        const btn = document.getElementById(`lock-${key}`);
-        const dot = document.getElementById(`dot-${key}`);
-        
-        row.classList.remove('locked');
-        btn.classList.remove('active');
-        btn.textContent = '🔒';
-        dot.classList.add('pulse');
-        document.getElementById(`select-${key}`).disabled = false;
-      });
+      Object.keys(categories).forEach(key => setCategoryState(key, 'live'));
       updatePreview();
     }
 
@@ -2608,6 +2928,8 @@
       }
       updateTelemetry(prompt);
       renderDiagnostics(prompt);
+      // Every mutation path ends here, so the rig can never drift from state.
+      syncRig();
       persistState();
     }
 

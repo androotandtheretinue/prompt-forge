@@ -13,13 +13,17 @@ Open an issue with:
 
 ## Editing the app
 
-Prompt Forge deliberately stays close to a single-file architecture.
+Prompt Forge ships as a single file, but since v5 the source is two: `index.html` holds the signal banks, the static foundation, and the prompt builder; `v5.js` layers the interaction model on top by reassigning the functions it replaces.
 
 1. Fork the repository.
-2. Edit `index.html`.
-3. Mirror the finished release file to `dist/prompt-forge-v4.0.0.html` when preparing a patch for 4.0.0.
+2. Edit `index.html`, `v5.js`, or both.
+3. Run `npm run build`. This inlines `v5.js` into `dist/prompt-forge.html`, the self-contained file people download. The filename carries no version number on purpose — the old `dist/prompt-forge-v4.0.0.html` convention went stale the moment the version moved.
 4. Run `npm test`.
 5. Open a pull request describing the creative capability added or the failure removed.
+
+### Which file to edit
+
+`v5.js` reassigns `renderCategories`, `randomizeAll`, `mutateRandom`, `pickRandomOption`, `captureConfiguration`, `applyConfiguration`, and others. When a function exists in both files, the `v5.js` version is the one that runs — but keep the `index.html` version working too. It is the fallback when the layer fails to load, and it is what `npm test` executes.
 
 ## Signal design
 
@@ -41,8 +45,9 @@ A Forge Card is a doctrine, not a random sample. Its selections should reinforce
 - No duplicate options within a category.
 - No broken preset references.
 - Every category appears once in prompt order.
-- Locked categories remain unchanged by every automated operation.
-- `index.html` and the versioned file in `dist/` remain identical for a release.
+- Every category appears in exactly one reroll cluster. Clusters must partition the axes: overlapping scopes make the cluster buttons indistinguishable, and an uncovered axis is one no cluster button can reach.
+- Locked categories remain unchanged by every automated operation, whether they are pinned at a value or muted blank.
+- `dist/prompt-forge.html` matches the output of `npm run build`.
 - No analytics or prompt-upload behavior is introduced without conspicuous disclosure and community discussion.
 
 ## Licensing contributions

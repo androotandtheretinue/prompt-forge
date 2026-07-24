@@ -1,43 +1,84 @@
-# Prompt Forge 5.1.0 — Strum
+# Prompt Forge 5.2.0 — Signal Rig
 
-Prompt Forge has crossed from prompt board into prompt instrument.
+Sixteen strings. You do not play all sixteen on every song.
 
-The v5 release introduces **Strum**: hold the pointer down and sweep across the category labels to repeatedly mutate the live prompt. Move back across a row and it plays again. Hold Shift and the same gesture advances sequentially through each pool instead of choosing randomly.
+Prompt Forge 5.1 made the board playable. 5.2 makes it configurable before you play: choose which axes are in the instrument, and the rest go quiet and stay quiet.
 
-## Release highlights
+## The Signal Rig
 
-- Repeated drag-strumming across all sixteen creative axes.
-- Shift-drag step strumming.
-- Persistent custom signals for every category.
-- Custom signals participate in dropdowns, randomization, strumming, Option Radar, and Blueprint saves.
-- Clear Unlocked preserves locked values and intentionally locked blanks.
-- Centralized browser-crypto-backed randomness.
-- Rerolls avoid immediate repeats when alternatives exist.
-- A new DARPA Forge Card built from phosphor monochrome, CRT raster, scan lines, telemetry, wireframe grids, HUD composition, and classified-interface atmosphere.
-- The DARPA card leaves setting, wardrobe, weather, and action unconstrained so the subject remains the subject instead of becoming an image on an operator's monitor.
-- 21 curated Forge Cards total.
-- The original static, inspectable foundation remains intact through the separate `v5.js` extension layer.
+Every axis now sits in one of three named states, shown as a chip strip above the board:
 
-## Why Strum
+| State | Meaning | Behavior |
+| --- | --- | --- |
+| **live** | in play | rerolls, cards, strums, and randomize may move it |
+| **pinned** | frozen at a value | survives every automated operation |
+| **muted** | frozen blank | contributes nothing to the prompt, and stays that way |
 
-Randomize is a command. Strum is a gesture.
+Tap a chip to cycle `live → pinned → muted`. The readout counts the three as you go.
 
-Rather than choosing every signal deliberately or replacing the entire board at once, the user can sweep through the instrument, hear the conceptual chord change, reverse direction, revisit one row, or hold discoveries in place with locks.
+Three bulk controls set the whole rig at once:
 
-The interface is becoming playable.
+- **🚫 MUTE BLANKS** — mute every axis that is currently empty. Randomize at RECON, keep the six that landed, mute the ten that did not, and the board is now a six-string instrument.
+- **🔐 PIN FILLED** — pin every axis that currently holds a value.
+- **🔓 ALL LIVE** — release everything. Values are kept.
 
-## Custom pools
+The rig is the deliberate counterpart to the payload doctrines. RECON gives you a random six; the rig lets you choose the six.
 
-The built-in vocabulary remains canonical, but it is no longer a boundary. Every category can accept user-created signals, stored locally in the browser and removable at any time.
+### No new state
 
-This turns Prompt Forge from a curated library into a user-extensible creative instrument.
+The three states are a reading of two properties the forge already stored:
+
+```
+live   = !locked
+pinned =  locked && value !== ''
+muted  =  locked && value === ''
+```
+
+Which means Blueprints, local persistence, and every lock guard in the v5 layer understood muting before it had a name. Save a rig to the Blueprint Vault and it travels with the rest of the configuration.
+
+Muting was technically possible before this release — clear a row, then lock it. Nothing said so, the two steps only worked in that order, and the result was styled identically to a pinned row. The capability existed and could not be found. Now it is one tap, and a muted row reads slate instead of gold.
+
+## The four cluster buttons now mean four different things
+
+They were unclear because they were nearly identical. Structure and Story shared three of their four rows:
+
+```
+before   structure : action, framing, composition, setting
+         story     : action, composition, setting, narrative
+```
+
+The reroll scopes now partition the sixteen axes — every axis in exactly one scope, no axis in two:
+
+```
+after    structure  : composition, camera, setting        the shot
+         atmosphere : lighting, mood, palette, weather    the air
+         surface    : medium, texture, style, quality, fx, color logic
+         story      : story signal, action, wardrobe      who, and what happens
+```
+
+Color Logic belonged to no cluster at all and could not be reached from any cluster button. It now lives in Surface.
+
+Two smaller corrections to the same problem:
+
+- Every cluster button is prefixed with **⟳**. The labels were nouns; the action is a verb.
+- **Hovering a scope outlines the rows it will change**, in both the board and the rig strip, before the click commits. The button titles list their member axes and are generated from the actual cluster definition, so a label cannot drift from what it does.
+
+## Repo catches up to the code
+
+5.2 is also the release where the project's release discipline rejoins reality.
+
+The audit harness had been failing since v5 shipped, and worse than failing — it had verified nothing. It extracted the application with a pattern anchored on `</script></body>` that started matching at the first inline block. Adding the `<script src="v5.js">` tag made it swallow that markup as JavaScript, so the harness could not parse the file it was testing.
+
+The signal counts held anyway. They held unwatched.
+
+- The harness now takes the last attribute-free `<script>` block, and additionally checks that `v5.js` parses.
+- `npm run build` inlines `v5.js` into **`dist/prompt-forge.html`** — a genuinely self-contained file, which the previous distribution had not been since v5. The old `dist/prompt-forge-v4.0.0.html` is retired; a version baked into a filename goes stale on the next release, and this one had been stale for two.
+- New checks enforce the invariants this release introduces: reroll scopes must be disjoint and must cover every axis, and the three rig states must derive correctly from lock and value.
+
+## Verified
+
+2,000 unique signals across 16 axes, 20 Forge Cards, all preset and prompt-order references resolving. Muted axes were driven through randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, page reload, and a Blueprint round-trip, and stayed blank through all of it.
 
 ## Why CC0
 
-The forge is meant to propagate. CC0 lets artists, writers, teachers, developers, researchers, and delightful prompt goblins use the tool without waiting for permission or untangling attribution requirements.
-
-Take it. Change it. Give the changed thing away again—or do not. The gift has no hook in it.
-
-## Release verification
-
-The live GitHub Pages application loads `index.html` with the `v5.js` extension. The v5.1 interaction layer has been manually verified for repeated strumming, reverse passes, same-row retriggering, locked-row protection, custom-signal persistence, custom-signal randomization, Option Radar integration, Blueprint capture, Clear Unlocked behavior, and DARPA card application.
+Unchanged. Take it, change it, give the changed thing away again — or do not. The gift has no hook in it.

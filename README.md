@@ -1,12 +1,12 @@
 # Prompt Forge DARPA v5
 
-**A public-domain, user-extensible visual prompt instrument: 2,000+ signals, 16 creative axes, drag-strumming, custom pools, and no permission required.**
+**A public-domain, user-extensible visual prompt instrument: 2,000+ signals, 16 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
 
-[Launch Prompt Forge](https://androotandtheretinue.github.io/prompt-forge/) · [Read the v5.1.0 release notes](RELEASE_NOTES.md)
+[Launch Prompt Forge](https://androotandtheretinue.github.io/prompt-forge/) · [Read the v5.2.0 release notes](RELEASE_NOTES.md)
 
 Prompt Forge turns a subject into a structured image-generation prompt by combining medium, action, texture, style, lighting, framing, mood, palette, quality, setting, weather, wardrobe, effects, composition, color logic, and story signal.
 
-Lock what matters. Roll what does not. Strum the board. Add your own signals. Follow the strange result somewhere useful.
+Pin what matters. Mute what does not. Roll the rest. Strum the board. Add your own signals. Follow the strange result somewhere useful.
 
 It is a static web app. There is no account, backend, build step, or server-side storage.
 
@@ -22,7 +22,9 @@ It is a static web app. There is no account, backend, build step, or server-side
 - Centralized browser randomness avoids immediate repeat selections where possible.
 - **RECON / STANDARD / FULL** missions randomize 6, 10, or all 16 unlocked axes.
 - **Mutate 3** creates controlled variation without destroying the whole composition.
-- **Cluster rerolls** target Structure, Atmosphere, Surface, or Story.
+- **Signal Rig**: set every axis to **live**, **pinned**, or **muted** before you forge. Muted axes stay blank through everything.
+- **MUTE BLANKS / PIN FILLED / ALL LIVE** configure the whole rig in one move.
+- **Cluster rerolls** target Structure, Atmosphere, Surface, or Story. The four scopes partition the sixteen axes, and hovering one outlines exactly the rows it will change.
 - **Option Radar** searches built-in and custom signals.
 - **Chaos Dial** provides a visible, pinned modifier.
 - **Universal, Midjourney, and SDXL** output formats.
@@ -30,7 +32,7 @@ It is a static web app. There is no account, backend, build step, or server-side
 - **Blueprint Vault** stores named configurations, including custom pools.
 - Persistent **24-prompt history**.
 - **Live telemetry and diagnostics** for density, range, and compatibility problems.
-- Real locks: locked values and locked blanks survive cards, radar selection, clearing, mutation, strumming, and randomization.
+- Real locks: pinned values and muted blanks survive cards, radar selection, clearing, mutation, strumming, and randomization.
 
 ## Use it
 
@@ -44,12 +46,14 @@ The interface loads Tailwind CSS and two fonts from public CDNs. Prompt state, h
 
 Download or clone the repository, then open `index.html` in a modern browser. Keep `v5.js` beside `index.html`.
 
+Or take the single self-contained file: `dist/prompt-forge.html`, which has `v5.js` inlined and needs nothing beside it.
+
 ## Five-minute doctrine
 
 1. Enter the subject.
 2. Choose **RECON**, **STANDARD**, or **FULL**.
 3. Randomize—or strum across the board.
-4. Lock discoveries that feel alive, including intentionally blank axes.
+4. Pin discoveries that feel alive. Mute the axes this image has no use for.
 5. Add custom signals when the existing vocabulary cannot hold the idea.
 6. Mutate, reroll, or Shift-strum until the image has a point of view.
 7. Select an output format and copy the result.
@@ -61,7 +65,35 @@ The controls are invitations, not commandments. Contradictions can be productive
 - **Drag across category labels:** repeatedly randomize unlocked rows as the pointer moves.
 - **Move back across a row:** reroll it again without releasing the pointer.
 - **Shift + drag:** advance through each crossed category pool instead of randomizing.
-- Locked rows are ignored.
+- Pinned and muted rows are ignored.
+
+## Signal Rig
+
+Sixteen chips above the board decide which axes are in play. Tap one to cycle it.
+
+| State | Meaning | Behavior |
+| --- | --- | --- |
+| **live** | in play | rerolls, cards, strums, and randomize may move it |
+| **pinned** | frozen at a value | survives every automated operation |
+| **muted** | frozen blank | contributes nothing, and stays that way |
+
+- **🚫 MUTE BLANKS** mutes every axis that is currently empty — the fast way to lock in your blanks before you start.
+- **🔐 PIN FILLED** pins every axis that currently holds a value.
+- **🔓 ALL LIVE** releases everything. Values are kept.
+
+Each row carries its own **🚫** for muting a single axis without touching the rig.
+
+The three states are not new stored data. They are a reading of the lock and the value the forge already kept:
+
+```
+live   = !locked
+pinned =  locked && value !== ''
+muted  =  locked && value === ''
+```
+
+So a rig saves to the Blueprint Vault with everything else, and persists across reloads on its own.
+
+The rig is the deliberate counterpart to the mission doctrines: RECON gives you a random six, the rig lets you choose the six.
 
 ## Custom pools
 
@@ -113,4 +145,4 @@ Wild additions are welcome. Please read [CONTRIBUTING.md], run `npm test`, and k
 
 ## Version
 
-Current release: **5.1.0 — Strum**. See [CHANGELOG.md](CHANGELOG.md).
+Current release: **5.2.0 — Signal Rig**. See [CHANGELOG.md](CHANGELOG.md).

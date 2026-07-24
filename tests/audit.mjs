@@ -1,25 +1,34 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { buildSingleFile, DIST_PATH, LAYER_PATH, SOURCE_PATH } from '../scripts/build.mjs';
 
-const sourcePath = new URL('../index.html', import.meta.url);
-const distPath = new URL('../dist/prompt-forge-v4.0.0.html', import.meta.url);
-const html = fs.readFileSync(sourcePath, 'utf8');
-const dist = fs.readFileSync(distPath, 'utf8');
+const html = fs.readFileSync(SOURCE_PATH, 'utf8');
 
 function fail(message) {
   console.error(`FAIL: ${message}`);
   process.exitCode = 1;
 }
 
-if (html !== dist) fail('index.html and the versioned distribution file differ.');
+if (!fs.existsSync(DIST_PATH)) {
+  fail('dist/prompt-forge.html is missing. Run `npm run build`.');
+} else if (fs.readFileSync(DIST_PATH, 'utf8') !== buildSingleFile()) {
+  fail('dist/prompt-forge.html is stale. Run `npm run build`.');
+}
 
-const match = html.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/);
-if (!match) {
+/*
+ * Take the LAST attribute-free <script> block. The previous pattern anchored on
+ * `</script>\s*</body>` and matched from the first inline block to the last,
+ * which meant that adding the v5 tag made it swallow `</script><script src=…>`
+ * as if that were JavaScript. The harness then failed to parse the file it was
+ * meant to be testing, and the audit silently verified nothing.
+ */
+const blocks = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+if (!blocks.length) {
   fail('Inline application script not found.');
   process.exit();
 }
 
-let script = match[1];
+let script = blocks[blocks.length - 1][1];
 script += `
 globalThis.__forgeAudit = {
   counts: Object.fromEntries(Object.entries(categories).map(([key, category]) => [key, category.options.filter(option => !option.startsWith('—')).length])),
@@ -29,7 +38,24 @@ globalThis.__forgeAudit = {
   missingFromOrder: Object.keys(categories).filter(key => !promptOrder.includes(key)),
   extraInOrder: promptOrder.filter(key => !categories[key]),
   clusterErrors: Object.entries(categoryClusters).flatMap(([name, keys]) => keys.filter(key => !categories[key]).map(key => ({ name, key }))),
-  cardCount: Object.keys(presets).length
+  clusterMembership: Object.entries(categoryClusters).flatMap(([name, keys]) => keys.map(key => ({ name, key }))),
+  clusterNames: Object.keys(categoryClusters),
+  categoryKeys: Object.keys(categories),
+  cardCount: Object.keys(presets).length,
+  rigStates: Object.keys(categories).map(key => {
+    const cat = categories[key];
+    const read = value => { cat.value = value.value; cat.locked = value.locked; return categoryStateOf(cat); };
+    const before = { value: cat.value, locked: cat.locked };
+    const observed = {
+      live: read({ value: 'x', locked: false }),
+      liveBlank: read({ value: '', locked: false }),
+      pinned: read({ value: 'x', locked: true }),
+      muted: read({ value: '', locked: true })
+    };
+    cat.value = before.value;
+    cat.locked = before.locked;
+    return { key, observed };
+  })
 };`;
 
 const context = {
@@ -59,10 +85,37 @@ if (audit.missingMeta.length) fail(`Forge Cards missing metadata: ${audit.missin
 if (audit.missingFromOrder.length || audit.extraInOrder.length) fail('Prompt order does not match the category registry.');
 if (audit.clusterErrors.length) fail(`Broken cluster references: ${JSON.stringify(audit.clusterErrors)}`);
 
+/*
+ * Reroll scopes must partition the axes. Overlapping scopes are what made the
+ * four cluster buttons feel interchangeable before v5.2, and an uncovered axis
+ * (colorlogic, until v5.2) is one no cluster button can ever reach.
+ */
+const clusteredKeys = audit.clusterMembership.map(entry => entry.key);
+const duplicatedInClusters = clusteredKeys.filter((key, index) => clusteredKeys.indexOf(key) !== index);
+const uncovered = audit.categoryKeys.filter(key => !clusteredKeys.includes(key));
+if (duplicatedInClusters.length) fail(`Reroll scopes overlap on: ${[...new Set(duplicatedInClusters)].join(', ')}`);
+if (uncovered.length) fail(`Axes reachable by no reroll scope: ${uncovered.join(', ')}`);
+
+// The Signal Rig reads three states out of the two persisted properties.
+const badStates = audit.rigStates.filter(({ observed }) =>
+  observed.live !== 'live' ||
+  observed.liveBlank !== 'live' ||
+  observed.pinned !== 'pinned' ||
+  observed.muted !== 'muted');
+if (badStates.length) fail(`Rig state derivation is wrong for: ${badStates.map(entry => entry.key).join(', ')}`);
+
+// The v5 layer is not executed here, but it must at least parse.
+try {
+  new vm.Script(fs.readFileSync(LAYER_PATH, 'utf8'));
+} catch (error) {
+  fail(`v5.js is invalid: ${error.message}`);
+}
+
 if (!process.exitCode) {
   console.log('Prompt Forge audit passed.');
   console.log(`  ${Object.keys(audit.counts).length} axes`);
   console.log(`  ${total.toLocaleString()} unique signals`);
   console.log(`  ${audit.cardCount} valid Forge Cards`);
-  console.log('  distribution file matches index.html');
+  console.log(`  ${audit.clusterNames.length} reroll scopes partitioning all ${audit.categoryKeys.length} axes`);
+  console.log('  v5 layer parses; dist/prompt-forge.html matches the build');
 }

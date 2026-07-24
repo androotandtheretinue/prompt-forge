@@ -1,15 +1,15 @@
 cff-version: 1.2.0
 message: "Attribution is not required under CC0, but if you wish to cite Prompt Forge, use this metadata."
-title: "Prompt Forge DARPA v4"
+title: "Prompt Forge DARPA v5"
 type: software
-version: 4.0.0
-date-released: 2026-07-20
+version: 5.2.0
+date-released: 2026-07-24
 authors:
   - name: "Root and The Retinue"
     alias: "@OAndroot"
 url: "https://github.com/androotandtheretinue/prompt-forge"
 license: CC0-1.0
-abstract: "A public-domain visual prompt instrument with 2,000 signals across 16 creative axes."
+abstract: "A public-domain, user-extensible visual prompt instrument with 2,000 signals across 16 creative axes, drag-strumming, custom pools, and a three-state signal rig."
 keywords:
   - generative-art
   - prompt-engineering
