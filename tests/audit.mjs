@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
-import { buildSingleFile, DIST_PATH, LAYER_PATH, SOURCE_PATH } from '../scripts/build.mjs';
 
+const SOURCE_PATH = new URL('../index.html', import.meta.url);
 const html = fs.readFileSync(SOURCE_PATH, 'utf8');
 
 function fail(message) {
@@ -9,26 +9,38 @@ function fail(message) {
   process.exitCode = 1;
 }
 
-if (!fs.existsSync(DIST_PATH)) {
-  fail('dist/prompt-forge.html is missing. Run `npm run build`.');
-} else if (fs.readFileSync(DIST_PATH, 'utf8') !== buildSingleFile()) {
-  fail('dist/prompt-forge.html is stale. Run `npm run build`.');
-}
-
 /*
- * Take the LAST attribute-free <script> block. The previous pattern anchored on
- * `</script>\s*</body>` and matched from the first inline block to the last,
- * which meant that adding the v5 tag made it swallow `</script><script src=…>`
- * as if that were JavaScript. The harness then failed to parse the file it was
- * meant to be testing, and the audit silently verified nothing.
+ * index.html carries more than one attribute-free <script> block: the
+ * application, then the v5 interaction layer that reassigns parts of it.
+ * Select by content rather than position. An earlier version of this harness
+ * anchored on `</script>\s*</body>` and matched from the first block to the
+ * last, so it swallowed markup as JavaScript and silently verified nothing for
+ * two releases. Position is exactly the thing that keeps changing here.
  */
-const blocks = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+const blocks = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match => match[1]);
 if (!blocks.length) {
-  fail('Inline application script not found.');
+  fail('No inline script blocks found.');
   process.exit();
 }
 
-let script = blocks[blocks.length - 1][1];
+// Every inline block must at least parse, whichever one we go on to execute.
+blocks.forEach((block, index) => {
+  try {
+    new vm.Script(block);
+  } catch (error) {
+    fail(`Inline script block ${index + 1} of ${blocks.length} is invalid: ${error.message}`);
+  }
+});
+if (process.exitCode) process.exit();
+
+const APP_MARKER = 'const categories = {';
+const appBlocks = blocks.filter(block => block.includes(APP_MARKER));
+if (appBlocks.length !== 1) {
+  fail(`Expected exactly one inline block defining \`${APP_MARKER}\`; found ${appBlocks.length}.`);
+  process.exit();
+}
+
+let script = appBlocks[0];
 script += `
 globalThis.__forgeAudit = {
   counts: Object.fromEntries(Object.entries(categories).map(([key, category]) => [key, category.options.filter(option => !option.startsWith('—')).length])),
@@ -104,12 +116,10 @@ const badStates = audit.rigStates.filter(({ observed }) =>
   observed.muted !== 'muted');
 if (badStates.length) fail(`Rig state derivation is wrong for: ${badStates.map(entry => entry.key).join(', ')}`);
 
-// The v5 layer is not executed here, but it must at least parse.
-try {
-  new vm.Script(fs.readFileSync(LAYER_PATH, 'utf8'));
-} catch (error) {
-  fail(`v5.js is invalid: ${error.message}`);
-}
+// Prompt Forge is one file. Nothing may reintroduce an external dependency.
+const externalScripts = [...html.matchAll(/<script\s[^>]*src=["']([^"']+)["']/g)].map(match => match[1]);
+const localScripts = externalScripts.filter(src => !/^(https?:)?\/\//.test(src));
+if (localScripts.length) fail(`index.html is not self-contained; it loads ${localScripts.join(', ')}.`);
 
 if (!process.exitCode) {
   console.log('Prompt Forge audit passed.');
@@ -117,5 +127,5 @@ if (!process.exitCode) {
   console.log(`  ${total.toLocaleString()} unique signals`);
   console.log(`  ${audit.cardCount} valid Forge Cards`);
   console.log(`  ${audit.clusterNames.length} reroll scopes partitioning all ${audit.categoryKeys.length} axes`);
-  console.log('  v5 layer parses; dist/prompt-forge.html matches the build');
+  console.log(`  ${blocks.length} inline script blocks, all parsing, no local script dependencies`);
 }

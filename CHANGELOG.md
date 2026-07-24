@@ -9,7 +9,6 @@ Added MUTE BLANKS, PIN FILLED, and ALL LIVE for setting the whole rig at once.
 Added a live rig readout counting live, pinned, and muted axes.
 Added cluster hover preview: hovering a reroll scope outlines the exact rows and chips it will change before the click commits.
 Added generated cluster button titles listing member axes, so a scope's label can no longer drift from its membership.
-Added `npm run build`, which inlines `v5.js` into a genuinely self-contained `dist/prompt-forge.html`.
 Changed
 Reroll scopes now partition the sixteen axes instead of overlapping. Structure and Story previously shared three of their four rows, which is why the four buttons felt interchangeable.
 Structure is now Composition, Camera, and Setting; Story is now Story Signal, Action, and Wardrobe; Surface absorbs Color Logic, which belonged to no scope at all and was unreachable from any cluster button.
@@ -19,13 +18,13 @@ Locking a row that holds no value now presents as muting it. The underlying stat
 `toggleLock` and `unlockAll` route through one state setter instead of poking DOM nodes directly, and no longer throw when a row is absent.
 Fixed
 Fixed the audit harness, which had silently verified nothing since v5 shipped. Its script-extraction pattern anchored on `</script></body>` and began matching at the first inline block, so adding the `v5.js` tag made it swallow markup as JavaScript and fail to parse the application at all.
-Fixed the stale distribution file. `dist/` had never been re-cut after v5 and was missing the `v5.js` reference entirely.
-Retired the frozen `dist/prompt-forge-v4.0.0.html` filename, which had misdescribed the release for two versions.
+Folded `v5.js` back into `index.html` as a second inline script block. The project described itself as single-file for two releases while shipping two files; it is now one file again, and the audit fails if a local script or stylesheet reference is reintroduced.
+Removed `dist/` and the build step. With `index.html` self-contained there is nothing left to mirror, which retires the drift that produced the stale distribution in the first place.
 Validated
 Reroll scopes are disjoint and cover all sixteen axes.
 The three rig states derive correctly from lock and value for every axis.
-`v5.js` parses.
-`dist/prompt-forge.html` matches the build output.
+Every inline script block parses, and `index.html` references no local script file.
+The merged file opens and runs correctly straight from disk over `file://` with no server and no network.
 Muted axes survive randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, and Option Radar, and persist across reload and Blueprint round-trips.
 [5.1.0] — 2026-07-24
 Added

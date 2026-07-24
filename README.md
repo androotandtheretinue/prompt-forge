@@ -8,7 +8,7 @@ Prompt Forge turns a subject into a structured image-generation prompt by combin
 
 Pin what matters. Mute what does not. Roll the rest. Strum the board. Add your own signals. Follow the strange result somewhere useful.
 
-It is a static web app. There is no account, backend, build step, or server-side storage.
+It is a single static HTML file. There is no account, backend, build step, or server-side storage.
 
 ## What is inside
 
@@ -44,9 +44,9 @@ The interface loads Tailwind CSS and two fonts from public CDNs. Prompt state, h
 
 ### Local use
 
-Download or clone the repository, then open `index.html` in a modern browser. Keep `v5.js` beside `index.html`.
+Download `index.html` and open it in a modern browser. That one file is the entire program — no build step, no companion scripts, nothing to keep beside it.
 
-Or take the single self-contained file: `dist/prompt-forge.html`, which has `v5.js` inlined and needs nothing beside it.
+Tailwind and two fonts still load from public CDNs, so an offline copy renders with fallback styling. Everything else works with no network at all.
 
 ## Five-minute doctrine
 

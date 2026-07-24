@@ -71,13 +71,16 @@ The audit harness had been failing since v5 shipped, and worse than failing — 
 
 The signal counts held anyway. They held unwatched.
 
-- The harness now takes the last attribute-free `<script>` block, and additionally checks that `v5.js` parses.
-- `npm run build` inlines `v5.js` into **`dist/prompt-forge.html`** — a genuinely self-contained file, which the previous distribution had not been since v5. The old `dist/prompt-forge-v4.0.0.html` is retired; a version baked into a filename goes stale on the next release, and this one had been stale for two.
+- The harness now selects the application block by its contents rather than its position, and parse-checks every inline block. Position is exactly the thing that kept changing.
+- **`v5.js` is folded back into `index.html`.** The project called itself single-file for two releases while shipping two files. It is one file again — open it straight off disk and it runs. A new check fails the build if any local script or stylesheet reference reappears.
+- `dist/` and the build step are gone. With `index.html` self-contained there is nothing left to mirror, which permanently retires the class of bug that produced the stale distribution.
 - New checks enforce the invariants this release introduces: reroll scopes must be disjoint and must cover every axis, and the three rig states must derive correctly from lock and value.
 
 ## Verified
 
-2,000 unique signals across 16 axes, 20 Forge Cards, all preset and prompt-order references resolving. Muted axes were driven through randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, page reload, and a Blueprint round-trip, and stayed blank through all of it.
+2,000 unique signals across 16 axes and 20 Forge Cards in the canonical banks, with every preset and prompt-order reference resolving. The running app carries more than that — the v5 layer's `installDarpaCard()` appends its vocabulary to the built-in pools on load, so the live board reports **2,039 signals and 21 Forge Cards**. Both numbers are correct; they count different things, and the audit measures the source.
+
+Muted axes were driven through randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, page reload, and a Blueprint round-trip, and stayed blank through all of it. The merged file was also opened directly from disk over `file://`, with no server and no network, and ran clean.
 
 ## Why CC0
 
