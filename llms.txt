@@ -30,13 +30,21 @@ texture (128), weather (112), fx (128), quality (96).
 
 1. State the single idea the image is in service of. One sentence, in your
    own words, before choosing anything.
-2. Choose at most one signal per axis, and only values that appear in the
-   vocabulary. Do not invent, translate, pluralize, or blend signals — an
-   invented signal is the one failure mode this file exists to prevent.
-3. Omit any axis that does not serve the idea. Sixteen filled axes is a
-   worse prompt than six chosen ones. Omission is a decision, not a gap.
-4. Emit the chosen signals in the axis order above.
-5. Name the idea alongside the prompt, so a reader can judge whether the
+2. Choose at most one signal per axis, and only values listed under that
+   axis. A signal is valid only in the axis that lists it. Several axes
+   carry adjacent language, and relocating a value is the most common
+   observed failure: "Twilight" is a lighting signal, and the weather axis
+   does not contain it. Check the axis, not just the vocabulary.
+3. Do not invent, translate, pluralize, abbreviate, or blend signals. If
+   the idea wants something the vocabulary lacks, say so plainly rather
+   than approximating it — a near-miss is indistinguishable from a real
+   signal to whoever reads the prompt next.
+4. Omit any axis that does not serve the idea. Filling all sixteen is the
+   most common sign that a form is being completed rather than an image
+   being made; six chosen signals beat sixteen supplied ones. Omission is
+   a decision, not a gap, and you should be able to say why you omitted.
+5. Emit the chosen signals in the axis order above.
+6. Name the idea alongside the prompt, so a reader can judge whether the
    signals actually served it.
 
 If you cannot reach the vocabulary files, say so and stop. Do not supply

@@ -214,6 +214,32 @@ if (!/<link\s[^>]*rel=["']alternate["'][^>]*href=["']vocabulary\.json["']/.test(
   fail('index.html <head> is missing the vocabulary.json pointer that survives truncated fetches.');
 }
 
+/*
+ * Version strings must agree with package.json.
+ *
+ * Three of them had drifted independently: the static footer said v4.0, the v5
+ * layer overwrote it with a hardcoded v5.1 while PF_VERSION sat at 5.2 two
+ * thousand lines above, and the <head> still advertised v4 to every link
+ * preview and scraper. Each was written once and never read again, which is the
+ * whole failure mode — so they are read here.
+ */
+const shortVersion = version.replace(/\.\d+$/, '');
+const versionClaims = [
+  { label: 'PF_VERSION', found: (html.match(/const PF_VERSION = '([^']+)'/) || [])[1], want: shortVersion },
+  { label: 'static footer', found: (html.match(/FORGED WITH hop\.e[^<]*DARPA v([\d.]+)/) || [])[1], want: shortVersion },
+  { label: '<title>', found: (html.match(/<title>PROMPT FORGE DARPA v(\d+)/) || [])[1], want: shortVersion.split('.')[0] },
+  { label: 'og:title', found: (html.match(/og:title["'] content=["']Prompt Forge DARPA v(\d+)/) || [])[1], want: shortVersion.split('.')[0] }
+];
+for (const { label, found, want } of versionClaims) {
+  if (found === undefined) fail(`Could not find the ${label} version string in index.html.`);
+  else if (found !== want) fail(`${label} says v${found}; package.json is ${version} (expected v${want}).`);
+}
+
+// The runtime footer must derive its version rather than restate it.
+if (/DARPA v[\d.]+ ·/.test(html.slice(html.indexOf('footer.textContent')))) {
+  fail('The runtime footer hardcodes a version instead of interpolating PF_VERSION.');
+}
+
 if (!process.exitCode) {
   console.log('Prompt Forge audit passed.');
   console.log(`  ${Object.keys(audit.counts).length} axes`);

@@ -8,6 +8,10 @@ Added a `<link rel="alternate">` and an `ai-vocabulary` meta tag to the first fe
 Added `.nojekyll` so GitHub Pages serves the repository verbatim rather than running it through a static-site build.
 Added audit checks that the published vocabulary files match the live `categories` object, that `llms.txt` references both, and that the `<head>` pointer is present.
 Fixed
+Fixed the footer, which reported the wrong version twice. The static markup said DARPA v4.0 and the v5 layer overwrote it with a hardcoded v5.1, while `PF_VERSION` sat at 5.2 in the same file. The runtime footer now interpolates `PF_VERSION`.
+Tightened `llms.txt` to require that a signal be listed *under the axis it is used in*. The previous wording asked only that values appear in the vocabulary, which permitted relocating a real signal into the wrong axis — observed in the wild, where an agent placed the lighting signal Twilight into weather and produced two lighting selections.
+Strengthened the omission guidance after an agent filled all sixteen axes: filling every axis is now named as the signature of completing a form rather than making an image.
+Added audit checks that every version string in `index.html` agrees with `package.json`, and that the runtime footer derives its version instead of restating it.
 Corrected `<head>` metadata that was two versions stale: the page title and Open Graph title still said DARPA v4, and the description still claimed 2,000 signals. This is the region a truncating fetcher is most likely to read, so it was the worst place in the file to be wrong.
 Narrowed the self-containment check to `rel="stylesheet"`. It previously rejected any local `<link href>`, which would have failed the new `rel="alternate"` vocabulary pointer — a data reference the page does not need in order to render.
 [5.2.0] — 2026-07-24
