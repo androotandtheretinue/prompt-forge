@@ -240,6 +240,32 @@ if (/DARPA v[\d.]+ ·/.test(html.slice(html.indexOf('footer.textContent')))) {
   fail('The runtime footer hardcodes a version instead of interpolating PF_VERSION.');
 }
 
+/*
+ * Social-card image. A link preview pointing at a 404 is worse than one with no
+ * image: the platform renders a broken card rather than a plain one, and the
+ * failure is invisible from inside the repository.
+ *
+ * Only existence and the absolute URL are checked. Whether the picture still
+ * looks like the current board cannot be verified here — regenerate it when the
+ * board changes.
+ */
+const cardMatch = html.match(/property=["']og:image["'] content=["']([^"']+)["']/);
+if (!cardMatch) {
+  fail('index.html declares no og:image, so shared links render without a preview.');
+} else {
+  const cardUrl = cardMatch[1];
+  if (!/^https?:\/\//.test(cardUrl)) {
+    fail(`og:image must be an absolute URL; found "${cardUrl}". Scrapers resolve it against their own host.`);
+  }
+  const cardFile = cardUrl.split('/').pop();
+  if (!fs.existsSync(new URL(`../${cardFile}`, import.meta.url))) {
+    fail(`og:image points at ${cardFile}, which is not in the repository.`);
+  }
+  if (!/name=["']twitter:card["'] content=["']summary_large_image["']/.test(html)) {
+    fail('An og:image is declared without twitter:card=summary_large_image, so X renders a thumbnail instead of a large card.');
+  }
+}
+
 if (!process.exitCode) {
   console.log('Prompt Forge audit passed.');
   console.log(`  ${Object.keys(audit.counts).length} axes`);

@@ -21,6 +21,18 @@ Prompt Forge is one file. `index.html` is the whole program: signal banks, style
 4. Run `npm test`.
 5. Open a pull request describing the creative capability added or the failure removed.
 
+### The social card
+
+`social-card.png` is the link preview. Regenerate it whenever the board's appearance or the version in the header changes, using an installed Chrome or Edge — no dependency required:
+
+```
+chrome --headless=new --disable-gpu --hide-scrollbars \
+  --virtual-time-budget=8000 --window-size=1200,630 \
+  --screenshot=social-card.png index.html
+```
+
+The audit checks that the file exists, that `og:image` is absolute, and that `twitter:card` is set. It cannot check whether the picture still resembles the board — that part is on you.
+
 ### The published vocabulary
 
 `vocabulary.json` and `vocabulary.txt` are generated from `index.html` and committed, because GitHub Pages serves files rather than running scripts, and machine readers need the vocabulary as data.

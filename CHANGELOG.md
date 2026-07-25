@@ -5,6 +5,7 @@ Added
 Added `llms.txt`, a plain-text front door for machine readers: what Prompt Forge is, the sixteen axes, where the vocabulary lives, and the operating instruction.
 Added `vocabulary.json` and `vocabulary.txt`, the complete 2,032-signal vocabulary published as data so nothing has to scrape the application. Both are generated from `index.html` by `npm run vocabulary`.
 Added a `<link rel="alternate">` and an `ai-vocabulary` meta tag to the first few hundred bytes of the `<head>`, so a truncated fetch still lands on a pointer to the vocabulary. `index.html` is ~175 kB and the signal pools begin around 40 kB in, past where many fetchers stop.
+Added `social-card.png` and the Open Graph and Twitter card metadata that points at it, so shared links render a picture of the board instead of bare text. Regenerated with headless Chrome; the audit checks the file exists, that `og:image` is absolute, and that `twitter:card` is set.
 Added `.nojekyll` so GitHub Pages serves the repository verbatim rather than running it through a static-site build.
 Added audit checks that the published vocabulary files match the live `categories` object, that `llms.txt` references both, and that the `<head>` pointer is present.
 Fixed

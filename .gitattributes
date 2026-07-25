@@ -8,3 +8,6 @@
 vocabulary.json text eol=lf
 vocabulary.txt  text eol=lf
 llms.txt        text eol=lf
+
+# Binary. Never line-ending converted.
+*.png binary
