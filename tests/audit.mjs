@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
-import { extractVocabulary, toJson, toText } from '../tools/vocabulary.mjs';
+import { extractVocabulary, toJson, toText, MIRRORS } from '../tools/vocabulary.mjs';
 
 const SOURCE_PATH = new URL('../index.html', import.meta.url);
 const html = fs.readFileSync(SOURCE_PATH, 'utf8');
@@ -188,6 +188,28 @@ for (const { file, expected } of published) {
 const llms = fs.readFileSync(new URL('../llms.txt', import.meta.url), 'utf8');
 for (const ref of ['vocabulary.json', 'vocabulary.txt']) {
   if (!llms.includes(ref)) fail(`llms.txt does not reference ${ref}.`);
+}
+
+/*
+ * Mirrors must be reachable from every entry point.
+ *
+ * An agent whose fetcher allowlists hosts can be blocked from *.github.io, and
+ * that blocks llms.txt along with everything else — the reader fails before
+ * reaching the sentence that would have told them where else to look. One
+ * observed in the wild stopped rather than fabricating, which is the file
+ * working, but it should not have had to stop at all.
+ *
+ * So every door carries the address of the others: llms.txt, both generated
+ * vocabulary files, and the <head> meta that survives truncation.
+ */
+if (!llms.includes('## ACCESS')) {
+  fail('llms.txt has no ACCESS section telling a blocked reader that nothing is gated.');
+}
+for (const [name, url] of Object.entries(MIRRORS)) {
+  if (!llms.includes(url)) fail(`llms.txt does not list the ${name} mirror (${url}).`);
+}
+if (!html.includes('raw.githubusercontent.com/androotandtheretinue/prompt-forge')) {
+  fail('The <head> ai-vocabulary pointer does not mention the mirror, so a truncated fetch on a blocked host finds no alternative.');
 }
 
 /*

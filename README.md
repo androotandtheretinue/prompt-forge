@@ -60,6 +60,16 @@ The full vocabulary is published as data, so nothing has to scrape the applicati
 | [`vocabulary.json`](vocabulary.json) | All 2,032 signals with axis metadata. |
 | [`vocabulary.txt`](vocabulary.txt) | The same signals, flat, no parser required. |
 
+Some agents run fetchers that allowlist hosts, and `*.github.io` is not always on the list. That is a host-level policy, not a restriction here — nothing in this project is gated. The same three files are served as plain text from `raw.githubusercontent.com`, and every entry point carries the mirror address so a blocked reader finds the alternative rather than a dead end:
+
+```
+https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/llms.txt
+https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.json
+https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.txt
+```
+
+Both paths track `main` and move as the vocabulary grows. Replace `main` with a commit SHA to pin the exact vocabulary a result was built from — `main` for operating the instrument, a pinned SHA for anything you intend to cite.
+
 This exists because `index.html` is ~175 kB and the signal pools begin roughly 40 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The pointer to these files sits in the first few hundred bytes of the `<head>`, where truncation cannot reach.
 
 Both vocabulary files are generated from the application by `npm run vocabulary`, and the audit fails if they drift from it.

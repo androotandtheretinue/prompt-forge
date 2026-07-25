@@ -7,6 +7,12 @@
 License: CC0-1.0. No account, key, attribution, or permission required.
 Homepage: https://androotandtheretinue.github.io/prompt-forge/
 
+## ACCESS
+
+Some agents cannot fetch *.github.io. That is a host-level policy, not a
+restriction here. Nothing in this project is gated. If the Pages path fails,
+use the mirrors below — same files, plain text, no rendering.
+
 ## Get the vocabulary
 
 Do not scrape index.html. It is a 173 kB single-file application and the
@@ -16,8 +22,24 @@ truncate. Read one of these instead:
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.txt
 
+Mirrors, if that host is blocked for you:
+
+- https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.json
+- https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.txt
+
+This file is mirrored too, since a reader blocked from the first host cannot
+read these instructions there either:
+
+- https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/llms.txt
+
 Same content, generated from the application source. JSON carries the axis
 metadata; the text file is flat and needs no parser.
+
+Both paths track the `main` branch and move as the vocabulary grows. If you
+are citing a result rather than operating the instrument, replace `main` with
+a commit SHA to pin the exact vocabulary you read:
+
+- https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/<sha>/vocabulary.json
 
 ## The 16 axes, in prompt order
 

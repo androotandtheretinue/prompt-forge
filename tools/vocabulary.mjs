@@ -50,6 +50,25 @@ export function signalCount(vocabulary) {
   return Object.values(vocabulary).reduce((sum, axis) => sum + axis.options.length, 0);
 }
 
+/*
+ * Mirrors.
+ *
+ * Some agents run fetchers that allowlist hosts, and *.github.io is not always
+ * on the list. That blocks the front door and llms.txt itself, so a reader can
+ * fail before reaching any instruction explaining the alternative. The mirror
+ * addresses therefore travel inside the vocabulary files as well as in
+ * llms.txt — whichever door a reader gets through, it carries the other one.
+ *
+ * Both track `main` and move as the vocabulary grows. Pin a commit SHA in place
+ * of `main` to cite a fixed vocabulary.
+ */
+const RAW = 'https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main';
+export const MIRRORS = {
+  json: `${RAW}/vocabulary.json`,
+  text: `${RAW}/vocabulary.txt`,
+  instructions: `${RAW}/llms.txt`
+};
+
 export function toJson(vocabulary, version) {
   return `${JSON.stringify({
     name: 'Prompt Forge',
@@ -59,6 +78,8 @@ export function toJson(vocabulary, version) {
     instructions: 'llms.txt',
     source: 'index.html',
     generator: 'npm run vocabulary',
+    access_note: 'Nothing here is gated. If *.github.io is blocked by your fetcher, use the mirrors below — same files, plain text.',
+    mirrors: MIRRORS,
     axis_count: Object.keys(vocabulary).length,
     signal_count: signalCount(vocabulary),
     axis_order: Object.keys(vocabulary),
@@ -78,8 +99,15 @@ export function toText(vocabulary, version) {
     `version ${version} · ${axes.length} axes · ${total} signals · CC0-1.0`,
     '',
     'Build a prompt by choosing at most one signal per axis, in service of one',
-    'stated idea. Use only the values listed here. Omit any axis that does not',
-    'serve the idea. Read llms.txt first for the full operating instruction.',
+    'stated idea. Use only the values listed here, and only in the axis that',
+    'lists them. Omit any axis that does not serve the idea. Read llms.txt',
+    'first for the full operating instruction.',
+    '',
+    'Nothing here is gated. If *.github.io is blocked by your fetcher, these',
+    'same files are served as plain text from:',
+    `  ${MIRRORS.instructions}`,
+    `  ${MIRRORS.json}`,
+    `  ${MIRRORS.text}`,
     '',
     `Axis order in a built prompt: ${axes.join(', ')}`,
     ''

@@ -2,8 +2,15 @@ PROMPT FORGE — SIGNAL VOCABULARY
 version 5.2.0 · 16 axes · 2032 signals · CC0-1.0
 
 Build a prompt by choosing at most one signal per axis, in service of one
-stated idea. Use only the values listed here. Omit any axis that does not
-serve the idea. Read llms.txt first for the full operating instruction.
+stated idea. Use only the values listed here, and only in the axis that
+lists them. Omit any axis that does not serve the idea. Read llms.txt
+first for the full operating instruction.
+
+Nothing here is gated. If *.github.io is blocked by your fetcher, these
+same files are served as plain text from:
+  https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/llms.txt
+  https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.json
+  https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.txt
 
 Axis order in a built prompt: narrative, action, mood, composition, setting, framing, wardrobe, medium, style, lighting, palette, colorlogic, texture, weather, fx, quality
 

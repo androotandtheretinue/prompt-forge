@@ -6,6 +6,12 @@
   "instructions": "llms.txt",
   "source": "index.html",
   "generator": "npm run vocabulary",
+  "access_note": "Nothing here is gated. If *.github.io is blocked by your fetcher, use the mirrors below — same files, plain text.",
+  "mirrors": {
+    "json": "https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.json",
+    "text": "https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.txt",
+    "instructions": "https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/llms.txt"
+  },
   "axis_count": 16,
   "signal_count": 2032,
   "axis_order": [
