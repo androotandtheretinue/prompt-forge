@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A free, public-domain visual prompt instrument with 2,032 signals across 16 creative axes.">
+  <meta name="description" content="A free, public-domain visual prompt instrument with 2,128 signals across 17 creative axes.">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="color-scheme" content="dark">
   <meta property="og:title" content="Prompt Forge DARPA v5">
-  <meta property="og:description" content="Forge image prompts from 2,032 signals, 20 curated cards, and model-aware controls.">
+  <meta property="og:description" content="Forge image prompts from 2,128 signals, 20 curated cards, and model-aware controls.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://androotandtheretinue.github.io/prompt-forge/">
   <!--
@@ -21,7 +21,7 @@
   <meta property="og:image:alt" content="The Prompt Forge control board: subject field, randomize and mutate controls, mission doctrine payload sizes, cluster reroll scopes, and the chaos dial.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Prompt Forge DARPA v5">
-  <meta name="twitter:description" content="Forge image prompts from 2,032 signals across 16 creative axes. Public domain, no account required.">
+  <meta name="twitter:description" content="Forge image prompts from 2,128 signals across 17 creative axes. Public domain, no account required.">
   <meta name="twitter:image" content="https://androotandtheretinue.github.io/prompt-forge/social-card.png">
   <title>PROMPT FORGE DARPA v5 | AI Image Generation Board</title>
 
@@ -703,12 +703,12 @@
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot" style="background:var(--neon-gold); box-shadow:0 0 10px var(--neon-gold);"></div>
         <span class="category-label">🛰️ MISSION DOCTRINE</span>
-        <span class="text-xs text-gray-500 ml-auto" id="densityReadout">FULL SPECTRUM · 16 dimensions</span>
+        <span class="text-xs text-gray-500 ml-auto" id="densityReadout">FULL SPECTRUM · 17 dimensions</span>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <button class="btn doctrine-btn" id="density-recon" onclick="setPayloadDensity('recon')">RECON · 6</button>
         <button class="btn doctrine-btn" id="density-standard" onclick="setPayloadDensity('standard')">STANDARD · 10</button>
-        <button class="btn doctrine-btn active" id="density-full" onclick="setPayloadDensity('full')">FULL · 16</button>
+        <button class="btn doctrine-btn active" id="density-full" onclick="setPayloadDensity('full')">FULL · 17</button>
       </div>
       <p class="text-xs text-gray-600 mb-3">Randomize only the selected payload size; locked intelligence survives every operation.</p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -882,7 +882,7 @@
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot" style="background:var(--signal-muted); box-shadow:0 0 10px var(--signal-muted);"></div>
         <span class="category-label">🎚️ SIGNAL RIG</span>
-        <span class="text-xs text-gray-500 ml-auto" id="rigReadout">16 live · 0 pinned · 0 muted</span>
+        <span class="text-xs text-gray-500 ml-auto" id="rigReadout">17 live · 0 pinned · 0 muted</span>
       </div>
       <p class="text-xs text-gray-600 mb-3">
         Choose which axes are in play before you forge. Tap a chip to cycle it:
@@ -1713,6 +1713,23 @@
         'Camera Obscura Study',
         // Surface and inlay traditions
         'Reverse Glass Painting', 'Sgraffito Plaster', 'Pietra Dura Inlay'
+      ],
+      /*
+       * Swimwear. The wardrobe axis carried 144 garments — plague doctor,
+       * beekeeper, cleanroom bunny suit, antique deep-sea diving dress — and
+       * exactly one swim-adjacent entry, Couture Whale-Tail Styling, which
+       * reaches the subject sideways through fashion styling. Any board that
+       * can dress a figure for a cleanroom and not for a pool has a hole in it.
+       *
+       * Sixteen, spanning competitive, technical, retro, and poolside, so the
+       * axis lands on 160 and the range stays useful rather than narrow.
+       */
+      wardrobe: [
+        'One-Piece Maillot', 'High-Leg Swimsuit', 'Bandeau Two-Piece',
+        'Halter Bikini', 'Cutout Monokini', 'Competition Racerback',
+        'Swim Briefs', 'Board Shorts', 'Rash Guard', 'Shortie Wetsuit',
+        'Vintage Wool Bathing Suit', 'Belted Retro Swimdress', 'Mesh Cover-Up',
+        'Sarong Wrap', 'Terrycloth Robe', 'Swim Cap and Goggles'
       ]
     };
 
@@ -1851,6 +1868,65 @@
       ]
     };
 
+    /*
+     * FIGURE — how the body is arranged, as distinct from what it is doing.
+     *
+     * Action carries 160 verbs and every one of them is an activity: running,
+     * forging, refusing a crown. None describes weight, spine, or the relation
+     * of shoulders to hips. A prompt could say the subject was reclining and
+     * could not say the reclining was contrapposto, counter-rotated, or
+     * collapsed — so the whole language of figure drawing and portrait
+     * direction was unreachable from the board.
+     *
+     * This is the axis a photographer or life-drawing tutor actually speaks in,
+     * and it composes with everything: the same eighty signals serve a portrait,
+     * a character render, a fashion plate, or a crowd.
+     */
+    categories.figure = {
+      icon: '🧍', label: 'FIGURE', locked: false, value: '',
+      options: ['— Select Figure —',
+        // Weight and stance
+        'Contrapposto', 'Weight on One Hip', 'Weight Back on Heels',
+        'Weight Forward on Toes', 'Even Weight, Squared Stance', 'Wide Base Stance',
+        'Narrow Crossed Ankles', 'One Foot Forward', 'Mid-Stride Suspension',
+        'Leaning Against Support', 'Braced Against Wind', 'Off-Balance Recovery',
+        // Spine and torso
+        'Arched Back', 'Rounded Spine', 'Elongated Neck and Spine',
+        'Torso Twisted Away', 'Leaning Into Frame', 'Curled Inward',
+        'Chest Open and Lifted', 'Collapsed Posture', 'Side Bend at the Waist',
+        'Hollowed Ribcage', 'Coiled Forward Hinge', 'Reclined Long Line',
+        // Shoulders against hips
+        'Counter-Rotated Shoulders and Hips', 'Shoulders Squared to Camera',
+        'Shoulders Turned Three-Quarter', 'One Shoulder Dropped',
+        'Shoulders Raised to the Ears', 'Hip Turned Toward the Lens',
+        'Hips Turned Away', 'Shoulder Blades Drawn Together',
+        'Asymmetric Shoulder Line', 'Spiral From Hip to Shoulder',
+        // Head and neck
+        'Chin Down, Eyes Up', 'Chin Lifted', 'Head Tilted to the Shoulder',
+        'Profile Turn', 'Look Back Over the Shoulder', 'Head Dropped Forward',
+        'Neck Extended Away From Shoulders', 'Face Turned Into the Light',
+        'Face Turned From the Light', 'Three-Quarter Head Turn',
+        // Arms and hands
+        'Hand at the Nape', 'Hands Clasped Behind the Back', 'Arms Akimbo',
+        'One Arm Raised Overhead', 'Arms Folded', 'Hand Shielding the Eyes',
+        'Fingers at the Collarbone', 'Hands in Pockets', 'Arm Draped Over the Head',
+        'Reaching Out of Frame', 'Hands Loose at the Sides', 'Elbow Propped',
+        'Palm Pressed to a Surface', 'Hand Gripping the Opposite Wrist',
+        // Legs and feet
+        'Legs Crossed Standing', 'Knee Popped', 'One Knee Bent, Foot Flat',
+        'Legs Extended Long', 'Ankles Crossed Seated', 'Feet Turned Out',
+        'Heel Lifted', 'Knees Drawn Up',
+        // Seated, kneeling, reclining
+        'Perched on an Edge', 'Seated Forward Lean', 'Slouched Low in the Seat',
+        'Seated Side-Saddle', 'Propped on One Elbow', 'Supine, Arms Overhead',
+        'Prone on the Forearms', 'Upright on Both Knees',
+        'Crouched on the Balls of the Feet', 'Cross-Legged Seated',
+        // Quality of held tension
+        'Held Tension Throughout', 'Fully Released Weight',
+        'Stillness Between Two Movements', 'Asymmetry Held Deliberately'
+      ]
+    };
+
     let subjectLocked = false;
     let chaosLevel = 0;
     let pinnedChaosModifier = '';
@@ -1876,12 +1952,14 @@
       structure: ['composition', 'framing', 'setting'],
       atmosphere: ['lighting', 'mood', 'palette', 'weather'],
       surface: ['medium', 'texture', 'style', 'quality', 'fx', 'colorlogic'],
-      story: ['narrative', 'action', 'wardrobe']
+      story: ['narrative', 'action', 'figure', 'wardrobe']
     };
 
+    // Figure sits beside action and wardrobe: what the subject is doing, how
+    // the body holds it, and what it wears. Rerolling Story now moves all four.
     const promptOrder = [
-      'narrative', 'action', 'mood', 'composition', 'setting', 'framing', 'wardrobe',
-      'medium', 'style', 'lighting', 'palette', 'colorlogic', 'texture',
+      'narrative', 'action', 'figure', 'mood', 'composition', 'setting', 'framing',
+      'wardrobe', 'medium', 'style', 'lighting', 'palette', 'colorlogic', 'texture',
       'weather', 'fx', 'quality'
     ];
 
@@ -2835,14 +2913,20 @@
     }
 
     function syncDensityUI() {
+      const axisCount = Object.keys(categories).length;
       const labels = {
         recon: 'RECON · 6 dimensions',
         standard: 'STANDARD · 10 dimensions',
-        full: `FULL SPECTRUM · ${Object.keys(categories).length} dimensions`
+        full: `FULL SPECTRUM · ${axisCount} dimensions`
       };
       ['recon', 'standard', 'full'].forEach(mode => {
         document.getElementById(`density-${mode}`).classList.toggle('active', payloadDensity === mode);
       });
+      // Derive the button's count too. The static markup is a fallback for
+      // no-JS readers and scrapers; leaving it to be maintained by hand is how
+      // the footer ended up two versions behind.
+      const fullButton = document.getElementById('density-full');
+      if (fullButton) fullButton.textContent = `FULL · ${axisCount}`;
       document.getElementById('densityReadout').textContent = labels[payloadDensity];
     }
 

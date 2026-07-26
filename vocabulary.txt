@@ -1,5 +1,5 @@
 PROMPT FORGE — SIGNAL VOCABULARY
-version 5.2.0 · 16 axes · 2032 signals · CC0-1.0
+version 5.2.0 · 17 axes · 2128 signals · CC0-1.0
 
 Build a prompt by choosing at most one signal per axis, in service of one
 stated idea. Use only the values listed here, and only in the axis that
@@ -12,7 +12,7 @@ same files are served as plain text from:
   https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.json
   https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.txt
 
-Axis order in a built prompt: narrative, action, mood, composition, setting, framing, wardrobe, medium, style, lighting, palette, colorlogic, texture, weather, fx, quality
+Axis order in a built prompt: narrative, action, figure, mood, composition, setting, framing, wardrobe, medium, style, lighting, palette, colorlogic, texture, weather, fx, quality
 
 ========================================================================
 NARRATIVE — STORY SIGNAL (80 signals)
@@ -261,6 +261,90 @@ Planting a Signal Beacon
 Conducting an Orchestra of Drones
 Kneeling Before No One
 Turning the Key Together
+
+========================================================================
+FIGURE — FIGURE (80 signals)
+========================================================================
+Contrapposto
+Weight on One Hip
+Weight Back on Heels
+Weight Forward on Toes
+Even Weight, Squared Stance
+Wide Base Stance
+Narrow Crossed Ankles
+One Foot Forward
+Mid-Stride Suspension
+Leaning Against Support
+Braced Against Wind
+Off-Balance Recovery
+Arched Back
+Rounded Spine
+Elongated Neck and Spine
+Torso Twisted Away
+Leaning Into Frame
+Curled Inward
+Chest Open and Lifted
+Collapsed Posture
+Side Bend at the Waist
+Hollowed Ribcage
+Coiled Forward Hinge
+Reclined Long Line
+Counter-Rotated Shoulders and Hips
+Shoulders Squared to Camera
+Shoulders Turned Three-Quarter
+One Shoulder Dropped
+Shoulders Raised to the Ears
+Hip Turned Toward the Lens
+Hips Turned Away
+Shoulder Blades Drawn Together
+Asymmetric Shoulder Line
+Spiral From Hip to Shoulder
+Chin Down, Eyes Up
+Chin Lifted
+Head Tilted to the Shoulder
+Profile Turn
+Look Back Over the Shoulder
+Head Dropped Forward
+Neck Extended Away From Shoulders
+Face Turned Into the Light
+Face Turned From the Light
+Three-Quarter Head Turn
+Hand at the Nape
+Hands Clasped Behind the Back
+Arms Akimbo
+One Arm Raised Overhead
+Arms Folded
+Hand Shielding the Eyes
+Fingers at the Collarbone
+Hands in Pockets
+Arm Draped Over the Head
+Reaching Out of Frame
+Hands Loose at the Sides
+Elbow Propped
+Palm Pressed to a Surface
+Hand Gripping the Opposite Wrist
+Legs Crossed Standing
+Knee Popped
+One Knee Bent, Foot Flat
+Legs Extended Long
+Ankles Crossed Seated
+Feet Turned Out
+Heel Lifted
+Knees Drawn Up
+Perched on an Edge
+Seated Forward Lean
+Slouched Low in the Seat
+Seated Side-Saddle
+Propped on One Elbow
+Supine, Arms Overhead
+Prone on the Forearms
+Upright on Both Knees
+Crouched on the Balls of the Feet
+Cross-Legged Seated
+Held Tension Throughout
+Fully Released Weight
+Stillness Between Two Movements
+Asymmetry Held Deliberately
 
 ========================================================================
 MOOD — MOOD (144 signals)
@@ -791,7 +875,7 @@ Vertical Scroll Composition
 Circular Tondo Crop
 
 ========================================================================
-WARDROBE — WARDROBE (144 signals)
+WARDROBE — WARDROBE (160 signals)
 ========================================================================
 Casual Streetwear
 Business Attire
@@ -937,6 +1021,22 @@ Coat Worn Like a Shield
 Shared Oversized Coat
 Clothing Patched with Circuit Diagrams
 Garment Carrying Its Own Weather
+One-Piece Maillot
+High-Leg Swimsuit
+Bandeau Two-Piece
+Halter Bikini
+Cutout Monokini
+Competition Racerback
+Swim Briefs
+Board Shorts
+Rash Guard
+Shortie Wetsuit
+Vintage Wool Bathing Suit
+Belted Retro Swimdress
+Mesh Cover-Up
+Sarong Wrap
+Terrycloth Robe
+Swim Cap and Goggles
 
 ========================================================================
 MEDIUM — MEDIUM (160 signals)

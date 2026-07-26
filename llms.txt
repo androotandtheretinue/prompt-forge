@@ -1,6 +1,6 @@
 # Prompt Forge
 
-> A public-domain visual prompt instrument. 2,032 signals across 16 creative
+> A public-domain visual prompt instrument. 2,128 signals across 17 creative
 > axes. You build an image prompt by choosing at most one signal per axis, in
 > service of a single stated idea.
 
@@ -15,7 +15,7 @@ use the mirrors below — same files, plain text, no rendering.
 
 ## Get the vocabulary
 
-Do not scrape index.html. It is a 173 kB single-file application and the
+Do not scrape index.html. It is a 175 kB single-file application and the
 signal pools begin about 34 kB in, past the point where many fetchers
 truncate. Read one of these instead:
 
@@ -41,12 +41,24 @@ a commit SHA to pin the exact vocabulary you read:
 
 - https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/<sha>/vocabulary.json
 
-## The 16 axes, in prompt order
+## The 17 axes, in prompt order
 
-narrative (story signal, 80), action (160), mood (144), composition (80),
-setting (160), framing (camera, 128), wardrobe (144), medium (160),
-style (176), lighting (128), palette (128), colorlogic (color logic, 80),
-texture (128), weather (112), fx (128), quality (96).
+narrative (story signal, 80), action (160), figure (80), mood (144),
+composition (80), setting (160), framing (camera, 128), wardrobe (160),
+medium (160), style (176), lighting (128), palette (128),
+colorlogic (color logic, 80), texture (128), weather (112), fx (128),
+quality (96).
+
+Two axes are worth naming because they have no common equivalent, and an
+agent that skips them is leaving most of the instrument unused:
+
+- figure describes how the body is arranged rather than what it is doing —
+  contrapposto, counter-rotated shoulders and hips, chin down with the eyes
+  up. Action says the subject is reclining; figure says how.
+- colorlogic gives relational instructions rather than colors: chromatic
+  skin against achromatic clothing, warm subject in a cool world,
+  pearlescence only in the highlights. It describes a relationship between
+  regions of the image, which is how a colorist thinks.
 
 ## How to operate it
 

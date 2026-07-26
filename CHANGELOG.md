@@ -2,12 +2,16 @@ Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
 Added
+Added FIGURE, a seventeenth axis of 80 signals describing how the body is arranged rather than what it is doing: contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up, hand at the nape. Action carried 160 verbs and not one of them described posture, so the entire language of figure drawing and portrait direction was unreachable from the board.
+Added 16 swimwear and poolside garments to Wardrobe, taking it from 144 to 160. The axis could dress a figure for a cleanroom, a beehive, and an antique diving bell, but held exactly one swim-adjacent entry.
+Added Figure to the Story reroll scope, which now moves narrative, action, figure, and wardrobe together — what the subject is doing, how the body holds it, and what it wears.
 Added `llms.txt`, a plain-text front door for machine readers: what Prompt Forge is, the sixteen axes, where the vocabulary lives, and the operating instruction.
 Added `vocabulary.json` and `vocabulary.txt`, the complete 2,032-signal vocabulary published as data so nothing has to scrape the application. Both are generated from `index.html` by `npm run vocabulary`.
 Added a `<link rel="alternate">` and an `ai-vocabulary` meta tag to the first few hundred bytes of the `<head>`, so a truncated fetch still lands on a pointer to the vocabulary. `index.html` is ~175 kB and the signal pools begin around 40 kB in, past where many fetchers stop.
 Added `social-card.png` and the Open Graph and Twitter card metadata that points at it, so shared links render a picture of the board instead of bare text. Regenerated with headless Chrome; the audit checks the file exists, that `og:image` is absolute, and that `twitter:card` is set.
 Added raw.githubusercontent.com mirrors for `llms.txt`, `vocabulary.json` and `vocabulary.txt`, plus an ACCESS section stating that nothing here is gated. Some agents run fetchers that allowlist hosts and cannot reach `*.github.io`, which blocks the instructions along with the data. Every entry point now carries the mirror address, and the audit enforces it.
 Added `.nojekyll` so GitHub Pages serves the repository verbatim rather than running it through a static-site build.
+The `FULL` payload button now derives its axis count instead of restating it, the same fix applied to the footer.
 Added audit checks that the published vocabulary files match the live `categories` object, that `llms.txt` references both, and that the `<head>` pointer is present.
 Fixed
 Fixed the footer, which reported the wrong version twice. The static markup said DARPA v4.0 and the v5 layer overwrote it with a hardcoded v5.1, while `PF_VERSION` sat at 5.2 in the same file. The runtime footer now interpolates `PF_VERSION`.

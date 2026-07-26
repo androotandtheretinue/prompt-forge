@@ -89,8 +89,8 @@ const audit = context.__forgeAudit;
 const total = Object.values(audit.counts).reduce((sum, count) => sum + count, 0);
 const duplicateCount = Object.values(audit.duplicates).reduce((sum, values) => sum + values.length, 0);
 
-if (Object.keys(audit.counts).length !== 16) fail(`Expected 16 axes; found ${Object.keys(audit.counts).length}.`);
-if (total !== 2032) fail(`Expected 2,032 signals; found ${total}.`);
+if (Object.keys(audit.counts).length !== 17) fail(`Expected 17 axes; found ${Object.keys(audit.counts).length}.`);
+if (total !== 2128) fail(`Expected 2,128 signals; found ${total}.`);
 if (duplicateCount) fail(`Found ${duplicateCount} duplicate signals.`);
 if (audit.cardCount !== 20) fail(`Expected 20 Forge Cards; found ${audit.cardCount}.`);
 if (audit.presetErrors.length) fail(`Broken Forge Card values: ${JSON.stringify(audit.presetErrors)}`);

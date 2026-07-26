@@ -1,10 +1,10 @@
 # Prompt Forge DARPA v5
 
-**A public-domain, user-extensible visual prompt instrument: 2,032 signals, 16 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
+**A public-domain, user-extensible visual prompt instrument: 2,128 signals, 17 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
 
 [Launch Prompt Forge](https://androotandtheretinue.github.io/prompt-forge/) · [Read the v5.2.0 release notes](RELEASE_NOTES.md)
 
-Prompt Forge turns a subject into a structured image-generation prompt by combining medium, action, texture, style, lighting, framing, mood, palette, quality, setting, weather, wardrobe, effects, composition, color logic, and story signal.
+Prompt Forge turns a subject into a structured image-generation prompt by combining medium, action, figure, texture, style, lighting, framing, mood, palette, quality, setting, weather, wardrobe, effects, composition, color logic, and story signal.
 
 Pin what matters. Mute what does not. Roll the rest. Strum the board. Add your own signals. Follow the strange result somewhere useful.
 
@@ -12,7 +12,9 @@ It is a single static HTML file. There is no account, backend, build step, or se
 
 ## What is inside
 
-- **2,032 signals** across **16 axes**, including a **160-medium** bank that covers still images and images in motion — Claymation, Rotoscoping, Stop Motion, Cel Animation, Machinima, and the pre-cinema motion studies they came from.
+- **2,128 signals** across **17 axes**, including a **160-medium** bank that covers still images and images in motion — Claymation, Rotoscoping, Stop Motion, Cel Animation, Machinima, and the pre-cinema motion studies they came from.
+- **Figure**: 80 signals for how the body is arranged, as distinct from what it is doing. Contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up. Action tells you the subject is reclining; Figure tells you how.
+- **Color Logic**: 80 *relational* instructions rather than colors — chromatic skin against achromatic clothing, warm subject in a cool world, pearlescence only in the highlights. It describes a relationship between regions of the image, which is how a colorist thinks and is the axis with no equivalent in other prompt tools.
 - **21 Forge Cards**, including the new **DARPA** card for phosphor-terminal, scan-line, telemetry, and retro-defense-interface aesthetics.
 - **Drag Strum**: hold and sweep across category labels to repeatedly randomize unlocked axes.
 - **Shift + Drag Step Strum**: advance each crossed category through its pool.
@@ -20,11 +22,11 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - Custom signals participate in randomization, strumming, Option Radar, and Blueprint saves.
 - **Clear Unlocked** clears the subject and every unlocked axis while preserving locked values and intentionally locked blanks.
 - Centralized browser randomness avoids immediate repeat selections where possible.
-- **RECON / STANDARD / FULL** missions randomize 6, 10, or all 16 unlocked axes.
+- **RECON / STANDARD / FULL** missions randomize 6, 10, or all 17 unlocked axes.
 - **Mutate 3** creates controlled variation without destroying the whole composition.
 - **Signal Rig**: set every axis to **live**, **pinned**, or **muted** before you forge. Muted axes stay blank through everything.
 - **MUTE BLANKS / PIN FILLED / ALL LIVE** configure the whole rig in one move.
-- **Cluster rerolls** target Structure, Atmosphere, Surface, or Story. The four scopes partition the sixteen axes, and hovering one outlines exactly the rows it will change.
+- **Cluster rerolls** target Structure, Atmosphere, Surface, or Story. The four scopes partition the seventeen axes, and hovering one outlines exactly the rows it will change.
 - **Option Radar** searches built-in and custom signals.
 - **Chaos Dial** provides a visible, pinned modifier.
 - **Universal, Midjourney, and SDXL** output formats.
@@ -50,14 +52,14 @@ Tailwind and two fonts still load from public CDNs, so an offline copy renders w
 
 ### For AI agents
 
-Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first. It describes the instrument, lists the sixteen axes, and gives the operating instruction: one signal per axis at most, only listed values, in service of one stated idea.
+Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first. It describes the instrument, lists the seventeen axes, and gives the operating instruction: one signal per axis at most, only listed values, in service of one stated idea.
 
 The full vocabulary is published as data, so nothing has to scrape the application:
 
 | File | Contents |
 | --- | --- |
 | [`llms.txt`](llms.txt) | What this is and how to operate it. Start here. |
-| [`vocabulary.json`](vocabulary.json) | All 2,032 signals with axis metadata. |
+| [`vocabulary.json`](vocabulary.json) | All 2,128 signals with axis metadata. |
 | [`vocabulary.txt`](vocabulary.txt) | The same signals, flat, no parser required. |
 
 Some agents run fetchers that allowlist hosts, and `*.github.io` is not always on the list. That is a host-level policy, not a restriction here — nothing in this project is gated. The same three files are served as plain text from `raw.githubusercontent.com`, and every entry point carries the mirror address so a blocked reader finds the alternative rather than a dead end:
@@ -70,7 +72,7 @@ https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabul
 
 Both paths track `main` and move as the vocabulary grows. Replace `main` with a commit SHA to pin the exact vocabulary a result was built from — `main` for operating the instrument, a pinned SHA for anything you intend to cite.
 
-This exists because `index.html` is ~175 kB and the signal pools begin roughly 40 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The pointer to these files sits in the first few hundred bytes of the `<head>`, where truncation cannot reach.
+This exists because `index.html` is ~175 kB and the signal pools begin about 34 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The pointer to these files sits in the first few hundred bytes of the `<head>`, where truncation cannot reach.
 
 Both vocabulary files are generated from the application by `npm run vocabulary`, and the audit fails if they drift from it.
 
@@ -95,7 +97,7 @@ The controls are invitations, not commandments. Contradictions can be productive
 
 ## Signal Rig
 
-Sixteen chips above the board decide which axes are in play. Tap one to cycle it.
+Seventeen chips above the board decide which axes are in play. Tap one to cycle it.
 
 | State | Meaning | Behavior |
 | --- | --- | --- |
