@@ -2,6 +2,7 @@ Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
 Added
+Added eight Forge Cards in a warm-figure register the first twenty had no room for: Komorebi, Negative Fill, Waterline, Salt and Gold, Poolside Noon, Rim Light Confession, Light Through Water, and Lido 1972. Every one specifies a Figure pose and a Color Logic relationship, the two axes that most distinguish this board, and several deliberately leave axes open.
 Added FIGURE, a seventeenth axis of 80 signals describing how the body is arranged rather than what it is doing: contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up, hand at the nape. Action carried 160 verbs and not one of them described posture, so the entire language of figure drawing and portrait direction was unreachable from the board.
 Added 16 swimwear and poolside garments to Wardrobe, taking it from 144 to 160. The axis could dress a figure for a cleanroom, a beehive, and an antique diving bell, but held exactly one swim-adjacent entry.
 Added Figure to the Story reroll scope, which now moves narrative, action, figure, and wardrobe together — what the subject is doing, how the body holds it, and what it wears.

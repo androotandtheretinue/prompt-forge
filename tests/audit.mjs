@@ -92,7 +92,7 @@ const duplicateCount = Object.values(audit.duplicates).reduce((sum, values) => s
 if (Object.keys(audit.counts).length !== 17) fail(`Expected 17 axes; found ${Object.keys(audit.counts).length}.`);
 if (total !== 2128) fail(`Expected 2,128 signals; found ${total}.`);
 if (duplicateCount) fail(`Found ${duplicateCount} duplicate signals.`);
-if (audit.cardCount !== 20) fail(`Expected 20 Forge Cards; found ${audit.cardCount}.`);
+if (audit.cardCount !== 28) fail(`Expected 28 Forge Cards; found ${audit.cardCount}.`);
 if (audit.presetErrors.length) fail(`Broken Forge Card values: ${JSON.stringify(audit.presetErrors)}`);
 if (audit.missingMeta.length) fail(`Forge Cards missing metadata: ${audit.missingMeta.join(', ')}`);
 if (audit.missingFromOrder.length || audit.extraInOrder.length) fail('Prompt order does not match the category registry.');

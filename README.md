@@ -15,7 +15,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **2,128 signals** across **17 axes**, including a **160-medium** bank that covers still images and images in motion — Claymation, Rotoscoping, Stop Motion, Cel Animation, Machinima, and the pre-cinema motion studies they came from.
 - **Figure**: 80 signals for how the body is arranged, as distinct from what it is doing. Contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up. Action tells you the subject is reclining; Figure tells you how.
 - **Color Logic**: 80 *relational* instructions rather than colors — chromatic skin against achromatic clothing, warm subject in a cool world, pearlescence only in the highlights. It describes a relationship between regions of the image, which is how a colorist thinks and is the axis with no equivalent in other prompt tools.
-- **21 Forge Cards**, including the new **DARPA** card for phosphor-terminal, scan-line, telemetry, and retro-defense-interface aesthetics.
+- **29 Forge Cards**, including eight warm-figure doctrines — Komorebi, Waterline, Salt and Gold, Poolside Noon, Lido 1972 and others — and the **DARPA** card for phosphor-terminal, scan-line, telemetry, and retro-defense-interface aesthetics.
 - **Drag Strum**: hold and sweep across category labels to repeatedly randomize unlocked axes.
 - **Shift + Drag Step Strum**: advance each crossed category through its pool.
 - **Custom Signals**: add persistent entries to any category pool.
