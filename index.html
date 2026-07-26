@@ -238,6 +238,38 @@
       box-shadow: 0 0 8px rgba(124, 138, 168, 0.6);
     }
 
+    /*
+     * A scope carries the same three verbs a single row does — reroll, pin,
+     * mute — so what you can do to one axis you can do to four at once.
+     * The reroll button takes the remaining width; the two operators stay a
+     * fixed glyph wide.
+     */
+    .cluster-group {
+      display: flex;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .cluster-group .cluster-btn {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /*
+     * Kept narrow deliberately. At the four-across breakpoint the longest label
+     * (ATMOSPHERE) clears its column by only a few pixels, and emoji metrics
+     * differ between platforms — the padding here is the margin that keeps it
+     * from truncating on someone else's machine.
+     */
+    .cluster-op {
+      flex: 0 0 auto;
+      padding: 6px 5px;
+      line-height: 1;
+    }
+
     /* Cluster hover preview: show the blast radius before committing. */
     .cluster-btn.previewing {
       color: var(--neon-magenta);
@@ -711,13 +743,29 @@
         <button class="btn doctrine-btn active" id="density-full" onclick="setPayloadDensity('full')">FULL · 17</button>
       </div>
       <p class="text-xs text-gray-600 mb-3">Randomize only the selected payload size; locked intelligence survives every operation.</p>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <button class="btn btn-random text-xs cluster-btn" id="cluster-structure" onclick="rerollCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">⟳ 🏗 STRUCTURE</button>
-        <button class="btn btn-random text-xs cluster-btn" id="cluster-atmosphere" onclick="rerollCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">⟳ 🌫 ATMOSPHERE</button>
-        <button class="btn btn-random text-xs cluster-btn" id="cluster-surface" onclick="rerollCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">⟳ 🧪 SURFACE</button>
-        <button class="btn btn-random text-xs cluster-btn" id="cluster-story" onclick="rerollCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">⟳ 🗝 STORY</button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-2">
+        <div class="cluster-group" data-cluster="structure">
+          <button class="btn btn-random text-xs cluster-btn" id="cluster-structure" onclick="rerollCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">⟳ 🏗 STRUCTURE</button>
+          <button class="btn btn-lock cluster-op" id="cluster-lock-structure" onclick="lockCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">🔐</button>
+          <button class="btn btn-mute cluster-op" id="cluster-mute-structure" onclick="muteCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">🚫</button>
+        </div>
+        <div class="cluster-group" data-cluster="atmosphere">
+          <button class="btn btn-random text-xs cluster-btn" id="cluster-atmosphere" onclick="rerollCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">⟳ 🌫 ATMOSPHERE</button>
+          <button class="btn btn-lock cluster-op" id="cluster-lock-atmosphere" onclick="lockCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">🔐</button>
+          <button class="btn btn-mute cluster-op" id="cluster-mute-atmosphere" onclick="muteCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">🚫</button>
+        </div>
+        <div class="cluster-group" data-cluster="surface">
+          <button class="btn btn-random text-xs cluster-btn" id="cluster-surface" onclick="rerollCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">⟳ 🧪 SURFACE</button>
+          <button class="btn btn-lock cluster-op" id="cluster-lock-surface" onclick="lockCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">🔐</button>
+          <button class="btn btn-mute cluster-op" id="cluster-mute-surface" onclick="muteCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">🚫</button>
+        </div>
+        <div class="cluster-group" data-cluster="story">
+          <button class="btn btn-random text-xs cluster-btn" id="cluster-story" onclick="rerollCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">⟳ 🗝 STORY</button>
+          <button class="btn btn-lock cluster-op" id="cluster-lock-story" onclick="lockCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">🔐</button>
+          <button class="btn btn-mute cluster-op" id="cluster-mute-story" onclick="muteCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">🚫</button>
+        </div>
       </div>
-      <p class="text-xs text-gray-600 mt-2" id="clusterHint">Hover a scope to outline the rows it rerolls. Muted and pinned rows are never touched.</p>
+      <p class="text-xs text-gray-600 mt-2" id="clusterHint">Each scope rerolls, pins, or mutes its rows together. Hover to outline them. Pinned and muted rows survive every reroll.</p>
     </div>
 
     <!-- Chaos Dial & Output Mode -->
@@ -2794,6 +2842,11 @@
         muteBtn.classList.toggle('active', state === 'muted');
         muteBtn.title = MUTE_BUTTON_TITLES[state];
       }
+
+      // A scope's state is derived from its rows, so changing one row can
+      // change what its scope reads as. Reconcile here rather than asking every
+      // caller to remember.
+      syncClusterButtons();
     }
 
     function rigChipTitle(key, state) {
@@ -2874,12 +2927,69 @@
     // CLUSTER SCOPES
     // ============================================
 
+    /*
+     * A scope reads as one of the three rig states, or as mixed.
+     *
+     * `pinned` means nothing in the scope is still live — every row is held,
+     * whether at a value or blank. That is the same equivalence the rest of the
+     * board uses: locking a row that holds no value presents as muting it.
+     */
+    function clusterStateOf(name) {
+      const keys = (categoryClusters[name] || []).filter(key => categories[key]);
+      if (!keys.length) return 'live';
+      const states = keys.map(key => categoryStateOf(categories[key]));
+      if (states.every(state => state === 'muted')) return 'muted';
+      if (states.every(state => state === 'live')) return 'live';
+      if (states.every(state => state !== 'live')) return 'pinned';
+      return 'mixed';
+    }
+
+    function setClusterState(name, target) {
+      const keys = (categoryClusters[name] || []).filter(key => categories[key]);
+      // Clicking the engaged operator releases the scope, so one button both
+      // applies and undoes and no scope can be stranded held.
+      const next = clusterStateOf(name) === target ? 'live' : target;
+      keys.forEach(key => {
+        // setCategoryState refuses to pin a blank row, which would otherwise
+        // leave half a scope live. Hold it blank instead — same thing the lock
+        // button does to a single empty row.
+        if (next === 'pinned' && !categories[key].value) setCategoryState(key, 'muted');
+        else setCategoryState(key, next);
+      });
+      syncClusterButtons();
+      renderRig();
+      updatePreview();
+    }
+
+    function lockCluster(name) { setClusterState(name, 'pinned'); }
+    function muteCluster(name) { setClusterState(name, 'muted'); }
+
     function syncClusterButtons() {
       Object.entries(categoryClusters).forEach(([name, keys]) => {
+        const members = keys.filter(key => categories[key]);
+        const labels = members.map(key => categories[key].label);
+        const noun = `${labels.length} ${labels.length === 1 ? 'axis' : 'axes'}`;
+        const list = labels.join(' · ');
+        const state = clusterStateOf(name);
+
         const btn = document.getElementById(`cluster-${name}`);
-        if (!btn) return;
-        const labels = keys.filter(key => categories[key]).map(key => categories[key].label);
-        btn.title = `Reroll ${labels.length} ${labels.length === 1 ? 'axis' : 'axes'}: ${labels.join(' · ')}`;
+        if (btn) btn.title = `Reroll ${noun}: ${list}`;
+
+        const lockBtn = document.getElementById(`cluster-lock-${name}`);
+        if (lockBtn) {
+          lockBtn.classList.toggle('active', state === 'pinned');
+          lockBtn.title = state === 'pinned'
+            ? `Held: ${list} — click to return the scope to live`
+            : `Hold ${noun} at their current values: ${list}`;
+        }
+
+        const muteBtn = document.getElementById(`cluster-mute-${name}`);
+        if (muteBtn) {
+          muteBtn.classList.toggle('active', state === 'muted');
+          muteBtn.title = state === 'muted'
+            ? `Muted: ${list} — click to return the scope to live`
+            : `Blank ${noun} and hold them blank, so the image carries none of them: ${list}`;
+        }
       });
     }
 

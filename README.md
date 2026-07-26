@@ -26,7 +26,8 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **Mutate 3** creates controlled variation without destroying the whole composition.
 - **Signal Rig**: set every axis to **live**, **pinned**, or **muted** before you forge. Muted axes stay blank through everything.
 - **MUTE BLANKS / PIN FILLED / ALL LIVE** configure the whole rig in one move.
-- **Cluster rerolls** target Structure, Atmosphere, Surface, or Story. The four scopes partition the seventeen axes, and hovering one outlines exactly the rows it will change.
+- **Cluster scopes** target Structure, Atmosphere, Surface, or Story. The four scopes partition the seventeen axes, and hovering one outlines exactly the rows it will change.
+- Each scope carries **⟳ reroll, 🔐 pin, and 🚫 mute** — the same three verbs a single row has. Mute Story to build an image that carries no narrative, action, figure or wardrobe at all. Both operators toggle back to live.
 - **Option Radar** searches built-in and custom signals.
 - **Chaos Dial** provides a visible, pinned modifier.
 - **Universal, Midjourney, and SDXL** output formats.

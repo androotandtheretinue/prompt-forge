@@ -1,5 +1,12 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
+[Unreleased]
+Added
+Added pin and mute operators to each cluster scope. A scope previously only rerolled; it now carries the same three verbs a single row does, so what you can do to one axis you can do to four at once. Muting Story holds narrative, action, figure and wardrobe blank through every operation, which is how you build an image that carries no story at all.
+Both operators are toggles — clicking the engaged one returns the scope to live, so no scope can be stranded held.
+Locking a scope that contains a blank row holds that row blank rather than refusing, matching the existing rule that locking an empty row presents as muting it.
+Cluster operator titles are generated from live membership and current state, so a label cannot drift from what the button does.
+
 [5.3.0] — 2026-07-26
 Added
 Added eight Forge Cards in a warm-figure register the first twenty had no room for: Komorebi, Negative Fill, Waterline, Salt and Gold, Poolside Noon, Rim Light Confession, Light Through Water, and Lido 1972. Every one specifies a Figure pose and a Color Logic relationship, the two axes that most distinguish this board, and several deliberately leave axes open.
