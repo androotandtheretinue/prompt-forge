@@ -1,105 +1,93 @@
-# Prompt Forge 5.2.0 — Signal Rig and Images in Motion
+# Prompt Forge 5.3.0 — The Figure
 
-Sixteen strings. You do not play all sixteen on every song — and one of them was missing half its notes.
+Sixteen axes could say the subject was reclining. None could say how.
 
-Prompt Forge 5.1 made the board playable. 5.2 does two things to it. The **Signal Rig** makes the board configurable before you play: choose which axes are in the instrument, and the rest go quiet and stay quiet. The **medium axis** grows from 128 to 160 and learns, for the first time, that images move.
+5.2 made the board configurable. 5.3 adds the axis that was missing from it, opens the vocabulary to readers who are not human, and takes things *out* of the Forge Cards.
 
-## The Signal Rig
+## FIGURE — the seventeenth axis
 
-Every axis now sits in one of three named states, shown as a chip strip above the board:
+The action axis carries 160 options and every one is an activity: running, forging, praying, refusing a crown. Not one describes how a body is arranged. No contrapposto. No counter-rotated shoulders and hips. No weight on one hip, no arched back, no chin down with the eyes up, no hand at the nape.
 
-| State | Meaning | Behavior |
-| --- | --- | --- |
-| **live** | in play | rerolls, cards, strums, and randomize may move it |
-| **pinned** | frozen at a value | survives every automated operation |
-| **muted** | frozen blank | contributes nothing to the prompt, and stays that way |
+A prompt could say the subject was reclining. It could not say whether the reclining was collapsed, coiled, or held — so the entire language of figure drawing and portrait direction was unreachable from the board.
 
-Tap a chip to cycle `live → pinned → muted`. The readout counts the three as you go.
+Eighty signals, grouped the way a photographer or a life-drawing tutor actually speaks:
 
-Three bulk controls set the whole rig at once:
-
-- **🚫 MUTE BLANKS** — mute every axis that is currently empty. Randomize at RECON, keep the six that landed, mute the ten that did not, and the board is now a six-string instrument.
-- **🔐 PIN FILLED** — pin every axis that currently holds a value.
-- **🔓 ALL LIVE** — release everything. Values are kept.
-
-The rig is the deliberate counterpart to the payload doctrines. RECON gives you a random six; the rig lets you choose the six.
-
-### No new state
-
-The three states are a reading of two properties the forge already stored:
-
-```
-live   = !locked
-pinned =  locked && value !== ''
-muted  =  locked && value === ''
-```
-
-Which means Blueprints, local persistence, and every lock guard in the v5 layer understood muting before it had a name. Save a rig to the Blueprint Vault and it travels with the rest of the configuration.
-
-Muting was technically possible before this release — clear a row, then lock it. Nothing said so, the two steps only worked in that order, and the result was styled identically to a pinned row. The capability existed and could not be found. Now it is one tap, and a muted row reads slate instead of gold.
-
-## The four cluster buttons now mean four different things
-
-They were unclear because they were nearly identical. Structure and Story shared three of their four rows:
-
-```
-before   structure : action, framing, composition, setting
-         story     : action, composition, setting, narrative
-```
-
-The reroll scopes now partition the sixteen axes — every axis in exactly one scope, no axis in two:
-
-```
-after    structure  : composition, camera, setting        the shot
-         atmosphere : lighting, mood, palette, weather    the air
-         surface    : medium, texture, style, quality, fx, color logic
-         story      : story signal, action, wardrobe      who, and what happens
-```
-
-Color Logic belonged to no cluster at all and could not be reached from any cluster button. It now lives in Surface.
-
-Two smaller corrections to the same problem:
-
-- Every cluster button is prefixed with **⟳**. The labels were nouns; the action is a verb.
-- **Hovering a scope outlines the rows it will change**, in both the board and the rig strip, before the click commits. The button titles list their member axes and are generated from the actual cluster definition, so a label cannot drift from what it does.
-
-## The medium axis learns that images move
-
-The forge could name 128 ways to make a still image and not one way to make an image that moves. No Claymation, no Rotoscoping, no Stop Motion — an absence wide enough that you could not ask for the look of a Švankmajer short or a Fleischer cartoon at all.
-
-Twenty mediums close it, grouped the way the techniques actually divide:
-
-| Group | Mediums |
+| Group | Examples |
 | --- | --- |
-| **Frame by frame** | Claymation, Stop Motion, Puppet Animation, Cutout Animation, Silhouette Animation, Pixilation, Sand Animation, Paint-on-Glass Animation, Pinscreen Animation |
-| **Drawn** | Cel Animation, Rotoscoping, Rubber Hose Animation |
-| **Computed and captured** | Machinima, Motion Capture Animation |
-| **Pre-cinema and motion study** | Zoetrope Strip, Flip Book Sequence, Chronophotography, Slit-Scan Photography, Stroboscopic Exposure, Time-Lapse Composite |
+| **Weight and stance** | Contrapposto, Weight on One Hip, Mid-Stride Suspension, Braced Against Wind |
+| **Spine and torso** | Arched Back, Coiled Forward Hinge, Collapsed Posture, Reclined Long Line |
+| **Shoulders against hips** | Counter-Rotated Shoulders and Hips, Spiral From Hip to Shoulder |
+| **Head and neck** | Chin Down Eyes Up, Look Back Over the Shoulder, Neck Extended Away From Shoulders |
+| **Arms and hands** | Hand at the Nape, Arms Akimbo, Fingers at the Collarbone |
+| **Legs and feet** | Knee Popped, Ankles Crossed Seated, Heel Lifted |
+| **Seated and reclining** | Propped on One Elbow, Crouched on the Balls of the Feet, Perched on an Edge |
+| **Held tension** | Held Tension Throughout, Fully Released Weight, Stillness Between Two Movements |
 
-The last group is the one that makes the rest work as *image* prompts rather than *video* prompts. Chronophotography and slit-scan are how motion has always been made to hold still on a single surface — they give the axis a way to say "moving" to an image model without asking it for a film.
+Figure joins the **Story** scope, beside action and wardrobe. Rerolling Story now moves all four: what the subject is doing, how the body holds it, and what it wears.
 
-Twelve more fill gaps the v4 expansion reached past on its way to the instrument bench: **Mezzotint, Aquatint, Drypoint, Silverpoint** in printmaking; **Autochrome, Albumen Print, Gum Bichromate Print, Platinum Palladium Print, Camera Obscura Study** in historical photography; **Reverse Glass Painting, Sgraffito Plaster, Pietra Dura Inlay** in surface and inlay work.
+This is not a patch for one use case. The same eighty signals serve a portrait, a character render, a fashion plate, or a crowd.
 
-Medium goes from 128 to 160, matching Action and Setting. The forge goes from 2,000 to 2,032. Every axis remains a multiple of sixteen — the convention is now enforced by the audit rather than merely observed.
+## Swimwear, and a hole in the wardrobe
 
-## Repo catches up to the code
+The wardrobe axis carried 144 garments — plague doctor robes, a beekeeper suit, a cleanroom bunny suit, an antique deep-sea diving dress — and exactly one swim-adjacent entry, reaching the subject sideways through fashion styling.
 
-5.2 is also the release where the project's release discipline rejoins reality.
+Sixteen entries close it, spanning competitive, technical, retro and poolside. Wardrobe reaches 160.
 
-The audit harness had been failing since v5 shipped, and worse than failing — it had verified nothing. It extracted the application with a pattern anchored on `</script></body>` that started matching at the first inline block. Adding the `<script src="v5.js">` tag made it swallow that markup as JavaScript, so the harness could not parse the file it was testing.
+## Eight warm-figure Forge Cards
 
-The signal counts held anyway. They held unwatched.
+The first twenty doctrines are cold in a consistent way: cathedrals, black sites, orbital folklore. Not one is about a body being pleasant to look at. The vocabulary supported that register completely — *Komorebi Feeling* has been sitting in the mood axis since v4 — but no card reached for it, so arriving there took sixteen deliberate selections instead of one click.
 
-- The harness now selects the application block by its contents rather than its position, and parse-checks every inline block. Position is exactly the thing that kept changing.
-- **`v5.js` is folded back into `index.html`.** The project called itself single-file for two releases while shipping two files. It is one file again — open it straight off disk and it runs. A new check fails the build if any local script or stylesheet reference reappears.
-- `dist/` and the build step are gone. With `index.html` self-contained there is nothing left to mirror, which permanently retires the class of bug that produced the stale distribution.
-- New checks enforce the invariants this release introduces: reroll scopes must be disjoint and must cover every axis, and the three rig states must derive correctly from lock and value.
+**Komorebi · Negative Fill · Waterline · Salt and Gold · Poolside Noon · Rim Light Confession · Light Through Water · Lido 1972**
+
+Every one sets a Figure pose and a Color Logic relationship, deliberately. Those are the two axes with no equivalent in comparable tools, and a preset demonstrates them better than documentation does: *Achromatic Skin Chromatic Clothing* under hard overhead light is an instruction no other prompt board can express.
+
+Three of the eight — Komorebi, Negative Fill, Waterline — were specified from the published vocabulary before they were built, and every value validated on the first pass.
+
+## Restraint, applied to the old cards
+
+Twelve of the twenty original cards set every axis available to them. That is a finished image, not a doctrine — and it matters more than it sounds, because applying a card clears every unlocked axis first. A card that specifies all seventeen leaves nothing to roll.
+
+**42 assignments removed**, in three kinds:
+
+- **Tautology.** Projection Cathedral stated its idea three times — medium *Projection Mapping*, lighting *Projection-Mapped Light*, wardrobe *Projection-Mapped Garment*. Wetware Archive put a *Macro Lens* beside a *Scanning Electron Micrograph*.
+- **Weather on interiors.** All twelve set it, including a courtroom, a data centre, a sealed underground bunker and a kitchen. Eleven lost it.
+- **Contradiction.** Field Artifact declared *Object-Centered Stillness* and then specified what a person was doing and wearing.
+
+What stayed is what each card is *for*. Black-Site Angel keeps both *Surgical White and Arterial Red* and *Red as Administrative Signal* — one names the hues, the other says what the red means, and the pair is the card's whole thesis.
+
+The twelve now set 12–13 axes and leave 4–5 open. Across all 28, the average is 13.
+
+## The vocabulary is published as data
+
+An agent pointed at Prompt Forge could reach the page and still not reach the signals. `index.html` is ~175 kB and the pools begin about 34 kB in, past where many fetchers truncate — and a model that gets a thin lookup fills in plausible signals from memory, which fails while looking like success.
+
+- **`llms.txt`** — the front door: what this is, the seventeen axes, and the operating instruction.
+- **`vocabulary.json`** — all 2,128 signals with axis metadata.
+- **`vocabulary.txt`** — the same, flat, no parser required.
+
+Both are generated from `index.html` by `npm run vocabulary`, and the audit regenerates them in memory and compares, so they cannot drift.
+
+### Mirrors, because a blocked host is not a dead end
+
+Some agents run fetchers that allowlist hosts and cannot reach `*.github.io`. That blocks `llms.txt` along with the data — the sentence explaining where else to look was itself behind the door it describes.
+
+Every entry point now carries the mirror addresses at `raw.githubusercontent.com`, including `llms.txt` itself. Nothing here is gated; that is a host-level policy, not a restriction of this project.
+
+Use `main` to operate the instrument. Pin a commit SHA for anything you intend to cite.
+
+## Two agents, two fixes
+
+Both changes to `llms.txt` this release came from watching cold agents use it, not from anticipating them.
+
+One returned fifteen exact signals and one relocation: *Twilight*, a lighting signal, submitted as weather. The instruction said to use "only values that appear in the vocabulary," and Twilight does appear — the rule was underspecified. A signal is now valid only in the axis that lists it, and the file cites this exact failure. The same run filled all sixteen axes, so filling everything is now named as the signature of completing a form rather than making an image.
+
+The other could not reach the host at all, and stopped rather than fabricating. That is the file working. It should not have had to stop, and now it does not have to.
 
 ## Verified
 
-2,032 unique signals across 16 axes and 20 Forge Cards in the canonical banks, with every preset and prompt-order reference resolving, no duplicates inside any axis, and every axis a multiple of sixteen. The running app carries more than that — the v5 layer's `installDarpaCard()` appends its vocabulary to the built-in pools on load, so the live board reports **2,071 signals and 21 Forge Cards**. Both numbers are correct; they count different things, and the audit measures the source.
+2,128 unique signals across 17 axes and 28 Forge Cards in the canonical banks, no duplicates within any axis, every axis a multiple of sixteen, every preset and prompt-order reference resolving. The running app carries more — `installDarpaCard()` appends its vocabulary on load, so the live board reports **2,167 signals and 29 Forge Cards**. Both counts are right; the audit measures the source.
 
-Muted axes were driven through randomize, Forge Cards, cluster rerolls, strumming, Mutate 3, page reload, and a Blueprint round-trip, and stayed blank through all of it. The merged file was also opened directly from disk over `file://`, with no server, and ran clean. It is self-contained in code, not in presentation: Tailwind and the two webfonts still come from public CDNs, so a genuinely offline copy runs with fallback styling. The audit enforces the code half — no local script or stylesheet reference may reappear.
+Figure rerolls with the Story scope, a muted figure survives randomize, and pinned rows survive card application. The audit grew to fifteen checks this release, most of them guarding claims rather than code — every version string in the file must agree with `package.json`, the vocabulary files must match the application, and `llms.txt` must carry the mirrors.
 
 ## Why CC0
 

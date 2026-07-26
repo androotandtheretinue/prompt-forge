@@ -1,6 +1,6 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
-[Unreleased]
+[5.3.0] — 2026-07-26
 Added
 Added eight Forge Cards in a warm-figure register the first twenty had no room for: Komorebi, Negative Fill, Waterline, Salt and Gold, Poolside Noon, Rim Light Confession, Light Through Water, and Lido 1972. Every one specifies a Figure pose and a Color Logic relationship, the two axes that most distinguish this board, and several deliberately leave axes open.
 Added FIGURE, a seventeenth axis of 80 signals describing how the body is arranged rather than what it is doing: contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up, hand at the nape. Action carried 160 verbs and not one of them described posture, so the entire language of figure drawing and portrait direction was unreachable from the board.
@@ -21,6 +21,15 @@ Strengthened the omission guidance after an agent filled all sixteen axes: filli
 Added audit checks that every version string in `index.html` agrees with `package.json`, and that the runtime footer derives its version instead of restating it.
 Corrected `<head>` metadata that was two versions stale: the page title and Open Graph title still said DARPA v4, and the description still claimed 2,000 signals. This is the region a truncating fetcher is most likely to read, so it was the worst place in the file to be wrong.
 Narrowed the self-containment check to `rel="stylesheet"`. It previously rejected any local `<link href>`, which would have failed the new `rel="alternate"` vocabulary pointer — a data reference the page does not need in order to render.
+Changed
+Applied restraint to the twelve Forge Cards that set every axis available to them, removing 42 assignments. The cuts were tautologies (Projection Cathedral stated its idea in medium, lighting and wardrobe), weather on interiors (all twelve set it, including a courtroom, a data centre, a sealed bunker and a kitchen), and one outright contradiction (Field Artifact declared Object-Centered Stillness while specifying what a person was doing and wearing). The twelve now set 12–13 axes and leave 4–5 open, so a card hands you a coherent core and empty rows to roll.
+Forge Card definitions are written in prompt order, so a card reads in the sequence it builds.
+Validated
+2,128 unique signals across 17 axes, no duplicates within any axis, every axis a multiple of 16.
+28 Forge Cards in source, every value resolving to its correct axis, all metadata present.
+Reroll scopes are disjoint and cover all seventeen axes.
+Pinned and muted rows survive card application, randomize, cluster rerolls, and strumming.
+The published vocabulary files match the application, and every entry point carries the mirror addresses.
 [5.2.0] — 2026-07-24
 Added
 Added 32 mediums, taking the axis from 128 to 160 and the forge from 2,000 to 2,032 signals.
