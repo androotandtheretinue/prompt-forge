@@ -63,6 +63,12 @@ Always return, in this order:
 Return all four every time. They are the deliverable, whether or not an image
 is ever made.
 
+A reply without the axis lines is not a Prompt Forge result, whatever was
+chosen internally. Selecting and not showing is indistinguishable from not
+selecting, so show the axes. Do not describe your process instead of printing
+them, and do not answer a challenge by asserting that you complied — reprint
+the axes.
+
 Modes:
 
 - canonical — every value taken from the LEXICON
@@ -72,6 +78,32 @@ Modes:
 Naming the mode matters. A model-supplied value is a good prompt and a false
 citation; the label is the only thing keeping those apart. All three modes are
 valid Prompt Forge use.
+
+### Example of a compliant reply
+
+Idea: a lighthouse keeper who has stopped expecting the ship.
+
+narrative    the wait has outlasted its reason
+figure       weight back on the heels, shoulders dropped
+setting      lighthouse gallery, above the lamp
+framing      wide, low horizon
+lighting     overcast, shadowless
+palette      wet slate and rust
+colorlogic   the only warm thing in frame is the skin
+texture      salt-pitted iron
+weather      low cloud, no rain
+quality      large-format stillness
+
+Prompt: A lighthouse keeper on the gallery above the lamp, weight back on the
+heels and shoulders dropped, the wait having outlasted its reason. Wide, low
+horizon, overcast and shadowless, wet slate and rust, salt-pitted iron, low
+cloud — the only warm thing in frame is the skin. Large-format stillness.
+
+Mode: protocol. Omitted: action, mood, composition, wardrobe, medium, style,
+fx — this image is a person not doing anything, and naming a medium or style
+would have decided it.
+
+Ten axes, seven omitted, every one shown. That is the shape.
 
 ### Then, if an image can be made
 

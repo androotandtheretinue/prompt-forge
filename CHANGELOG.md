@@ -10,7 +10,9 @@ Split `llms.txt` into a PROTOCOL and a LEXICON, protocol first. The axes, select
 Each axis now carries a one-line gloss, so an agent can fill `colorlogic` or `figure` from its own knowledge. The key alone was not enough to act on.
 Replaced "if you cannot reach the vocabulary, say so and stop" with a fallback: fill from your own knowledge and report the mode. Three modes are valid — canonical, protocol, mixed — and naming the mode is required, since a model-supplied value is a good prompt and a false citation.
 Stated that the prompt is always the deliverable and that image generation is additional, never a substitute: generate if you can, otherwise delegate, otherwise (on X) ask Grok, otherwise return the prompt alone.
-Added audit checks that `llms.txt` keeps its PROTOCOL and LEXICON sections, describes every axis the app defines, and still says the prompt is always returned.
+Made compliance falsifiable. An agent asked to use the board returned an idea and an image with no axis lines, then answered a challenge by asserting it had selected from the categories — a claim nobody could check. `llms.txt` now states that a reply without the axis lines is not a Prompt Forge result whatever was chosen internally, and that a challenge is answered by reprinting the axes rather than by describing the process.
+Added a worked example of a compliant reply — ten axes shown, seven named as omitted, with the mode labelled. Agents pattern-match on a concrete shape far more reliably than they follow prose rules, and it demonstrates restraint and mode-labelling in the same twenty lines.
+Added audit checks that `llms.txt` keeps its PROTOCOL and LEXICON sections, describes every axis the app defines, still says the prompt is always returned, and carries both the worked example and the not-a-result rule.
 
 [5.3.0] — 2026-07-26
 Added

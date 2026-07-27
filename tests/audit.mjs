@@ -237,6 +237,24 @@ if (undescribed.length) {
 if (!/never instead of/i.test(llms) || !/Always return/i.test(llms)) {
   fail('llms.txt no longer states that the prompt is always returned and that image generation is additional.');
 }
+
+/*
+ * The anti-bluff mechanism.
+ *
+ * An agent asked to use the board replied with an idea and an image, no axis
+ * lines, and then answered a challenge by asserting it had selected from the
+ * categories. That claim was unfalsifiable, which is the actual defect: a
+ * protocol nobody can check is a protocol nobody follows. Two things fix it —
+ * saying that an unshown selection does not count, and showing the exact shape
+ * of a compliant reply, since models copy a worked example far more reliably
+ * than they follow a rule.
+ */
+if (!/not a Prompt Forge result/i.test(llms)) {
+  fail('llms.txt no longer states that a reply without the axis lines does not count.');
+}
+if (!/^### Example of a compliant reply$/m.test(llms) || !/^Mode: /m.test(llms)) {
+  fail('llms.txt is missing the worked example, which is what most agents actually pattern-match on.');
+}
 for (const [name, url] of Object.entries(MIRRORS)) {
   if (!llms.includes(url)) fail(`llms.txt does not list the ${name} mirror (${url}).`);
 }
