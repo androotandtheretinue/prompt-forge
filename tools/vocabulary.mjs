@@ -61,14 +61,18 @@ export function signalCount(vocabulary) {
 export const PROTOCOL_BEGIN = '<!-- BEGIN llms.txt -->';
 export const PROTOCOL_END = '<!-- END llms.txt -->';
 
+/*
+ * The copy lives inside a <pre>, so `&` and `<` are markup unless escaped.
+ * llms.txt happens to contain neither today — it did contain a literal <sha>
+ * placeholder a few revisions ago, which would have been swallowed as a tag and
+ * broken the page quietly. Escaping on the way in and unescaping on the way out
+ * makes that a non-event rather than a trap for whoever edits next.
+ */
+const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const unescapeHtml = text => text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
 export function protocolBlock(llms) {
-  // The copy lives inside a <script>, which ends at the first literal closing
-  // tag regardless of context. Nothing in llms.txt has ever contained one, and
-  // if that changes the page would break silently rather than loudly.
-  if (/<\/script/i.test(llms)) {
-    throw new Error('llms.txt contains a closing script tag and cannot be embedded verbatim.');
-  }
-  return `${PROTOCOL_BEGIN}\n${llms.trimEnd()}\n${PROTOCOL_END}`;
+  return `${PROTOCOL_BEGIN}\n${escapeHtml(llms.trimEnd())}\n${PROTOCOL_END}`;
 }
 
 export function embedProtocol(html, llms) {
@@ -84,7 +88,7 @@ export function extractProtocol(html) {
   const start = html.indexOf(PROTOCOL_BEGIN);
   const end = html.indexOf(PROTOCOL_END);
   if (start === -1 || end === -1 || end < start) return null;
-  return html.slice(start + PROTOCOL_BEGIN.length, end).trim();
+  return unescapeHtml(html.slice(start + PROTOCOL_BEGIN.length, end).trim());
 }
 
 /*

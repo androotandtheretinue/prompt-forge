@@ -377,14 +377,40 @@ if (!html.includes('raw.githubusercontent.com/androotandtheretinue/prompt-forge'
  * and a protocol forty kilobytes into the file would be behind the same wall
  * the vocabulary already sits behind.
  */
+/*
+ * Script tags must balance, including inside comments.
+ *
+ * A comment here once explained the embed by spelling out a literal opening
+ * script tag. Balanced parsers ignore comments and were fine; the regex-based
+ * strippers used by extraction pipelines are not, and matched from that text
+ * to the next closing tag — taking the protocol with it. The prose broke the
+ * thing it described, and nothing rendered differently, so only a count catches
+ * it.
+ */
+const scriptOpens = (html.match(/<script/gi) || []).length;
+const scriptCloses = (html.match(/<\/script>/gi) || []).length;
+if (scriptOpens !== scriptCloses) {
+  fail(`index.html has ${scriptOpens} opening and ${scriptCloses} closing script tags. A stray one — even inside a comment — makes regex-based extractors swallow everything up to the next close.`);
+}
+
 const embedded = extractProtocol(html);
 if (embedded === null) {
   fail('index.html has no llms.txt embed markers, so a reader of the page alone gets a pointer instead of the protocol.');
 } else if (normalize(embedded) !== normalize(llms.trim())) {
   fail('The llms.txt copy embedded in index.html does not match llms.txt. Run `npm run vocabulary`.');
 } else {
+  /*
+   * It also has to stay early, but "early" is measured against two different
+   * readers. A markdown converter strips the head entirely, so the protocol
+   * lands within the first page of extracted text no matter what the byte
+   * offset says. A raw-HTML reader counts bytes, and the ~19 kB of inline CSS
+   * above the disclosure is unavoidable without moving styles out of the file,
+   * which the single-file rule forbids. 24 kB leaves headroom for the CSS to
+   * grow a little and still fails loudly if the block is ever moved down the
+   * body, which is the regression that would actually matter.
+   */
   const offsetKb = Buffer.byteLength(html.slice(0, html.indexOf('BEGIN llms.txt')), 'utf8') / 1024;
-  if (offsetKb > 16) {
+  if (offsetKb > 24) {
     fail(`The embedded protocol starts ${offsetKb.toFixed(0)} kB into index.html; it must stay near the top to survive a truncated fetch.`);
   }
 }
