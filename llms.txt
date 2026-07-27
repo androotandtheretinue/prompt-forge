@@ -1,85 +1,123 @@
 # Prompt Forge
 
-> A public-domain visual prompt instrument. 2,128 signals across 17 creative
-> axes. You build an image prompt by choosing at most one signal per axis, in
-> service of a single stated idea.
+> A public-domain protocol for building image prompts: 17 axes, at most one
+> value per axis, in service of one stated idea.
 
 License: CC0-1.0. No account, key, attribution, or permission required.
 Homepage: https://androotandtheretinue.github.io/prompt-forge/
 
-## ACCESS
+Two layers. The PROTOCOL is the machine-readable architecture and is complete
+in this file — you need nothing else. The LEXICON is a curated vocabulary
+built for humans to browse; it is optional for you.
 
-Some agents cannot fetch *.github.io. That is a host-level policy, not a
-restriction here. Nothing in this project is gated. If the Pages path fails,
-use the mirrors below — same files, plain text, no rendering.
+## PROTOCOL
 
-## Get the vocabulary
+### The 17 axes, in prompt order
+
+Fill each from the LEXICON if you can read it, otherwise from your own
+knowledge. Keep the axis names and this order either way.
+
+narrative    the implied event or tension — what just happened, or is about to
+action       what the subject is doing
+figure       how the body is arranged: pose, weight, spine, limbs. Not the
+             activity. Action says reclining; figure says how.
+mood         emotional register
+composition  arrangement of elements within the frame
+setting      where it happens
+framing      camera: shot size, lens, angle
+wardrobe     clothing and costume
+medium       how the image is made: photographic, painted, printed, animated
+style        art-historical or genre idiom
+lighting     source, direction, and quality of light
+palette      colour scheme
+colorlogic   a relational rule between regions of the image — chromatic skin
+             against achromatic clothing, warm subject in a cool world,
+             pearlescence only in highlights. Not a colour; a relationship.
+texture      surface quality
+weather      atmospheric condition. Omit indoors.
+fx           visual phenomena and effects
+quality      rendering fidelity and finish
+
+Keep the axis structure. Do not collapse it into freeform prose — the
+structure is the portable part, and a paragraph is not a Prompt Forge prompt.
+
+### Selection
+
+1. State the single idea the image serves. One sentence, before choosing.
+2. At most one value per axis.
+3. A value belongs to exactly one axis. Twilight is lighting, not weather.
+4. Omit any axis that does not serve the idea. Filling all seventeen is the
+   usual sign that a form is being completed rather than an image made. Six
+   chosen values beat seventeen supplied ones. Omission is a decision, not a
+   gap — be able to say why you omitted.
+
+### Output
+
+Always return, in this order:
+
+1. the idea, in one sentence
+2. the chosen axes, one per line, in prompt order
+3. the assembled prompt
+4. the mode
+
+Return all four every time. They are the deliverable, whether or not an image
+is ever made.
+
+Modes:
+
+- canonical — every value taken from the LEXICON
+- protocol  — values from your own knowledge; LEXICON not read
+- mixed     — say which axes came from where
+
+Naming the mode matters. A model-supplied value is a good prompt and a false
+citation; the label is the only thing keeping those apart. All three modes are
+valid Prompt Forge use.
+
+### Then, if an image can be made
+
+Optional, and additional — never instead of the output above.
+
+1. Generate it yourself, if you can.
+2. Otherwise delegate the assembled prompt to an image-generation agent you
+   can invoke.
+3. On X/Twitter, if you cannot generate but can call Grok, ask Grok to render
+   it.
+4. If no route exists, stop here. The prompt already is the result.
+
+Never withhold the prompt because you could not render it, and never replace
+it with the image.
+
+## LEXICON
+
+Optional. 2,128 curated signals across the same 17 axes, built so a human
+browsing the board meets visual language they would not have thought of. Read
+it when you want that curation instead of your own priors.
 
 Do not scrape index.html. It is a 175 kB single-file application and the
 signal pools begin about 34 kB in, past the point where many fetchers
-truncate. Read one of these instead:
+truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.txt
 
-Mirrors, if that host is blocked for you:
+If you use it, take values verbatim and only in the axis that lists them. Do
+not invent, translate, pluralize, abbreviate, or blend canonical signals — a
+near-miss is indistinguishable from a real one to whoever reads it next. Where
+the idea wants something the vocabulary lacks, use your own word for that axis
+and report the mode as mixed.
+
+### ACCESS
+
+Some agents cannot fetch *.github.io. That is a host-level policy, not a
+restriction here. Nothing in this project is gated. If the Pages path fails,
+use the mirrors — same files, plain text, no rendering.
 
 - https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.json
 - https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabulary.txt
-
-This file is mirrored too, since a reader blocked from the first host cannot
-read these instructions there either:
-
 - https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/llms.txt
 
-Same content, generated from the application source. JSON carries the axis
-metadata; the text file is flat and needs no parser.
+If neither host is reachable, do not stop. Use the PROTOCOL above and report
+the mode as protocol. It is complete without them.
 
-Both paths track the `main` branch and move as the vocabulary grows. If you
-are citing a result rather than operating the instrument, replace `main` with
-a commit SHA to pin the exact vocabulary you read:
-
-- https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/<sha>/vocabulary.json
-
-## The 17 axes, in prompt order
-
-narrative (story signal, 80), action (160), figure (80), mood (144),
-composition (80), setting (160), framing (camera, 128), wardrobe (160),
-medium (160), style (176), lighting (128), palette (128),
-colorlogic (color logic, 80), texture (128), weather (112), fx (128),
-quality (96).
-
-Two axes are worth naming because they have no common equivalent, and an
-agent that skips them is leaving most of the instrument unused:
-
-- figure describes how the body is arranged rather than what it is doing —
-  contrapposto, counter-rotated shoulders and hips, chin down with the eyes
-  up. Action says the subject is reclining; figure says how.
-- colorlogic gives relational instructions rather than colors: chromatic
-  skin against achromatic clothing, warm subject in a cool world,
-  pearlescence only in the highlights. It describes a relationship between
-  regions of the image, which is how a colorist thinks.
-
-## How to operate it
-
-1. State the single idea the image is in service of. One sentence, in your
-   own words, before choosing anything.
-2. Choose at most one signal per axis, and only values listed under that
-   axis. A signal is valid only in the axis that lists it. Several axes
-   carry adjacent language, and relocating a value is the most common
-   observed failure: "Twilight" is a lighting signal, and the weather axis
-   does not contain it. Check the axis, not just the vocabulary.
-3. Do not invent, translate, pluralize, abbreviate, or blend signals. If
-   the idea wants something the vocabulary lacks, say so plainly rather
-   than approximating it — a near-miss is indistinguishable from a real
-   signal to whoever reads the prompt next.
-4. Omit any axis that does not serve the idea. Filling all sixteen is the
-   most common sign that a form is being completed rather than an image
-   being made; six chosen signals beat sixteen supplied ones. Omission is
-   a decision, not a gap, and you should be able to say why you omitted.
-5. Emit the chosen signals in the axis order above.
-6. Name the idea alongside the prompt, so a reader can judge whether the
-   signals actually served it.
-
-If you cannot reach the vocabulary files, say so and stop. Do not supply
-remembered or plausible-sounding signals in their place.
+Both paths track `main` and move as the vocabulary grows. To cite a result
+rather than operate the instrument, replace `main` with a commit SHA.

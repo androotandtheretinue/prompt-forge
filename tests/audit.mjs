@@ -202,8 +202,40 @@ for (const ref of ['vocabulary.json', 'vocabulary.txt']) {
  * So every door carries the address of the others: llms.txt, both generated
  * vocabulary files, and the <head> meta that survives truncation.
  */
-if (!llms.includes('## ACCESS')) {
+if (!/^#+ ACCESS$/m.test(llms)) {
   fail('llms.txt has no ACCESS section telling a blocked reader that nothing is gated.');
+}
+
+/*
+ * llms.txt is two documents in one file: a PROTOCOL that is complete on its
+ * own, and a LEXICON that is optional. That split is the whole design — an
+ * agent that can read only this file must still be able to operate the board,
+ * because the two failures seen in the wild were a truncated fetch and a
+ * blocked host. Putting the protocol in a second file would reintroduce both.
+ */
+for (const heading of ['## PROTOCOL', '## LEXICON']) {
+  if (!llms.includes(heading)) {
+    fail(`llms.txt is missing its ${heading.replace('## ', '')} section; the protocol/lexicon split is what makes the file self-sufficient.`);
+  }
+}
+
+/*
+ * Every axis must be named in llms.txt, with a gloss.
+ *
+ * The protocol is only portable if an agent can fill an axis from its own
+ * knowledge, and it cannot do that for `colorlogic` or `figure` from the key
+ * alone. Adding an axis to the app without describing it here would leave the
+ * machine-facing contract quietly one axis short — exactly the drift this
+ * suite exists to catch.
+ */
+const undescribed = audit.categoryKeys.filter(key => !new RegExp(`^${key}\\s{2,}\\S`, 'm').test(llms));
+if (undescribed.length) {
+  fail(`llms.txt does not describe these axes: ${undescribed.join(', ')}. Each needs a line of the form "<key>  <what it means>".`);
+}
+
+// The prompt is the deliverable; rendering is optional and additional.
+if (!/never instead of/i.test(llms) || !/Always return/i.test(llms)) {
+  fail('llms.txt no longer states that the prompt is always returned and that image generation is additional.');
 }
 for (const [name, url] of Object.entries(MIRRORS)) {
   if (!llms.includes(url)) fail(`llms.txt does not list the ${name} mirror (${url}).`);
@@ -296,5 +328,6 @@ if (!process.exitCode) {
   console.log(`  ${audit.clusterNames.length} reroll scopes partitioning all ${audit.categoryKeys.length} axes`);
   console.log(`  every axis sized to a multiple of 16 (medium ${audit.counts.medium})`);
   console.log(`  ${blocks.length} inline script blocks, all parsing, no local script or stylesheet dependencies`);
-  console.log(`  vocabulary.json and vocabulary.txt match the application, and llms.txt points at both`);
+  console.log(`  vocabulary.json and vocabulary.txt match the application`);
+  console.log(`  llms.txt carries the protocol, all ${audit.categoryKeys.length} axes, and the mirrors`);
 }

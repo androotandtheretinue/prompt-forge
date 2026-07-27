@@ -53,7 +53,16 @@ Tailwind and two fonts still load from public CDNs, so an offline copy renders w
 
 ### For AI agents
 
-Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first. It describes the instrument, lists the seventeen axes, and gives the operating instruction: one signal per axis at most, only listed values, in service of one stated idea.
+Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first. Nothing else is required — that one file is self-sufficient.
+
+It separates two things the project had been conflating:
+
+- **The Protocol** — the seventeen axes with a one-line gloss each, the selection and omission rules, prompt assembly, and what to do about images. This is the portable, machine-readable architecture, and it lives entirely inside `llms.txt` so a truncated fetch or a blocked host cannot cost an agent the ability to use the board.
+- **The Lexicon** — the 2,128 curated signals below. Built so a human browsing the board meets language they would not have thought of. An LLM already carries broad visual vocabulary, so this is **optional** for one: useful when you want the curation instead of the model's own priors.
+
+An agent that can read only `llms.txt` fills each axis from its own knowledge and says so. Three modes are valid — `canonical` (every value from the Lexicon), `protocol` (own knowledge), and `mixed` — and naming the mode is required, because a model-supplied value is a good prompt and a false citation, and the label is what keeps those apart.
+
+The prompt is always the deliverable. Generating an image is additional, never a substitute, and an agent with no rendering route still returns a complete result.
 
 The full vocabulary is published as data, so nothing has to scrape the application:
 

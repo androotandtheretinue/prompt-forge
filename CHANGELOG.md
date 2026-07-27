@@ -6,6 +6,11 @@ Added pin and mute operators to each cluster scope. A scope previously only rero
 Both operators are toggles — clicking the engaged one returns the scope to live, so no scope can be stranded held.
 Locking a scope that contains a blank row holds that row blank rather than refusing, matching the existing rule that locking an empty row presents as muting it.
 Cluster operator titles are generated from live membership and current state, so a label cannot drift from what the button does.
+Split `llms.txt` into a PROTOCOL and a LEXICON, protocol first. The axes, selection rules, output contract and image-handling are the portable machine-readable architecture and now live entirely in that one file; the curated vocabulary is named as an optional human-discovery layer. An LLM already carries broad visual vocabulary — what it lacked was the structure.
+Each axis now carries a one-line gloss, so an agent can fill `colorlogic` or `figure` from its own knowledge. The key alone was not enough to act on.
+Replaced "if you cannot reach the vocabulary, say so and stop" with a fallback: fill from your own knowledge and report the mode. Three modes are valid — canonical, protocol, mixed — and naming the mode is required, since a model-supplied value is a good prompt and a false citation.
+Stated that the prompt is always the deliverable and that image generation is additional, never a substitute: generate if you can, otherwise delegate, otherwise (on X) ask Grok, otherwise return the prompt alone.
+Added audit checks that `llms.txt` keeps its PROTOCOL and LEXICON sections, describes every axis the app defines, and still says the prompt is always returned.
 
 [5.3.0] — 2026-07-26
 Added
