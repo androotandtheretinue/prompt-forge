@@ -286,6 +286,24 @@ if (!/^Blank: /m.test(llms) || !/comes to seventeen/i.test(llms)) {
 }
 
 /*
+ * Two things an agent got wrong even while following the contract.
+ *
+ * It produced a Blank list and dropped one axis from it — sixteen accounted
+ * for out of seventeen, palette simply gone. Stating the total is not the same
+ * as asking for the total to be checked, so the file now says to count.
+ *
+ * It also returned the idea, subject, axes and mode, and no assembled prompt.
+ * Four parts of five, missing the only one that is the deliverable rather than
+ * a description of it. That needed saying outright.
+ */
+if (!/Count before you send/i.test(llms)) {
+  fail('llms.txt no longer asks the reader to check that filled plus blank equals seventeen.');
+}
+if (!/must never be absent/i.test(llms)) {
+  fail('llms.txt no longer singles out the assembled prompt as the part that cannot be omitted.');
+}
+
+/*
  * The worked example must itself account for every axis, since it is the shape
  * agents copy. An eighteenth axis that never reached the example would teach a
  * seventeen-axis habit, and the rule above would be contradicted by the only

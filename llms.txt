@@ -85,6 +85,16 @@ Always return, in this order:
    count of filled and blank comes to seventeen. A short why is welcome where
    the reason is interesting, and never required.
 
+Count before you send: filled plus blank must equal seventeen exactly. An axis
+missing from both lists was skipped, not decided, and skipping is the thing
+this accounting exists to catch. It is easy to lose one — palette and
+colorlogic go missing most often, being the two an image can seem to survive
+without.
+
+Part 4 is the one that must never be absent. Everything else describes the
+prompt; that line is the prompt, and a reply without it has produced nothing
+usable no matter how complete the rest looks.
+
 Return all five every time. They are the deliverable, whether or not an image
 is ever made.
 
