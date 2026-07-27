@@ -257,6 +257,40 @@ if (!/^### Example of a compliant reply$/m.test(llms) || !/^Mode: /m.test(llms) 
 }
 
 /*
+ * Every axis considered, every blank reported.
+ *
+ * An agent filled five axes and said nothing about the other twelve. Nothing
+ * in that reply distinguished twelve deliberate omissions from a pass that
+ * stopped after five, and in the output those are identical. Naming the blanks
+ * is the only evidence restraint happened — which is why it is required, and
+ * why the reasons are not.
+ */
+if (!/all seventeen axes in order/i.test(llms)) {
+  fail('llms.txt no longer tells the reader to consider every axis in turn.');
+}
+if (!/^Blank: /m.test(llms) || !/comes to seventeen/i.test(llms)) {
+  fail('llms.txt no longer requires every blank axis to be reported by name.');
+}
+
+/*
+ * The worked example must itself account for every axis, since it is the shape
+ * agents copy. An eighteenth axis that never reached the example would teach a
+ * seventeen-axis habit, and the rule above would be contradicted by the only
+ * demonstration of it in the file.
+ */
+const example = llms.split('### Example of a compliant reply')[1] || '';
+const exFilled = [...(example.split('Prompt:')[0] || '').matchAll(/^([a-z]+)\s{2,}/gm)].map(match => match[1]);
+const exBlank = ((example.match(/^Blank: ([^\n]+)/m) || [])[1] || '')
+  .replace(/\.$/, '').split(',').map(entry => entry.trim()).filter(Boolean);
+const accounted = new Set([...exFilled, ...exBlank]);
+const unaccounted = audit.categoryKeys.filter(key => !accounted.has(key));
+const bogus = [...accounted].filter(key => !audit.categoryKeys.includes(key));
+const bothWays = exFilled.filter(key => exBlank.includes(key));
+if (unaccounted.length) fail(`The llms.txt example neither fills nor blanks: ${unaccounted.join(', ')}. It must account for every axis.`);
+if (bogus.length) fail(`The llms.txt example names axes that do not exist: ${bogus.join(', ')}.`);
+if (bothWays.length) fail(`The llms.txt example lists these as both filled and blank: ${bothWays.join(', ')}.`);
+
+/*
  * The subject is not an axis.
  *
  * index.html keeps it in its own field and puts it at the head of the prompt,

@@ -55,12 +55,15 @@ structure is the portable part, and a paragraph is not a Prompt Forge prompt.
 ### Selection
 
 1. State the single idea the image serves. One sentence, before choosing.
-2. At most one value per axis.
-3. A value belongs to exactly one axis. Twilight is lighting, not weather.
-4. Omit any axis that does not serve the idea. Filling all seventeen is the
-   usual sign that a form is being completed rather than an image made. Six
-   chosen values beat seventeen supplied ones. Omission is a decision, not a
-   gap — be able to say why you omitted.
+2. Go through all seventeen axes in order and decide each one: fill it, or
+   leave it blank. Both are decisions. An axis you never considered is not
+   restraint, it is an unfinished pass — and the two are indistinguishable in
+   the output, which is why the blanks are reported.
+3. At most one value per axis.
+4. A value belongs to exactly one axis. Twilight is lighting, not weather.
+5. Leave blank any axis that does not serve the idea. Filling all seventeen is
+   the usual sign that a form is being completed rather than an image made.
+   Six chosen values beat seventeen supplied ones.
 
 ### Output
 
@@ -70,10 +73,16 @@ Always return, in this order:
 2. the subject
 3. the chosen axes, one per line, in prompt order
 4. the assembled prompt — the subject first, then the axis values in order
-5. the mode, and which axes you omitted
+5. the mode, and every axis you left blank — by name, all of them, so the
+   count of filled and blank comes to seventeen. A short why is welcome where
+   the reason is interesting, and never required.
 
 Return all five every time. They are the deliverable, whether or not an image
 is ever made.
+
+Listing the blanks is not bookkeeping. It is the only evidence that an axis
+was considered and declined rather than forgotten, and it is what makes
+restraint legible as a choice.
 
 A reply without the axis lines is not a Prompt Forge result, whatever was
 chosen internally. Selecting and not showing is indistinguishable from not
@@ -112,11 +121,13 @@ heels and shoulders dropped, the wait having outlasted its reason. Wide, low
 horizon, overcast and shadowless, wet slate and rust, salt-pitted iron, low
 cloud — the only warm thing in frame is the skin. Large-format stillness.
 
-Mode: protocol. Omitted: action, mood, composition, wardrobe, medium, style,
-fx — this image is a person not doing anything, and naming a medium or style
-would have decided it.
+Mode: protocol.
+Blank: action, mood, composition, wardrobe, medium, style, fx.
+Why: the image is a person not doing anything, so action and composition would
+work against it; medium and style would decide a look this idea is better off
+not committing to.
 
-Ten axes, seven omitted, every one shown. That is the shape.
+Ten filled, seven blank, seventeen accounted for. That is the shape.
 
 ### Then, if an image can be made
 
