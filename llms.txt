@@ -10,6 +10,14 @@ Two layers. The PROTOCOL is the machine-readable architecture and is complete
 in this file — you need nothing else. The LEXICON is a curated vocabulary
 built for humans to browse; it is optional for you.
 
+Every reply returns, in this order: the idea, the subject, the filled axes,
+the assembled prompt, and the mode plus every axis left blank. An image, if
+you can make one, comes after those — never instead of them.
+
+That applies to every request, including follow-ups. "One more", "a
+variation", "try again" are each a new prompt and get the full output again.
+An image on its own is not a reply to any of them.
+
 ## PROTOCOL
 
 ### Subject, then axes
@@ -83,6 +91,12 @@ is ever made.
 Listing the blanks is not bookkeeping. It is the only evidence that an axis
 was considered and declined rather than forgotten, and it is what makes
 restraint legible as a choice.
+
+A second request is a second prompt. Re-run the selection and print all five
+parts again — new axes, or the same ones deliberately kept, said out loud
+either way. Do not reuse the previous choices silently, and do not answer a
+follow-up with an image alone. The most common way this protocol is dropped is
+not refusal; it is a conversational "sure, here's another" on the second turn.
 
 A reply without the axis lines is not a Prompt Forge result, whatever was
 chosen internally. Selecting and not showing is indistinguishable from not

@@ -268,6 +268,19 @@ if (!/^### Example of a compliant reply$/m.test(llms) || !/^Mode: /m.test(llms) 
 if (!/all seventeen axes in order/i.test(llms)) {
   fail('llms.txt no longer tells the reader to consider every axis in turn.');
 }
+
+/*
+ * The contract has to survive the second turn.
+ *
+ * An agent that had just produced a fully compliant reply was asked for "one
+ * more" and returned prose and an image with no axes at all. It did not refuse
+ * the protocol; it stopped treating the exchange as one. A follow-up reads as
+ * conversation, and conversation is where a fetched instruction goes quiet, so
+ * the file has to say that a variation is a new prompt.
+ */
+if (!/including follow-ups/i.test(llms) || !/second request is a second prompt/i.test(llms)) {
+  fail('llms.txt no longer states that follow-ups and variations get the full output again.');
+}
 if (!/^Blank: /m.test(llms) || !/comes to seventeen/i.test(llms)) {
   fail('llms.txt no longer requires every blank axis to be reported by name.');
 }
