@@ -12,6 +12,16 @@ built for humans to browse; it is optional for you.
 
 ## PROTOCOL
 
+### Subject, then axes
+
+The subject is separate from the axes and comes first. It is the thing
+depicted — a lighthouse keeper, a cracked helmet, two negotiators. The axes do
+not name the subject; they describe how it is depicted.
+
+Never put the subject in an axis. If you find yourself writing the character
+into `figure`, that belongs in the subject, and `figure` should hold the pose
+it is standing in.
+
 ### The 17 axes, in prompt order
 
 Fill each from the LEXICON if you can read it, otherwise from your own
@@ -19,8 +29,9 @@ knowledge. Keep the axis names and this order either way.
 
 narrative    the implied event or tension — what just happened, or is about to
 action       what the subject is doing
-figure       how the body is arranged: pose, weight, spine, limbs. Not the
-             activity. Action says reclining; figure says how.
+figure       how the body is arranged: pose, weight, spine, limbs. Not who the
+             subject is, and not the activity. Action says reclining; figure
+             says weight on one hip, chin down, hand at the nape.
 mood         emotional register
 composition  arrangement of elements within the frame
 setting      where it happens
@@ -56,11 +67,12 @@ structure is the portable part, and a paragraph is not a Prompt Forge prompt.
 Always return, in this order:
 
 1. the idea, in one sentence
-2. the chosen axes, one per line, in prompt order
-3. the assembled prompt
-4. the mode
+2. the subject
+3. the chosen axes, one per line, in prompt order
+4. the assembled prompt — the subject first, then the axis values in order
+5. the mode, and which axes you omitted
 
-Return all four every time. They are the deliverable, whether or not an image
+Return all five every time. They are the deliverable, whether or not an image
 is ever made.
 
 A reply without the axis lines is not a Prompt Forge result, whatever was
@@ -81,7 +93,8 @@ valid Prompt Forge use.
 
 ### Example of a compliant reply
 
-Idea: a lighthouse keeper who has stopped expecting the ship.
+Idea: someone whose waiting has outlived its reason.
+Subject: a lighthouse keeper
 
 narrative    the wait has outlasted its reason
 figure       weight back on the heels, shoulders dropped

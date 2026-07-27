@@ -252,8 +252,22 @@ if (!/never instead of/i.test(llms) || !/Always return/i.test(llms)) {
 if (!/not a Prompt Forge result/i.test(llms)) {
   fail('llms.txt no longer states that a reply without the axis lines does not count.');
 }
-if (!/^### Example of a compliant reply$/m.test(llms) || !/^Mode: /m.test(llms)) {
-  fail('llms.txt is missing the worked example, which is what most agents actually pattern-match on.');
+if (!/^### Example of a compliant reply$/m.test(llms) || !/^Mode: /m.test(llms) || !/^Subject: /m.test(llms)) {
+  fail('llms.txt is missing the worked example, or the example no longer shows a subject line.');
+}
+
+/*
+ * The subject is not an axis.
+ *
+ * index.html keeps it in its own field and puts it at the head of the prompt,
+ * ahead of the seventeen axis values. llms.txt described the axes and never
+ * mentioned it, so an agent with a character to place had nowhere to put it —
+ * one wrote the character into `figure`, which is for how a body is arranged,
+ * not for whose body it is. A protocol that omits a field the app has will be
+ * filled in by guesswork at the nearest-looking axis.
+ */
+if (!/^### Subject, then axes$/m.test(llms) || !/Never put the subject in an axis/i.test(llms)) {
+  fail('llms.txt does not establish that the subject is separate from the axes and comes first.');
 }
 for (const [name, url] of Object.entries(MIRRORS)) {
   if (!llms.includes(url)) fail(`llms.txt does not list the ${name} mirror (${url}).`);
