@@ -10,6 +10,10 @@ Two layers. The PROTOCOL is the machine-readable architecture and is complete
 in this file — you need nothing else. The LEXICON is a curated vocabulary
 built for humans to browse; it is optional for you.
 
+This file is also embedded verbatim near the top of the application page, so
+if you fetched index.html you already have the protocol and need not fetch
+anything further. The vocabulary is a separate file either way.
+
 Every reply returns, in this order: the idea, the subject, the filled axes,
 the assembled prompt, and the mode plus every axis left blank. An image, if
 you can make one, comes after those — never instead of them.
@@ -184,9 +188,9 @@ Optional. 2,128 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html. It is a 175 kB single-file application and the
-signal pools begin about 34 kB in, past the point where many fetchers
-truncate. Read these instead:
+Do not scrape index.html for the vocabulary. It is a 196 kB single-file
+application and the signal pools begin about 48 kB in, past the point where
+many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.txt

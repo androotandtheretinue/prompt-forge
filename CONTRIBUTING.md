@@ -35,7 +35,7 @@ The audit checks that the file exists, that `og:image` is absolute, and that `tw
 
 ### The published vocabulary
 
-`vocabulary.json` and `vocabulary.txt` are generated from `index.html` and committed, because GitHub Pages serves files rather than running scripts, and machine readers need the vocabulary as data.
+`vocabulary.json` and `vocabulary.txt` are generated from `index.html` and committed, because GitHub Pages serves files rather than running scripts, and machine readers need the vocabulary as data. `npm run vocabulary` also embeds `llms.txt` verbatim into the `<head>` of `index.html`, so an agent that fetches the page it was pointed at already has the protocol. Edit `llms.txt`; never edit the embedded copy.
 
 This is a deliberate and narrow exception to the rule that killed `dist/`. That directory duplicated the entire application and drifted silently for two releases. These files duplicate only the signal pools, and `npm test` regenerates them in memory and compares — so drift is a failing test, not a quiet inaccuracy. Regenerate rather than hand-edit; a hand-maintained copy of 2,032 strings is a copy that will eventually lie.
 

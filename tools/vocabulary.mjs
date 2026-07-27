@@ -51,6 +51,43 @@ export function signalCount(vocabulary) {
 }
 
 /*
+ * The protocol, embedded in the page.
+ *
+ * index.html is the URL people share and therefore the one an agent is most
+ * likely to fetch, so it carries llms.txt verbatim rather than a pointer to it.
+ * Both the reader and the extractor are named by these markers, which is why
+ * this is a generated region and not something to edit by hand.
+ */
+export const PROTOCOL_BEGIN = '<!-- BEGIN llms.txt -->';
+export const PROTOCOL_END = '<!-- END llms.txt -->';
+
+export function protocolBlock(llms) {
+  // The copy lives inside a <script>, which ends at the first literal closing
+  // tag regardless of context. Nothing in llms.txt has ever contained one, and
+  // if that changes the page would break silently rather than loudly.
+  if (/<\/script/i.test(llms)) {
+    throw new Error('llms.txt contains a closing script tag and cannot be embedded verbatim.');
+  }
+  return `${PROTOCOL_BEGIN}\n${llms.trimEnd()}\n${PROTOCOL_END}`;
+}
+
+export function embedProtocol(html, llms) {
+  const start = html.indexOf(PROTOCOL_BEGIN);
+  const end = html.indexOf(PROTOCOL_END);
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error('index.html has no llms.txt embed markers.');
+  }
+  return html.slice(0, start) + protocolBlock(llms) + html.slice(end + PROTOCOL_END.length);
+}
+
+export function extractProtocol(html) {
+  const start = html.indexOf(PROTOCOL_BEGIN);
+  const end = html.indexOf(PROTOCOL_END);
+  if (start === -1 || end === -1 || end < start) return null;
+  return html.slice(start + PROTOCOL_BEGIN.length, end).trim();
+}
+
+/*
  * Mirrors.
  *
  * Some agents run fetchers that allowlist hosts, and *.github.io is not always

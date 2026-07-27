@@ -53,7 +53,7 @@ Tailwind and two fonts still load from public CDNs, so an offline copy renders w
 
 ### For AI agents
 
-Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first. Nothing else is required — that one file is self-sufficient.
+Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first. Nothing else is required — that one file is self-sufficient, and it is also embedded verbatim near the top of `index.html`, so an agent that fetches the page instead has the protocol anyway.
 
 It separates two things the project had been conflating:
 

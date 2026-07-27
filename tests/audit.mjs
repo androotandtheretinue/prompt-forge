@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
-import { extractVocabulary, toJson, toText, MIRRORS } from '../tools/vocabulary.mjs';
+import { extractVocabulary, toJson, toText, MIRRORS, extractProtocol } from '../tools/vocabulary.mjs';
 
 const SOURCE_PATH = new URL('../index.html', import.meta.url);
 const html = fs.readFileSync(SOURCE_PATH, 'utf8');
@@ -362,6 +362,31 @@ for (const [name, url] of Object.entries(MIRRORS)) {
 }
 if (!html.includes('raw.githubusercontent.com/androotandtheretinue/prompt-forge')) {
   fail('The <head> ai-vocabulary pointer does not mention the mirror, so a truncated fetch on a blocked host finds no alternative.');
+}
+
+/*
+ * The protocol embedded in index.html must match llms.txt exactly.
+ *
+ * index.html is the URL people share, so it is the one an agent fetches, and
+ * it now carries the protocol rather than a pointer to it. A copy is a thing
+ * that drifts — this project deleted dist/ over exactly that — so the copy is
+ * generated and compared rather than maintained. Edit llms.txt and run
+ * `npm run vocabulary`; never edit the embedded region.
+ *
+ * It also has to stay early. The whole point is surviving a truncated fetch,
+ * and a protocol forty kilobytes into the file would be behind the same wall
+ * the vocabulary already sits behind.
+ */
+const embedded = extractProtocol(html);
+if (embedded === null) {
+  fail('index.html has no llms.txt embed markers, so a reader of the page alone gets a pointer instead of the protocol.');
+} else if (normalize(embedded) !== normalize(llms.trim())) {
+  fail('The llms.txt copy embedded in index.html does not match llms.txt. Run `npm run vocabulary`.');
+} else {
+  const offsetKb = Buffer.byteLength(html.slice(0, html.indexOf('BEGIN llms.txt')), 'utf8') / 1024;
+  if (offsetKb > 16) {
+    fail(`The embedded protocol starts ${offsetKb.toFixed(0)} kB into index.html; it must stay near the top to survive a truncated fetch.`);
+  }
 }
 
 /*
