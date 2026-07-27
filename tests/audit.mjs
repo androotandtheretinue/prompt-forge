@@ -186,6 +186,15 @@ for (const { file, expected } of published) {
 
 // The front door has to point at files that exist, or it is worse than absent.
 const llms = fs.readFileSync(new URL('../llms.txt', import.meta.url), 'utf8');
+
+/*
+ * llms.txt is hard-wrapped, so any required sentence longer than a line is
+ * split by a newline and a prose check written as one string silently stops
+ * matching. That is a check that fails when the file is reflowed rather than
+ * when the rule is removed — worse than no check, since it trains you to
+ * ignore it. Structural checks below still read `llms`; prose checks read this.
+ */
+const llmsFlat = llms.replace(/\s+/g, ' ');
 for (const ref of ['vocabulary.json', 'vocabulary.txt']) {
   if (!llms.includes(ref)) fail(`llms.txt does not reference ${ref}.`);
 }
@@ -234,7 +243,7 @@ if (undescribed.length) {
 }
 
 // The prompt is the deliverable; rendering is optional and additional.
-if (!/never instead of/i.test(llms) || !/Always return/i.test(llms)) {
+if (!/never instead of/i.test(llmsFlat) || !/Always return/i.test(llmsFlat)) {
   fail('llms.txt no longer states that the prompt is always returned and that image generation is additional.');
 }
 
@@ -249,7 +258,7 @@ if (!/never instead of/i.test(llms) || !/Always return/i.test(llms)) {
  * of a compliant reply, since models copy a worked example far more reliably
  * than they follow a rule.
  */
-if (!/not a Prompt Forge result/i.test(llms)) {
+if (!/not a Prompt Forge result/i.test(llmsFlat)) {
   fail('llms.txt no longer states that a reply without the axis lines does not count.');
 }
 if (!/^### Example of a compliant reply$/m.test(llms) || !/^Mode: /m.test(llms) || !/^Subject: /m.test(llms)) {
@@ -265,7 +274,7 @@ if (!/^### Example of a compliant reply$/m.test(llms) || !/^Mode: /m.test(llms) 
  * is the only evidence restraint happened — which is why it is required, and
  * why the reasons are not.
  */
-if (!/all seventeen axes in order/i.test(llms)) {
+if (!/all seventeen axes in order/i.test(llmsFlat)) {
   fail('llms.txt no longer tells the reader to consider every axis in turn.');
 }
 
@@ -278,10 +287,10 @@ if (!/all seventeen axes in order/i.test(llms)) {
  * conversation, and conversation is where a fetched instruction goes quiet, so
  * the file has to say that a variation is a new prompt.
  */
-if (!/including follow-ups/i.test(llms) || !/second request is a second prompt/i.test(llms)) {
+if (!/including follow-ups/i.test(llmsFlat) || !/second request is a second prompt/i.test(llmsFlat)) {
   fail('llms.txt no longer states that follow-ups and variations get the full output again.');
 }
-if (!/^Blank: /m.test(llms) || !/comes to seventeen/i.test(llms)) {
+if (!/^Blank: /m.test(llms) || !/comes to seventeen/i.test(llmsFlat)) {
   fail('llms.txt no longer requires every blank axis to be reported by name.');
 }
 
@@ -296,10 +305,24 @@ if (!/^Blank: /m.test(llms) || !/comes to seventeen/i.test(llms)) {
  * Four parts of five, missing the only one that is the deliverable rather than
  * a description of it. That needed saying outright.
  */
-if (!/Count before you send/i.test(llms)) {
+if (!/Count before you send/i.test(llmsFlat)) {
   fail('llms.txt no longer asks the reader to check that filled plus blank equals seventeen.');
 }
-if (!/must never be absent/i.test(llms)) {
+
+/*
+ * The agent supplies the idea unless given one.
+ *
+ * "State the single idea the image serves" was read as "the human states it
+ * and I restate it": an agent reported the protocol internalised, then asked
+ * for an idea and waited. Nothing had gone wrong except deference — a request
+ * to use the tool had been turned into a request for requirements. The file
+ * now says the idea and subject are the agent's to choose by default, and that
+ * announcing readiness is not a reply.
+ */
+if (!/Choose the idea and the subject yourself/i.test(llmsFlat) || !/the first reply is the work/i.test(llmsFlat)) {
+  fail('llms.txt no longer states that the agent picks the idea and subject itself rather than asking for them.');
+}
+if (!/must never be absent/i.test(llmsFlat)) {
   fail('llms.txt no longer singles out the assembled prompt as the part that cannot be omitted.');
 }
 
@@ -331,7 +354,7 @@ if (bothWays.length) fail(`The llms.txt example lists these as both filled and b
  * not for whose body it is. A protocol that omits a field the app has will be
  * filled in by guesswork at the nearest-looking axis.
  */
-if (!/^### Subject, then axes$/m.test(llms) || !/Never put the subject in an axis/i.test(llms)) {
+if (!/^### Subject, then axes$/m.test(llms) || !/Never put the subject in an axis/i.test(llmsFlat)) {
   fail('llms.txt does not establish that the subject is separate from the axes and comes first.');
 }
 for (const [name, url] of Object.entries(MIRRORS)) {

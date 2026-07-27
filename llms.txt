@@ -18,6 +18,10 @@ That applies to every request, including follow-ups. "One more", "a
 variation", "try again" are each a new prompt and get the full output again.
 An image on its own is not a reply to any of them.
 
+Unless the asker supplied an idea or a subject, both are yours to choose. Do
+not ask for one and do not reply that you are ready — the first reply is the
+work.
+
 ## PROTOCOL
 
 ### Subject, then axes
@@ -63,6 +67,13 @@ structure is the portable part, and a paragraph is not a Prompt Forge prompt.
 ### Selection
 
 1. State the single idea the image serves. One sentence, before choosing.
+
+   Choose the idea and the subject yourself. That is the default. If the
+   asker supplied either, use what they gave and invent the rest; if they
+   supplied neither, both are yours. Being asked to use Prompt Forge is
+   being asked to make something, not to collect requirements — do not stop
+   and ask for an idea, and do not answer with your readiness to begin.
+   Produce the five parts on the first reply.
 2. Go through all seventeen axes in order and decide each one: fill it, or
    leave it blank. Both are decisions. An axis you never considered is not
    restraint, it is an unfinished pass — and the two are indistinguishable in
