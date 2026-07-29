@@ -29,7 +29,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **Cluster scopes** target Structure, Atmosphere, Surface, or Story. The four scopes partition the seventeen axes, and hovering one outlines exactly the rows it will change.
 - Each scope carries **⟳ reroll, 🔐 pin, and 🚫 mute** — the same three verbs a single row has. Mute Story to build an image that carries no narrative, action, figure or wardrobe at all. Both operators toggle back to live.
 - **Option Radar** searches built-in and custom signals.
-- **Chaos Dial** provides a visible, pinned modifier.
+- **Chaos Dial** corrupts the signal text itself, on a meter that documents its own thresholds: **DRIFT** at 25 (semantic variants), **MISSPELL** at 50, **LEET** at 75, **ZALGO** at the last tick. Zones are cumulative, so high chaos gives a mix rather than a uniform filter. Locked signals are immune, the corruption is seeded and saved with Blueprints, and every damaged signal is shown beside its original.
 - **Universal, Midjourney, and SDXL** output formats.
 - **Midjourney flight controls** for version, stylize, weird, SD/HD, seed, style reference, style weight, profile, RAW, TILE, and DRAFT.
 - **Blueprint Vault** stores named configurations, including custom pools.

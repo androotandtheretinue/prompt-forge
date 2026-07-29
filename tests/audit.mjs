@@ -55,6 +55,28 @@ globalThis.__forgeAudit = {
   clusterNames: Object.keys(categoryClusters),
   categoryKeys: Object.keys(categories),
   cardCount: Object.keys(presets).length,
+  corruption: (() => {
+    const probe = 'Golden Hour';
+    const kindsAt = level => Object.keys(categories).map(key => corruptSignal(key, probe, level, 47).kind);
+    const sample = level => Object.keys(categories).map(key => corruptSignal(key, probe, level, 47).value).join('|');
+    categories.medium.locked = true;
+    const lockedResult = corruptSignal('medium', probe, 100, 47);
+    categories.medium.locked = false;
+    return {
+      cleanBelowFirstTick: kindsAt(24).every(kind => kind === 'clean'),
+      driftsAtFirstTick: kindsAt(40).some(kind => kind === 'drift'),
+      spellsBySecondTick: kindsAt(60).some(kind => kind === 'spell'),
+      leetsByThirdTick: kindsAt(85).some(kind => kind === 'leet'),
+      zalgoAtLastTick: kindsAt(100).some(kind => kind === 'zalgo'),
+      zalgoBelowLastTick: [25, 40, 55, 70, 85, 99].some(level => kindsAt(level).includes('zalgo')),
+      cumulativeAtTop: new Set(kindsAt(100)).size > 1,
+      deterministic: sample(85) === sample(85),
+      seedMatters: sample(85) !== Object.keys(categories).map(key => corruptSignal(key, probe, 85, 999).value).join('|'),
+      lockedImmune: lockedResult.kind === 'locked' && lockedResult.value === probe,
+      zalgoThreshold: typeof ZALGO_AT === 'number' ? ZALGO_AT : null,
+      tickCount: Array.isArray(CHAOS_TICKS) ? CHAOS_TICKS.length : 0
+    };
+  })(),
   rigStates: Object.keys(categories).map(key => {
     const cat = categories[key];
     const read = value => { cat.value = value.value; cat.locked = value.locked; return categoryStateOf(cat); };
@@ -117,6 +139,40 @@ const duplicatedInClusters = clusteredKeys.filter((key, index) => clusteredKeys.
 const uncovered = audit.categoryKeys.filter(key => !clusteredKeys.includes(key));
 if (duplicatedInClusters.length) fail(`Reroll scopes overlap on: ${[...new Set(duplicatedInClusters)].join(', ')}`);
 if (uncovered.length) fail(`Axes reachable by no reroll scope: ${uncovered.join(', ')}`);
+
+/*
+ * The chaos dial corrupts signal text, and every property that makes it an
+ * instrument rather than a hazard is checked here.
+ *
+ * The ladder must be cumulative — uniform corruption reads as a filter, and
+ * every high-chaos prompt would break the same way. Zalgo must stay at the last
+ * tick, because it is the only tier that can defeat a parameter parser and the
+ * only one the diagnostics warn about; if it leaked downward the warning would
+ * be wrong everywhere. Locked signals must survive, following the rule that
+ * pins survive cards, radar, clearing, mutation and randomize. And the same
+ * seed must produce the same damage, or a blueprint cannot reproduce a result
+ * and nothing here can be tested twice.
+ */
+const chaos = audit.corruption;
+if (!chaos.cleanBelowFirstTick) fail('Chaos corrupts below the first tick; the bottom quarter of the dial must be a passthrough.');
+if (!chaos.driftsAtFirstTick) fail('Chaos produces no semantic drift past the first tick.');
+if (!chaos.spellsBySecondTick) fail('Chaos produces no misspellings past the second tick.');
+if (!chaos.leetsByThirdTick) fail('Chaos produces no leetspeak past the third tick.');
+if (!chaos.zalgoAtLastTick) fail('The last tick produces no zalgo, so the final zone does nothing the third does not.');
+if (chaos.zalgoBelowLastTick) fail('Zalgo appears below the last tick. Only the final zone may emit combining marks, since only it is warned about.');
+if (!chaos.cumulativeAtTop) fail('Corruption at the top of the dial is uniform. The tiers must stay cumulative or every wild prompt breaks identically.');
+if (!chaos.deterministic) fail('The same seed and dial setting produced different corruption; chaos must be reproducible to be shareable.');
+if (!chaos.seedMatters) fail('Changing the chaos seed changed nothing, so the seed is not reaching the corruption.');
+if (!chaos.lockedImmune) fail('Chaos corrupted a locked signal. Pins survive every other automated operation and must survive this one.');
+if (chaos.zalgoThreshold !== 100) fail(`Zalgo threshold is ${chaos.zalgoThreshold}; the meter is drawn with its last tick at 100.`);
+if (chaos.tickCount !== 4) fail(`Expected 4 chaos ticks; found ${chaos.tickCount}.`);
+
+// Each tick drawn on the meter must match a tier the engine actually has.
+const drawnTicks = [...html.matchAll(/class="chaos-tick[^"]*" data-at="(\d+)"/g)].map(match => Number(match[1]));
+const engineTicks = [0, 25, 50, 75, 100];
+if (drawnTicks.join(',') !== engineTicks.join(',')) {
+  fail(`The meter draws ticks at ${drawnTicks.join(', ')}; the corruption ladder steps at ${engineTicks.join(', ')}. A meter that documents itself has to be right.`);
+}
 
 // The Signal Rig reads three states out of the two persisted properties.
 const badStates = audit.rigStates.filter(({ observed }) =>
@@ -321,6 +377,18 @@ if (!/Count before you send/i.test(llmsFlat)) {
  */
 if (!/Choose the idea and the subject yourself/i.test(llmsFlat) || !/the first reply is the work/i.test(llmsFlat)) {
   fail('llms.txt no longer states that the agent picks the idea and subject itself rather than asking for them.');
+}
+
+/*
+ * Corruption has to be announced to downstream readers.
+ *
+ * The dial deliberately emits malformed tokens, and most models will silently
+ * repair a misspelling on the way past — which discards the choice and returns
+ * an image nobody asked for. The damage is load-bearing, so the file has to say
+ * so where an agent handling the prompt will see it.
+ */
+if (!/Corrupted signals are deliberate/i.test(llmsFlat) || !/Do not correct it/i.test(llmsFlat)) {
+  fail('llms.txt no longer warns that corrupted signals are deliberate and must not be repaired downstream.');
 }
 if (!/must never be absent/i.test(llmsFlat)) {
   fail('llms.txt no longer singles out the assembled prompt as the part that cannot be omitted.');

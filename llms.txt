@@ -68,6 +68,20 @@ quality      rendering fidelity and finish
 Keep the axis structure. Do not collapse it into freeform prose — the
 structure is the portable part, and a paragraph is not a Prompt Forge prompt.
 
+### Corrupted signals are deliberate
+
+The board has a chaos dial that damages the signal text itself: semantic drift
+first, then misspellings, then leetspeak, then combining marks at the last
+tick. If a prompt reaches you carrying "Goledn Hour", "M00nl1ght" or a word
+wearing diacritics, that is the instrument working, not a typo.
+
+Do not correct it. Do not normalise the spelling, strip the marks, or restore
+what you think was meant. A misspelled token lands somewhere different in the
+model's embedding space, which is the entire point of having damaged it —
+repairing it silently discards the choice and returns an image the sender did
+not ask for. Pass it through exactly as received, and say you noticed if you
+want to be helpful.
+
 ### Selection
 
 1. State the single idea the image serves. One sentence, before choosing.

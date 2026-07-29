@@ -239,6 +239,94 @@
       box-shadow: 0 0 8px rgba(124, 138, 168, 0.6);
     }
 
+    /* Chaos dial: the meter carries its own legend. */
+    .chaos-ticks {
+      position: relative;
+      height: 26px;
+      margin-top: 6px;
+    }
+
+    .chaos-tick {
+      position: absolute;
+      transform: translateX(-50%);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: #3c3c4a;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+    }
+
+    .chaos-tick:first-child { transform: none; }
+    .chaos-tick.chaos-tick-last { transform: translateX(-100%); }
+
+    .chaos-tick i {
+      display: block;
+      width: 1px;
+      height: 5px;
+      margin: 0 auto 3px;
+      background: #2a2a36;
+      transition: background 0.2s ease;
+    }
+
+    .chaos-tick:first-child i { margin-left: 0; }
+    .chaos-tick.chaos-tick-last i { margin-right: 0; }
+
+    .chaos-tick.reached { color: var(--neon-magenta); }
+    .chaos-tick.reached i { background: var(--neon-magenta); }
+    .chaos-tick.chaos-tick-last.reached { color: #ff4d4d; }
+    .chaos-tick.chaos-tick-last.reached i { background: #ff4d4d; }
+
+    #chaosZone { color: var(--neon-magenta); letter-spacing: 0.08em; }
+    #chaosZone.zalgo-zone { color: #ff4d4d; }
+
+    .chaos-seed {
+      width: 72px;
+      background: #12121a;
+      border: 1px solid #2a2a36;
+      border-radius: 3px;
+      color: #8a8a9a;
+      font-size: 11px;
+      padding: 2px 6px;
+      font-family: inherit;
+    }
+
+    /*
+     * The wound, shown. A tool that quietly rewrites your choices is not one
+     * you can trust, and at high settings the damage is the product — so the
+     * original stays visible beside what became of it.
+     */
+    .corruption-report { margin-top: 10px; }
+
+    .corruption-note {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: #55556a;
+      margin-bottom: 4px;
+    }
+
+    .corruption-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 11px;
+      line-height: 1.6;
+      flex-wrap: wrap;
+    }
+
+    .corruption-axis {
+      color: #4a4a5a;
+      min-width: 84px;
+      font-size: 9px;
+      letter-spacing: 0.06em;
+    }
+
+    .corruption-was { color: #55556a; text-decoration: line-through; }
+    .corruption-arrow { color: #3c3c4a; }
+    .corruption-now[data-kind="drift"] { color: #7fd4d4; }
+    .corruption-now[data-kind="spell"] { color: var(--neon-gold); }
+    .corruption-now[data-kind="leet"] { color: var(--neon-magenta); }
+    .corruption-now[data-kind="zalgo"] { color: #ff4d4d; }
+
     /*
      * The embedded protocol. Deliberately quiet: one muted line a human can
      * ignore or open, carrying ten kilobytes an agent needs. Closed, not
@@ -844,6 +932,20 @@ quality      rendering fidelity and finish
 Keep the axis structure. Do not collapse it into freeform prose — the
 structure is the portable part, and a paragraph is not a Prompt Forge prompt.
 
+### Corrupted signals are deliberate
+
+The board has a chaos dial that damages the signal text itself: semantic drift
+first, then misspellings, then leetspeak, then combining marks at the last
+tick. If a prompt reaches you carrying "Goledn Hour", "M00nl1ght" or a word
+wearing diacritics, that is the instrument working, not a typo.
+
+Do not correct it. Do not normalise the spelling, strip the marks, or restore
+what you think was meant. A misspelled token lands somewhere different in the
+model's embedding space, which is the entire point of having damaged it —
+repairing it silently discards the choice and returns an image the sender did
+not ask for. Pass it through exactly as received, and say you noticed if you
+want to be helpful.
+
 ### Selection
 
 1. State the single idea the image serves. One sentence, before choosing.
@@ -1082,16 +1184,34 @@ rather than operate the instrument, replace `main` with a commit SHA.
           class="chaos-slider w-full"
           oninput="updateChaos(this.value)"
         >
-        <div class="flex justify-between text-xs text-gray-600 mt-1">
-          <span>Clean</span>
-          <span>Controlled</span>
-          <span>Wild</span>
+        <!--
+          The meter documents itself. Each tick names the worst thing that can
+          happen to a signal past it, so nobody has to be told separately what
+          the dial does — and the last tick is the only one that can produce
+          zalgo, which is the only zone the diagnostics complain about.
+        -->
+        <div class="chaos-ticks">
+          <span class="chaos-tick" data-at="0" style="left:0%"><i></i>CLEAN</span>
+          <span class="chaos-tick" data-at="25" style="left:25%"><i></i>DRIFT</span>
+          <span class="chaos-tick" data-at="50" style="left:50%"><i></i>MISSPELL</span>
+          <span class="chaos-tick" data-at="75" style="left:75%"><i></i>LEET</span>
+          <span class="chaos-tick chaos-tick-last" data-at="100" style="left:100%"><i></i>ZALGO</span>
         </div>
         <div class="flex items-center gap-2 mt-2" id="chaosPinnedRow" style="display:none;">
           <span class="text-xs text-gray-500">Current modifier:</span>
           <span class="text-xs text-fuchsia-400" id="chaosPinnedText"></span>
           <button class="btn btn-random text-xs" onclick="rerollChaos()" title="Reroll chaos modifier">🎲 Reroll</button>
         </div>
+        <div class="flex items-center gap-2 mt-2">
+          <span class="text-xs text-gray-600">Corruption:</span>
+          <span class="text-xs" id="chaosZone">CLEAN</span>
+          <span class="text-xs text-gray-600 ml-auto">Seed</span>
+          <input type="number" id="chaosSeedInput" class="chaos-seed" value="47" min="0" max="999999"
+                 title="Same seed and same dial setting corrupt the same way. Change it to reroll the damage."
+                 oninput="updateChaosSeed(this.value)">
+          <button class="btn btn-random text-xs" onclick="rerollChaosSeed()" title="New corruption seed">🎲</button>
+        </div>
+        <div id="corruptionReport" class="corruption-report"></div>
       </div>
     </div>
 
@@ -2714,6 +2834,178 @@ rather than operate the instrument, replace `main` with a commit SHA.
       high: ['extreme perspective', 'fragmented', 'glitched reality', 'impossible geometry', 'abstract deconstruction', 'chaotic energy']
     };
 
+    /* ============================================
+     * SIGNAL CORRUPTION
+     * ============================================
+     *
+     * The dial used to append an adjective and call it chaos — a promise the
+     * prompt could not cash, since nothing about the output looked any wilder
+     * at 90 than at 10. It still appends the adjective. It now also damages the
+     * signal text itself, which is chaos you can read before you generate.
+     *
+     * Two different things are happening, and the ladder separates them.
+     * Semantic drift bends meaning while leaving the token intact — Golden Hour
+     * becomes Borrowed Golden Hour, which an image model understands perfectly
+     * and answers differently. Orthographic corruption attacks the token, and a
+     * misspelling lands somewhere off-manifold in the embedding space where the
+     * model's response is genuinely unpredictable. Drift steers. Corruption
+     * destabilises. The dial moves from one to the other.
+     *
+     * Four ticks, and each zone keeps the lighter tiers rather than replacing
+     * them. Uniform corruption reads as a filter — every high-chaos prompt
+     * broken the same way. A weighted draw per signal leaves some clean, some
+     * drifted, some eaten, which is what texture is.
+     */
+    const CHAOS_TICKS = [
+      { at: 25, key: 'drift', label: 'DRIFT' },
+      { at: 50, key: 'spell', label: 'MISSPELL' },
+      { at: 75, key: 'leet', label: 'LEET' },
+      { at: 100, key: 'zalgo', label: 'ZALGO' }
+    ];
+
+    // Zalgo is the last tick only. You have to go all the way to get it, and it
+    // is the one zone the diagnostics complain about.
+    const ZALGO_AT = 100;
+
+    function corruptionWeights(level) {
+      if (level < 25) return { clean: 1 };
+      if (level < 50) return { clean: 3, drift: 2 };
+      if (level < 75) return { clean: 2, drift: 3, spell: 3 };
+      if (level < ZALGO_AT) return { clean: 1, drift: 3, spell: 3, leet: 3 };
+      return { clean: 1, drift: 2, spell: 3, leet: 3, zalgo: 3 };
+    }
+
+    /*
+     * Seeded, so a dial setting is reproducible. Chaos you cannot repeat is not
+     * shareable and not testable; "blueprint plus chaos seed 47" is a result
+     * someone else can actually get. Felt-random, committed number.
+     */
+    let chaosSeed = 47;
+
+    function hashString(text) {
+      let hash = 2166136261;
+      for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return hash >>> 0;
+    }
+
+    function seededRandom(seed) {
+      let state = seed >>> 0;
+      return function next() {
+        state = (state + 0x6D2B79F5) >>> 0;
+        let t = Math.imul(state ^ (state >>> 15), 1 | state);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    const DRIFT_WORDS = [
+      'Counterfeit', 'Borrowed', 'Half-Remembered', 'Failing', 'Inverted',
+      'Secondhand', 'Unfinished', 'Rumoured', 'Mistranslated', 'Understudy',
+      'Rehearsed', 'Expired', 'Disputed', 'Approximate', 'Posthumous', 'Salvaged'
+    ];
+
+    const LEET_MAP = { a: '4', e: '3', i: '1', o: '0', s: '5', t: '7', b: '8', g: '9' };
+
+    const ZALGO_MARKS = [
+      '̀', '́', '̂', '̃', '̈', '̊',
+      '̧', '̴', '̵', '̶', '͓', '͙'
+    ];
+
+    function driftSignal(text, random) {
+      return `${DRIFT_WORDS[Math.floor(random() * DRIFT_WORDS.length)]} ${text}`;
+    }
+
+    function misspellSignal(text, random) {
+      const glyphs = [...text];
+      const letters = glyphs.map((glyph, index) => (/[a-z]/i.test(glyph) ? index : -1)).filter(index => index >= 0);
+      if (!letters.length) return text;
+      const at = letters[Math.floor(random() * letters.length)];
+      const operation = Math.floor(random() * 4);
+      if (operation === 0) glyphs.splice(at, 0, glyphs[at]);
+      // Never drop the leading character. "Serene" losing its S becomes
+      // "erene", which is not a misspelling any more — it is a different word
+      // the model has no way to recover. This tier is meant to stay readable.
+      else if (operation === 1 && at > 0 && glyphs.length > 2) glyphs.splice(at, 1);
+      else if (operation === 2 && at + 1 < glyphs.length) {
+        const held = glyphs[at];
+        glyphs[at] = glyphs[at + 1];
+        glyphs[at + 1] = held;
+      } else {
+        const vowels = 'aeiou';
+        const lower = glyphs[at].toLowerCase();
+        if (vowels.includes(lower)) glyphs[at] = vowels[Math.floor(random() * vowels.length)];
+        else glyphs.splice(at, 0, glyphs[at]);
+      }
+      return glyphs.join('');
+    }
+
+    function leetSignal(text, random) {
+      return [...text].map(glyph => {
+        const lower = glyph.toLowerCase();
+        if (LEET_MAP[lower] && random() < 0.5) return LEET_MAP[lower];
+        if (/[a-z]/i.test(glyph) && random() < 0.3) return random() < 0.5 ? glyph.toUpperCase() : lower;
+        return glyph;
+      }).join('');
+    }
+
+    function zalgoSignal(text, random) {
+      return [...text].map(glyph => {
+        if (!/\S/.test(glyph)) return glyph;
+        let out = glyph;
+        const depth = 1 + Math.floor(random() * 2);
+        for (let index = 0; index < depth; index += 1) {
+          out += ZALGO_MARKS[Math.floor(random() * ZALGO_MARKS.length)];
+        }
+        return out;
+      }).join('');
+    }
+
+    /*
+     * Locked signals are immune, which follows the doctrine everything else
+     * here follows: a pin survives cards, radar, clearing, mutation, strumming
+     * and randomize, so it survives this. It is also what makes the dial usable
+     * rather than merely dangerous — pin the subject and the medium, then let
+     * chaos eat the periphery. A dial that can consume your anchor is a hazard,
+     * not an instrument.
+     */
+    function corruptSignal(key, value, level, seed) {
+      if (!value || level < 25) return { value, original: value, kind: 'clean' };
+      if (key === '__subject' ? subjectLocked : categories[key] && categories[key].locked) {
+        return { value, original: value, kind: 'locked' };
+      }
+      const random = seededRandom(hashString(`${seed}|${key}|${value}|${level}`));
+      const weights = corruptionWeights(level);
+      const total = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+      let roll = random() * total;
+      let kind = 'clean';
+      for (const [candidate, weight] of Object.entries(weights)) {
+        roll -= weight;
+        if (roll <= 0) { kind = candidate; break; }
+      }
+      if (kind === 'drift') return { value: driftSignal(value, random), original: value, kind };
+      if (kind === 'spell') return { value: misspellSignal(value, random), original: value, kind };
+      if (kind === 'leet') return { value: leetSignal(value, random), original: value, kind };
+      if (kind === 'zalgo') return { value: zalgoSignal(value, random), original: value, kind };
+      return { value, original: value, kind: 'clean' };
+    }
+
+    // Every corruptible part of the prompt, in order, with its origin recorded.
+    function getCorruptedParts() {
+      const parts = [];
+      const subject = document.getElementById('subjectInput')?.value.trim() || '';
+      if (subject) parts.push({ key: '__subject', label: 'SUBJECT', ...corruptSignal('__subject', subject, chaosLevel, chaosSeed) });
+      promptOrder.forEach(key => {
+        const cat = categories[key];
+        if (cat && cat.value) {
+          parts.push({ key, label: cat.label, ...corruptSignal(key, cat.value, chaosLevel, chaosSeed) });
+        }
+      });
+      return parts;
+    }
+
     // ============================================
     // CHAOS & NEGATIVE FUNCTIONS
     // ============================================
@@ -2721,8 +3013,54 @@ rather than operate the instrument, replace `main` with a commit SHA.
     function updateChaos(value) {
       chaosLevel = parseInt(value);
       document.getElementById('chaosValue').textContent = value + '%';
+      syncChaosZone();
       rollChaosModifier();
       updatePreview();
+    }
+
+    function chaosZoneLabel(level) {
+      if (level < 25) return 'CLEAN';
+      const reached = CHAOS_TICKS.filter(tick => level >= tick.at);
+      return reached.length ? reached[reached.length - 1].label : 'CLEAN';
+    }
+
+    function syncChaosZone() {
+      const readout = document.getElementById('chaosZone');
+      if (readout) {
+        readout.textContent = chaosZoneLabel(chaosLevel);
+        readout.classList.toggle('zalgo-zone', chaosLevel >= ZALGO_AT);
+      }
+      document.querySelectorAll('.chaos-tick').forEach(tick => {
+        tick.classList.toggle('reached', chaosLevel >= Number(tick.dataset.at));
+      });
+    }
+
+    /*
+     * Show the wound. You should always be able to see what the forge did to a
+     * signal, both because a tool that silently rewrites your choices is not
+     * trustworthy and because the damage is the point — at high dial settings
+     * the interface is supposed to look injured.
+     */
+    function renderCorruptionReport() {
+      const panel = document.getElementById('corruptionReport');
+      if (!panel) return;
+      const damaged = getCorruptedParts().filter(part => part.kind !== 'clean' && part.kind !== 'locked');
+      const immune = getCorruptedParts().filter(part => part.kind === 'locked');
+      if (!damaged.length) {
+        panel.innerHTML = chaosLevel >= 25 && immune.length
+          ? `<div class="corruption-note">Nothing corrupted this roll · ${immune.length} locked ${immune.length === 1 ? 'signal is' : 'signals are'} immune.</div>`
+          : '';
+        return;
+      }
+      panel.innerHTML =
+        `<div class="corruption-note">${damaged.length} of ${getCorruptedParts().length} signals corrupted` +
+        `${immune.length ? ` · ${immune.length} locked and immune` : ''}</div>` +
+        damaged.map(part =>
+          `<div class="corruption-row"><span class="corruption-axis">${escapeHtml(part.label)}</span>` +
+          `<span class="corruption-was">${escapeHtml(part.original)}</span>` +
+          `<span class="corruption-arrow">→</span>` +
+          `<span class="corruption-now" data-kind="${part.kind}">${escapeHtml(part.value)}</span></div>`
+        ).join('');
     }
 
     function rollChaosModifier() {
@@ -2747,6 +3085,19 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     function rerollChaos() {
       rollChaosModifier();
+      updatePreview();
+    }
+
+    function updateChaosSeed(value) {
+      const parsed = Number.parseInt(value, 10);
+      chaosSeed = Number.isFinite(parsed) ? Math.max(0, Math.min(999999, parsed)) : 0;
+      updatePreview();
+    }
+
+    function rerollChaosSeed() {
+      chaosSeed = Math.floor(Math.random() * 1000000);
+      const field = document.getElementById('chaosSeedInput');
+      if (field) field.value = chaosSeed;
       updatePreview();
     }
 
@@ -2989,7 +3340,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         subject: document.getElementById('subjectInput')?.value || '',
         subjectLocked,
         categories: Object.fromEntries(Object.entries(categories).map(([key, cat]) => [key, { value: cat.value, locked: cat.locked }])),
-        chaosLevel, pinnedChaosModifier, outputMode, aspectRatio, payloadDensity,
+        chaosLevel, pinnedChaosModifier, chaosSeed, outputMode, aspectRatio, payloadDensity,
         negativePrompts: [...negativePrompts],
         mjControls: { ...mjControls }
       };
@@ -3008,6 +3359,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
       }
       chaosLevel = Number.isFinite(Number(config.chaosLevel)) ? Math.max(0, Math.min(100, Number(config.chaosLevel))) : 0;
       pinnedChaosModifier = typeof config.pinnedChaosModifier === 'string' ? config.pinnedChaosModifier : '';
+      // A blueprint without a seed predates corruption; keep the default so an
+      // old save reproduces exactly what it did before the dial had teeth.
+      chaosSeed = Number.isFinite(Number(config.chaosSeed)) ? Math.max(0, Math.min(999999, Number(config.chaosSeed))) : 47;
       outputMode = ['universal', 'midjourney', 'sdxl'].includes(config.outputMode) ? config.outputMode : 'universal';
       aspectRatio = ['none', '1:1', '3:2', '4:5', '16:9', '9:16', '21:9', '2:3', '4:3'].includes(config.aspectRatio) ? config.aspectRatio : 'none';
       payloadDensity = ['recon', 'standard', 'full'].includes(config.payloadDensity) ? config.payloadDensity : 'full';
@@ -3101,6 +3455,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
       });
       document.getElementById('chaosSlider').value = chaosLevel;
       document.getElementById('chaosValue').textContent = chaosLevel + '%';
+      const seedField = document.getElementById('chaosSeedInput');
+      if (seedField) seedField.value = chaosSeed;
+      syncChaosZone();
       const chaosRow = document.getElementById('chaosPinnedRow');
       chaosRow.style.display = pinnedChaosModifier ? 'flex' : 'none';
       document.getElementById('chaosPinnedText').textContent = pinnedChaosModifier;
@@ -3568,13 +3925,10 @@ rather than operate the instrument, replace `main` with a commit SHA.
     // ============================================
 
     function getBaseParts() {
-      const subject = document.getElementById('subjectInput').value.trim();
-      const parts = [];
-      if (subject) parts.push(subject);
-      promptOrder.forEach(key => {
-        const cat = categories[key];
-        if (cat?.value) parts.push(cat.value);
-      });
+      // Subject and axis values, each already put through the dial. Below 25 the
+      // corruption pass is a pure passthrough, so this is the old behaviour
+      // exactly until someone turns the knob.
+      const parts = getCorruptedParts().map(part => part.value);
       const chaosMod = getChaosModifier();
       if (chaosMod) parts.push(chaosMod);
       return parts;
@@ -3656,6 +4010,19 @@ rather than operate the instrument, replace `main` with a commit SHA.
       if (categories.colorlogic.value && !categories.palette.value) {
         messages.push(['warn', 'COLOR LOGIC ACTIVE WITHOUT PALETTE · deliberate, but underconstrained.']);
       }
+      /*
+       * Only the last tick warns. Everything below zalgo is plain text that
+       * survives all three output formats intact, so the diagnostics stay quiet
+       * across ninety percent of the dial's travel — which is what keeps the
+       * warning meaningful when it does fire. Combining marks are the one thing
+       * a parameter parser can choke on or strip without saying so.
+       */
+      if (chaosLevel >= ZALGO_AT) {
+        messages.push(['alert', 'ZALGO ZONE · combining marks may exceed model tolerance and can break Midjourney parameter parsing.']);
+      } else if (chaosLevel >= 50) {
+        const damaged = getCorruptedParts().filter(part => part.kind !== 'clean' && part.kind !== 'locked').length;
+        if (damaged) messages.push(['warn', `${damaged} SIGNAL${damaged === 1 ? '' : 'S'} CORRUPTED · malformed tokens are deliberate; do not correct them downstream.`]);
+      }
       if (outputMode === 'midjourney') {
         const seed = String(mjControls.seed).trim();
         if (seed && (!/^\d+$/.test(seed) || Number(seed) > 4294967295)) {
@@ -3693,6 +4060,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       }
       updateTelemetry(prompt);
       renderDiagnostics(prompt);
+      renderCorruptionReport();
       // Every mutation path ends here, so the rig can never drift from state.
       syncRig();
       persistState();
