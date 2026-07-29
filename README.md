@@ -1,6 +1,6 @@
 # Prompt Forge DARPA v5
 
-**A public-domain, user-extensible visual prompt instrument: 2,128 signals, 17 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
+**A public-domain, user-extensible visual prompt instrument: 2,304 signals, 17 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
 
 [Launch Prompt Forge](https://androotandtheretinue.github.io/prompt-forge/) · [Read the v5.3.0 release notes](RELEASE_NOTES.md)
 
@@ -12,7 +12,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 
 ## What is inside
 
-- **2,128 signals** across **17 axes**, including a **160-medium** bank that covers still images and images in motion — Claymation, Rotoscoping, Stop Motion, Cel Animation, Machinima, and the pre-cinema motion studies they came from.
+- **2,304 signals** across **17 axes**, including a **160-medium** bank that covers still images and images in motion — Claymation, Rotoscoping, Stop Motion, Cel Animation, Machinima, and the pre-cinema motion studies they came from.
 - **Figure**: 80 signals for how the body is arranged, as distinct from what it is doing. Contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up. Action tells you the subject is reclining; Figure tells you how.
 - **Color Logic**: 80 *relational* instructions rather than colors — chromatic skin against achromatic clothing, warm subject in a cool world, pearlescence only in the highlights. It describes a relationship between regions of the image, which is how a colorist thinks and is the axis with no equivalent in other prompt tools.
 - **29 Forge Cards**, including eight warm-figure doctrines — Komorebi, Waterline, Salt and Gold, Poolside Noon, Lido 1972 and others — and the **DARPA** card for phosphor-terminal, scan-line, telemetry, and retro-defense-interface aesthetics.
@@ -58,7 +58,7 @@ Point an agent at the Pages URL and tell it to read [`llms.txt`](llms.txt) first
 It separates two things the project had been conflating:
 
 - **The Protocol** — the seventeen axes with a one-line gloss each, the selection and omission rules, prompt assembly, and what to do about images. This is the portable, machine-readable architecture, and it lives entirely inside `llms.txt` so a truncated fetch or a blocked host cannot cost an agent the ability to use the board.
-- **The Lexicon** — the 2,128 curated signals below. Built so a human browsing the board meets language they would not have thought of. An LLM already carries broad visual vocabulary, so this is **optional** for one: useful when you want the curation instead of the model's own priors.
+- **The Lexicon** — the 2,304 curated signals below. Built so a human browsing the board meets language they would not have thought of. An LLM already carries broad visual vocabulary, so this is **optional** for one: useful when you want the curation instead of the model's own priors.
 
 An agent that can read only `llms.txt` fills each axis from its own knowledge and says so. Three modes are valid — `canonical` (every value from the Lexicon), `protocol` (own knowledge), and `mixed` — and naming the mode is required, because a model-supplied value is a good prompt and a false citation, and the label is what keeps those apart.
 
@@ -69,7 +69,7 @@ The full vocabulary is published as data, so nothing has to scrape the applicati
 | File | Contents |
 | --- | --- |
 | [`llms.txt`](llms.txt) | What this is and how to operate it. Start here. |
-| [`vocabulary.json`](vocabulary.json) | All 2,128 signals with axis metadata. |
+| [`vocabulary.json`](vocabulary.json) | All 2,304 signals with axis metadata. |
 | [`vocabulary.txt`](vocabulary.txt) | The same signals, flat, no parser required. |
 
 Some agents run fetchers that allowlist hosts, and `*.github.io` is not always on the list. That is a host-level policy, not a restriction here — nothing in this project is gated. The same three files are served as plain text from `raw.githubusercontent.com`, and every entry point carries the mirror address so a blocked reader finds the alternative rather than a dead end:
@@ -82,7 +82,7 @@ https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabul
 
 Both paths track `main` and move as the vocabulary grows. Replace `main` with a commit SHA to pin the exact vocabulary a result was built from — `main` for operating the instrument, a pinned SHA for anything you intend to cite.
 
-This exists because `index.html` is ~196 kB and the signal pools begin about 48 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
+This exists because `index.html` is ~205 kB and the signal pools begin about 50 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
 
 Both vocabulary files are generated from the application by `npm run vocabulary`, and the audit fails if they drift from it.
 

@@ -13,7 +13,7 @@
     "instructions": "https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/llms.txt"
   },
   "axis_count": 17,
-  "signal_count": 2128,
+  "signal_count": 2304,
   "axis_order": [
     "narrative",
     "action",
@@ -122,7 +122,7 @@
     },
     "action": {
       "label": "ACTION",
-      "count": 160,
+      "count": 176,
       "options": [
         "Standing",
         "Sitting",
@@ -283,7 +283,23 @@
         "Planting a Signal Beacon",
         "Conducting an Orchestra of Drones",
         "Kneeling Before No One",
-        "Turning the Key Together"
+        "Turning the Key Together",
+        "Riding Horseback",
+        "Riding a Motorcycle",
+        "Cycling",
+        "Driving at Speed",
+        "Rowing",
+        "Sailing",
+        "Surfing",
+        "Skating",
+        "Throwing",
+        "Bowing",
+        "Saluting",
+        "Toasting",
+        "Surrendering with Raised Hands",
+        "Dealing Cards",
+        "Tipping a Hat",
+        "Taking a Curtain Call"
       ]
     },
     "figure": {
@@ -524,7 +540,7 @@
     },
     "composition": {
       "label": "COMPOSITION",
-      "count": 80,
+      "count": 96,
       "options": [
         "Single Dominant Subject",
         "Equal-Weight Duo",
@@ -605,12 +621,28 @@
         "High Visual Center of Gravity",
         "Deliberate Headroom",
         "Tension Against Frame Edge",
-        "Thumbnail-First Silhouette Design"
+        "Thumbnail-First Silhouette Design",
+        "Triadic Grouping",
+        "Three-Figure Triangle",
+        "Frieze Line-Up",
+        "Ensemble Blocking",
+        "Chorus Behind Principal",
+        "Diagonal Rank of Figures",
+        "Foreground Trio Midground Crowd",
+        "Semicircle Facing In",
+        "Staggered Depth Row",
+        "One Apart from the Group",
+        "Paired Diagonals",
+        "Receding Column of Figures",
+        "Centered Group Portrait",
+        "Asymmetric Quartet",
+        "Figures at Four Corners",
+        "Group Turned Toward Offscreen Event"
       ]
     },
     "setting": {
       "label": "SETTING",
-      "count": 160,
+      "count": 176,
       "options": [
         "Prehistoric",
         "Ancient Egypt",
@@ -771,12 +803,28 @@
         "Kitchen During First Contact",
         "Courtroom for Nonhuman Persons",
         "Embassy in a Dream",
-        "Observatory Inside a Living Eye"
+        "Observatory Inside a Living Eye",
+        "Frontier Town Main Street",
+        "Saloon at Noon",
+        "Open Range",
+        "Opera House",
+        "Concert Stage",
+        "Backstage Before Curtain",
+        "Circus Tent",
+        "Ballroom",
+        "Fairground at Dusk",
+        "Harbor at Low Tide",
+        "Shipyard",
+        "Barn",
+        "Graveyard",
+        "Bridge at Night",
+        "Hospital Ward",
+        "Courtroom"
       ]
     },
     "framing": {
       "label": "CAMERA",
-      "count": 128,
+      "count": 144,
       "options": [
         "Extreme Close-up",
         "Close-up",
@@ -905,12 +953,28 @@
         "Sonar Display Composition",
         "Map-Like Topography View",
         "Vertical Scroll Composition",
-        "Circular Tondo Crop"
+        "Circular Tondo Crop",
+        "Selfie POV",
+        "Mirror Selfie",
+        "Video Call Grid",
+        "Arm's Length Front Camera",
+        "Screen-in-Screen",
+        "Rearview Mirror",
+        "Doorway Framing",
+        "Handheld Follow",
+        "Proscenium Wide",
+        "Box Seat View",
+        "Orchestra Pit Level",
+        "From the Wings",
+        "Boot-Level Low Angle",
+        "Across a Card Table",
+        "Saddle-Height Tracking",
+        "Balcony Looking Down"
       ]
     },
     "wardrobe": {
       "label": "WARDROBE",
-      "count": 160,
+      "count": 176,
       "options": [
         "Casual Streetwear",
         "Business Attire",
@@ -1071,12 +1135,28 @@
         "Mesh Cover-Up",
         "Sarong Wrap",
         "Terrycloth Robe",
-        "Swim Cap and Goggles"
+        "Swim Cap and Goggles",
+        "Duster Coat and Wide Brim",
+        "Gunbelt and Holster",
+        "Spurred Riding Boots",
+        "Leotard and Tights",
+        "Tutu",
+        "Pointe Shoes",
+        "Wedding Gown",
+        "Morning Suit",
+        "Flannel Pajamas",
+        "Silk Nightgown",
+        "School Uniform",
+        "Dress Uniform with Aiguillette",
+        "Chef Whites",
+        "Lab Coat",
+        "Stagehand Blacks",
+        "Ringmaster Tailcoat"
       ]
     },
     "medium": {
       "label": "MEDIUM",
-      "count": 160,
+      "count": 176,
       "options": [
         "Photography",
         "Film Photography",
@@ -1237,12 +1317,28 @@
         "Camera Obscura Study",
         "Reverse Glass Painting",
         "Sgraffito Plaster",
-        "Pietra Dura Inlay"
+        "Pietra Dura Inlay",
+        "Marker Illustration",
+        "Ballpoint Pen Drawing",
+        "Crayon Drawing",
+        "Pyrography",
+        "Blown Glass Sculpture",
+        "Tattoo Flash",
+        "Chalk Street Art",
+        "Anamorphic Pavement Art",
+        "Matte Painting",
+        "Gel Pen on Black",
+        "Scratchboard",
+        "Sign Painting",
+        "Gold Tooling on Leather",
+        "Sand Casting",
+        "Airbrushed Van Art",
+        "Charcoal and White Chalk on Toned Paper"
       ]
     },
     "style": {
       "label": "STYLE",
-      "count": 176,
+      "count": 192,
       "options": [
         "Renaissance",
         "Baroque",
@@ -1419,12 +1515,28 @@
         "Maximalist Editorial",
         "Luxury Sci-Fi",
         "Clinical Surrealism",
-        "Sacred Geometry Modernism"
+        "Sacred Geometry Modernism",
+        "Western",
+        "Weird West",
+        "Spaghetti Western",
+        "Afrofuturism",
+        "Indigenous Futurism",
+        "Harlem Renaissance",
+        "Chicano Art",
+        "Mexican Muralism",
+        "Color Field",
+        "Superflat",
+        "Mannerism",
+        "Socialist Realism",
+        "Social Realism",
+        "Ashcan School",
+        "Nihonga",
+        "Pictorialism"
       ]
     },
     "lighting": {
       "label": "LIGHTING",
-      "count": 128,
+      "count": 144,
       "options": [
         "Golden Hour",
         "Blue Hour",
@@ -1553,7 +1665,23 @@
         "Lightning Behind Silhouette",
         "Rotating Beacon Sweep",
         "Scanning Light Bar",
-        "Black Mirror Reflection Light"
+        "Black Mirror Reflection Light",
+        "Stage Spotlight",
+        "Follow Spot",
+        "Footlights",
+        "Ghost Light on an Empty Stage",
+        "House Lights Down",
+        "Marquee Bulbs",
+        "Dressing Room Bulbs",
+        "Fireworks Overhead",
+        "Sparkler Light",
+        "Carnival Bulb String",
+        "Sun Through Saloon Slats",
+        "Lantern on a Porch",
+        "Oil Lamp",
+        "Match Strike",
+        "Signal Fire",
+        "Projector Beam in Smoke"
       ]
     },
     "palette": {
@@ -1778,7 +1906,7 @@
     },
     "texture": {
       "label": "TEXTURE",
-      "count": 128,
+      "count": 144,
       "options": [
         "Thick Impasto",
         "Visible Brushstrokes",
@@ -1907,12 +2035,28 @@
         "Condensation Trails",
         "Subdermal Fiber Optics",
         "Veined Bioplastic",
-        "Memory Foam Impressions"
+        "Memory Foam Impressions",
+        "Terrazzo",
+        "Corduroy",
+        "Tooled Leather",
+        "Worn Denim",
+        "Sawdust and Straw",
+        "Sequined",
+        "Tulle",
+        "Greasepaint",
+        "Rosin Dust",
+        "Weathered Barn Board",
+        "Rusted Barbed Wire",
+        "Sun-Cracked Leather",
+        "Velvet Curtain Nap",
+        "Powder Coat",
+        "Chalk Dust",
+        "Burlap"
       ]
     },
     "weather": {
       "label": "WEATHER",
-      "count": 112,
+      "count": 128,
       "options": [
         "Clear Skies",
         "Cloudless",
@@ -2025,12 +2169,28 @@
         "Nanobot Mist",
         "Weather Simulation Malfunction",
         "Cloud Shadows Moving Too Fast",
-        "Rain Falling Only in One Room"
+        "Rain Falling Only in One Room",
+        "Hail",
+        "Rainbow",
+        "Dust Devil",
+        "Heat Haze Over Hardpan",
+        "Chinook Wind",
+        "Dry Lightning",
+        "Red Dust Haze",
+        "First Frost",
+        "Sun Break After Storm",
+        "Rolling Sea Fog",
+        "Squall Line Approaching",
+        "Still Air Before Thunder",
+        "Snow Beginning",
+        "Warm Rain",
+        "Blue Norther",
+        "Harvest Dust in Late Light"
       ]
     },
     "fx": {
       "label": "FX",
-      "count": 128,
+      "count": 144,
       "options": [
         "Floating Embers",
         "Drifting Sparks",
@@ -2159,7 +2319,23 @@
         "Shadow Moving Before the Body",
         "Reflection Refusing to Match",
         "Footprints Appearing Ahead",
-        "Doorway Rendering One Frame Late"
+        "Doorway Rendering One Frame Late",
+        "Fireworks Bursting",
+        "Sparkler Trails",
+        "Streamers Uncoiling",
+        "Balloon Release",
+        "Rice Thrown in Arc",
+        "Petals Thrown",
+        "Dust Kicked Up by Hooves",
+        "Tumbleweed Crossing",
+        "Gunsmoke Hanging",
+        "Curtain Billow",
+        "Stage Haze in Beams",
+        "Spotlight Dust Motes",
+        "Sawdust in the Ring",
+        "Spray Off a Wave Lip",
+        "Ice Chips from a Skate",
+        "Sparks from an Anvil"
       ]
     },
     "quality": {

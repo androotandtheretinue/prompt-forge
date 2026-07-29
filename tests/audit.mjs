@@ -90,7 +90,7 @@ const total = Object.values(audit.counts).reduce((sum, count) => sum + count, 0)
 const duplicateCount = Object.values(audit.duplicates).reduce((sum, values) => sum + values.length, 0);
 
 if (Object.keys(audit.counts).length !== 17) fail(`Expected 17 axes; found ${Object.keys(audit.counts).length}.`);
-if (total !== 2128) fail(`Expected 2,128 signals; found ${total}.`);
+if (total !== 2304) fail(`Expected 2,304 signals; found ${total}.`);
 if (duplicateCount) fail(`Found ${duplicateCount} duplicate signals.`);
 if (audit.cardCount !== 28) fail(`Expected 28 Forge Cards; found ${audit.cardCount}.`);
 if (audit.presetErrors.length) fail(`Broken Forge Card values: ${JSON.stringify(audit.presetErrors)}`);
@@ -452,12 +452,46 @@ const shortVersion = version.replace(/\.\d+$/, '');
 const versionClaims = [
   { label: 'PF_VERSION', found: (html.match(/const PF_VERSION = '([^']+)'/) || [])[1], want: shortVersion },
   { label: 'static footer', found: (html.match(/FORGED WITH hop\.e[^<]*DARPA v([\d.]+)/) || [])[1], want: shortVersion },
+  { label: 'static header', found: (html.match(/id="optionCountHeader">[^<]*DARPA v([\d.]+)/) || [])[1], want: shortVersion },
   { label: '<title>', found: (html.match(/<title>PROMPT FORGE DARPA v(\d+)/) || [])[1], want: shortVersion.split('.')[0] },
   { label: 'og:title', found: (html.match(/og:title["'] content=["']Prompt Forge DARPA v(\d+)/) || [])[1], want: shortVersion.split('.')[0] }
 ];
 for (const { label, found, want } of versionClaims) {
   if (found === undefined) fail(`Could not find the ${label} version string in index.html.`);
   else if (found !== want) fail(`${label} says v${found}; package.json is ${version} (expected v${want}).`);
+}
+
+/*
+ * The static header's signal count, too.
+ *
+ * JavaScript rewrites this line on load, so in a browser it is always right and
+ * nobody looks at the markup. Markdown converters strip the script, which makes
+ * the stale markup the only version a large class of agent ever sees — an
+ * outside audit read the live page and reported v4.0 with 2000 options, three
+ * releases behind. What no human can see is exactly what needs a check.
+ */
+const headerCount = (html.match(/id="optionCountHeader">[^<]*·\s*([\d,]+)\s*Options/) || [])[1];
+if (headerCount === undefined) {
+  fail('The static header no longer states a signal count in the expected form.');
+} else if (Number(headerCount.replace(/,/g, '')) !== total) {
+  fail(`The static header claims ${headerCount} options; the source holds ${total.toLocaleString()}.`);
+}
+
+/*
+ * Every signal count stated anywhere in the markup.
+ *
+ * The description, og:description and twitter:description each carry one, and
+ * all three sat two releases behind while the header and footer were being
+ * fixed by hand. They live in the first kilobyte, which is the part a
+ * truncating fetcher is most likely to keep, so a stale number there is the one
+ * most likely to be read. Sweep for the pattern rather than naming each tag,
+ * since the next one added would otherwise go unchecked too.
+ */
+const statedCounts = [...html.matchAll(/([\d,]{4,})\s+signals/gi)]
+  .map(match => match[1])
+  .filter(value => Number(value.replace(/,/g, '')) !== total);
+if (statedCounts.length) {
+  fail(`index.html states ${[...new Set(statedCounts)].join(', ')} signals somewhere in its markup; the source holds ${total.toLocaleString()}.`);
 }
 
 // The runtime footer must derive its version rather than restate it.

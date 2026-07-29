@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A free, public-domain visual prompt instrument with 2,128 signals across 17 creative axes.">
+  <meta name="description" content="A free, public-domain visual prompt instrument with 2,304 signals across 17 creative axes.">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="color-scheme" content="dark">
   <meta property="og:title" content="Prompt Forge DARPA v5">
-  <meta property="og:description" content="Forge image prompts from 2,128 signals, 20 curated cards, and model-aware controls.">
+  <meta property="og:description" content="Forge image prompts from 2,304 signals, 28 curated cards, and model-aware controls.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://androotandtheretinue.github.io/prompt-forge/">
   <!--
@@ -21,7 +21,7 @@
   <meta property="og:image:alt" content="The Prompt Forge control board: subject field, randomize and mutate controls, mission doctrine payload sizes, cluster reroll scopes, and the chaos dial.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Prompt Forge DARPA v5">
-  <meta name="twitter:description" content="Forge image prompts from 2,128 signals across 17 creative axes. Public domain, no account required.">
+  <meta name="twitter:description" content="Forge image prompts from 2,304 signals across 17 creative axes. Public domain, no account required.">
   <meta name="twitter:image" content="https://androotandtheretinue.github.io/prompt-forge/social-card.png">
   <title>PROMPT FORGE DARPA v5 | AI Image Generation Board</title>
 
@@ -736,7 +736,15 @@
       <h1 class="font-display text-3xl md:text-4xl font-black tracking-wider neon-text text-cyan-400 mb-2">
         PROMPT FORGE
       </h1>
-      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · DARPA v4.0 · 2000 Options</p>
+      <!--
+        The static text below is what a reader without JavaScript sees, which
+        now includes every agent whose fetcher converts HTML to markdown and
+        drops scripts. It said "DARPA v4.0 · 2000 Options" for three releases
+        because a browser overwrites it on load and nobody reads what they
+        cannot see. An outside audit of the live page reported the version as
+        v4.0.0 for exactly this reason. The audit checks it now.
+      -->
+      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · DARPA v5.3 · 2,304 Options · 17 Axes</p>
     </header>
 
     <!--
@@ -952,12 +960,12 @@ it with the image.
 
 ## LEXICON
 
-Optional. 2,128 curated signals across the same 17 axes, built so a human
+Optional. 2,304 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html for the vocabulary. It is a 196 kB single-file
-application and the signal pools begin about 48 kB in, past the point where
+Do not scrape index.html for the vocabulary. It is a 205 kB single-file
+application and the signal pools begin about 50 kB in, past the point where
 many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
@@ -2069,6 +2077,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       ]
     };
 
+
     [categoryExpansions, motionExpansions].forEach(expansion => {
       Object.entries(expansion).forEach(([key, additions]) => {
         const seen = new Set(categories[key].options);
@@ -2276,6 +2285,139 @@ rather than operate the instrument, replace `main` with a commit SHA.
       version: '', stylize: '', weird: '', resolution: '', seed: '',
       sref: '', styleWeight: '', profile: '', raw: false, tile: false, draft: false
     };
+
+    /*
+     * v5.4 vocabulary expansion — the clustered absences.
+     *
+     * An outside audit of the published vocabulary found the holes were not
+     * scattered but grouped, which is the useful kind of finding: a missing
+     * signal is an inconvenience, a missing *territory* is a genre the board
+     * cannot enter at all.
+     *
+     * The Western had no on-ramp anywhere — no frontier town, no duster, no
+     * Western in style. Performance had actions with no world: Performing on
+     * Stage and Conducting an Orchestra existed while theatre, footlights and
+     * dancewear did not. Celebration could be infiltrated but not thrown —
+     * The Ceremony Has Been Infiltrated with no ballroom and no fireworks. And
+     * nothing rode anything: 160 actions and not one riding, driving, rowing,
+     * sailing or surfing, which had gone unnoticed through a release that
+     * added sixteen swimsuits.
+     *
+     * Also the plain versions of estranged settings. The board tilts the
+     * ordinary on purpose — Hospital Without Staff, Courtroom for Nonhuman
+     * Persons — but tilting is a choice a user should get to make, and it
+     * cannot be made from a bank that only holds the tilted one.
+     */
+    const clusterExpansions = {
+      setting: [
+        // The Western had no entry point at all
+        'Frontier Town Main Street', 'Saloon at Noon', 'Open Range',
+        // Actions existed for these; the rooms did not
+        'Opera House', 'Concert Stage', 'Backstage Before Curtain', 'Circus Tent',
+        'Ballroom', 'Fairground at Dusk',
+        // Plain places, including the unestranged versions of tilted ones
+        'Harbor at Low Tide', 'Shipyard', 'Barn', 'Graveyard', 'Bridge at Night',
+        'Hospital Ward', 'Courtroom'
+      ],
+      wardrobe: [
+        'Duster Coat and Wide Brim', 'Gunbelt and Holster', 'Spurred Riding Boots',
+        // Figure gave the poses in 5.3; the clothes for them were missing
+        'Leotard and Tights', 'Tutu', 'Pointe Shoes',
+        'Wedding Gown', 'Morning Suit',
+        'Flannel Pajamas', 'Silk Nightgown',
+        'School Uniform', 'Dress Uniform with Aiguillette', 'Chef Whites', 'Lab Coat',
+        'Stagehand Blacks', 'Ringmaster Tailcoat'
+      ],
+      style: [
+        'Western', 'Weird West', 'Spaghetti Western',
+        // Afro-Surrealism and Queer Futurism shipped without the parent term
+        'Afrofuturism', 'Indigenous Futurism', 'Harlem Renaissance', 'Chicano Art',
+        'Mexican Muralism', 'Color Field', 'Superflat',
+        // Neo-Mannerism shipped without Mannerism
+        'Mannerism', 'Socialist Realism', 'Social Realism', 'Ashcan School',
+        'Nihonga', 'Pictorialism'
+      ],
+      action: [
+        'Riding Horseback', 'Riding a Motorcycle', 'Cycling', 'Driving at Speed',
+        'Rowing', 'Sailing', 'Surfing', 'Skating',
+        'Throwing', 'Bowing', 'Saluting', 'Toasting',
+        'Surrendering with Raised Hands', 'Dealing Cards', 'Tipping a Hat',
+        'Taking a Curtain Call'
+      ],
+      lighting: [
+        'Stage Spotlight', 'Follow Spot', 'Footlights', 'Ghost Light on an Empty Stage',
+        'House Lights Down', 'Marquee Bulbs', 'Dressing Room Bulbs',
+        'Fireworks Overhead', 'Sparkler Light', 'Carnival Bulb String',
+        'Sun Through Saloon Slats', 'Lantern on a Porch', 'Oil Lamp', 'Match Strike',
+        'Signal Fire', 'Projector Beam in Smoke'
+      ],
+      fx: [
+        'Fireworks Bursting', 'Sparkler Trails', 'Streamers Uncoiling',
+        'Balloon Release', 'Rice Thrown in Arc', 'Petals Thrown',
+        'Dust Kicked Up by Hooves', 'Tumbleweed Crossing', 'Gunsmoke Hanging',
+        'Curtain Billow', 'Stage Haze in Beams', 'Spotlight Dust Motes',
+        'Sawdust in the Ring', 'Spray Off a Wave Lip', 'Ice Chips from a Skate',
+        'Sparks from an Anvil'
+      ],
+      weather: [
+        // Graupel, thundersnow and a Double Rainbow, but neither of these
+        'Hail', 'Rainbow',
+        'Dust Devil', 'Heat Haze Over Hardpan', 'Chinook Wind', 'Dry Lightning',
+        'Red Dust Haze', 'First Frost', 'Sun Break After Storm', 'Rolling Sea Fog',
+        'Squall Line Approaching', 'Still Air Before Thunder', 'Snow Beginning',
+        'Warm Rain', 'Blue Norther', 'Harvest Dust in Late Light'
+      ],
+      medium: [
+        'Marker Illustration', 'Ballpoint Pen Drawing', 'Crayon Drawing',
+        'Pyrography', 'Blown Glass Sculpture', 'Tattoo Flash',
+        'Chalk Street Art', 'Anamorphic Pavement Art', 'Matte Painting',
+        'Gel Pen on Black', 'Scratchboard', 'Sign Painting',
+        'Gold Tooling on Leather', 'Sand Casting', 'Airbrushed Van Art',
+        'Charcoal and White Chalk on Toned Paper'
+      ],
+      framing: [
+        // Dashcams, periscopes and sonar shipped; the commonest camera
+        // position of the last fifteen years did not
+        'Selfie POV', 'Mirror Selfie', 'Video Call Grid', 'Arm\'s Length Front Camera',
+        'Screen-in-Screen', 'Rearview Mirror', 'Doorway Framing', 'Handheld Follow',
+        'Proscenium Wide', 'Box Seat View', 'Orchestra Pit Level', 'From the Wings',
+        'Boot-Level Low Angle', 'Across a Card Table', 'Saddle-Height Tracking',
+        'Balcony Looking Down'
+      ],
+      composition: [
+        // Solo and duo were well served; three or more was not
+        'Triadic Grouping', 'Three-Figure Triangle', 'Frieze Line-Up',
+        'Ensemble Blocking', 'Chorus Behind Principal', 'Diagonal Rank of Figures',
+        'Foreground Trio Midground Crowd', 'Semicircle Facing In',
+        'Staggered Depth Row', 'One Apart from the Group', 'Paired Diagonals',
+        'Receding Column of Figures', 'Centered Group Portrait', 'Asymmetric Quartet',
+        'Figures at Four Corners', 'Group Turned Toward Offscreen Event'
+      ],
+      texture: [
+        'Terrazzo', 'Corduroy', 'Tooled Leather', 'Worn Denim',
+        'Sawdust and Straw', 'Sequined', 'Tulle', 'Greasepaint',
+        'Rosin Dust', 'Weathered Barn Board', 'Rusted Barbed Wire',
+        'Sun-Cracked Leather', 'Velvet Curtain Nap', 'Powder Coat',
+        'Chalk Dust', 'Burlap'
+      ]
+    };
+
+    /*
+     * Merged after composition, colorlogic and narrative are defined, unlike
+     * the two expansions above. Those run before the last three axes exist, so
+     * a table naming `composition` there reads a category that is not there
+     * yet — which is a runtime failure, not a parse one, and therefore invisible
+     * until something executes it.
+     */
+    Object.entries(clusterExpansions).forEach(([key, additions]) => {
+      const seen = new Set(categories[key].options);
+      additions.forEach(option => {
+        if (!seen.has(option)) {
+          categories[key].options.push(option);
+          seen.add(option);
+        }
+      });
+    });
 
     /*
      * Reroll scopes. These partition the sixteen axes: every axis belongs to

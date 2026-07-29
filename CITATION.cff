@@ -9,7 +9,7 @@ authors:
     alias: "@OAndroot"
 url: "https://github.com/androotandtheretinue/prompt-forge"
 license: CC0-1.0
-abstract: "A public-domain, user-extensible visual prompt instrument with 2,128 signals across 17 creative axes, covering still and motion mediums, with drag-strumming, custom pools, and a three-state signal rig."
+abstract: "A public-domain, user-extensible visual prompt instrument with 2,304 signals across 17 creative axes, covering still and motion mediums, with drag-strumming, custom pools, and a three-state signal rig."
 keywords:
   - generative-art
   - prompt-engineering

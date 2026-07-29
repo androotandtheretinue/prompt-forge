@@ -184,12 +184,12 @@ it with the image.
 
 ## LEXICON
 
-Optional. 2,128 curated signals across the same 17 axes, built so a human
+Optional. 2,304 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html for the vocabulary. It is a 196 kB single-file
-application and the signal pools begin about 48 kB in, past the point where
+Do not scrape index.html for the vocabulary. It is a 205 kB single-file
+application and the signal pools begin about 50 kB in, past the point where
 many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
