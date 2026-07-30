@@ -2,7 +2,7 @@
 
 **A public-domain, user-extensible visual prompt instrument: 2,304 signals, 17 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
 
-[Launch Prompt Forge](https://androotandtheretinue.github.io/prompt-forge/) · [Read the v5.3.0 release notes](RELEASE_NOTES.md)
+[Launch Prompt Forge](https://androotandtheretinue.github.io/prompt-forge/) · [Read the v5.4.0 release notes](RELEASE_NOTES.md)
 
 Prompt Forge turns a subject into a structured image-generation prompt by combining medium, action, figure, texture, style, lighting, framing, mood, palette, quality, setting, weather, wardrobe, effects, composition, color logic, and story signal.
 
@@ -183,4 +183,4 @@ Wild additions are welcome. Please read [CONTRIBUTING.md], run `npm test`, and k
 
 ## Version
 
-Current release: **5.3.0 — The Figure**. See [CHANGELOG.md](CHANGELOG.md).
+Current release: **5.4.0 — Field Reports**. See [CHANGELOG.md](CHANGELOG.md).

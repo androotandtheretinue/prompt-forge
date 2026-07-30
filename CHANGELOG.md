@@ -1,6 +1,6 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
-[Unreleased]
+[5.4.0] — 2026-07-30
 Added
 Gave the chaos dial teeth. It appended an adjective and called that chaos — a promise the prompt could not cash, since nothing about the output looked wilder at 90 than at 10. It still appends the adjective, and now also damages the signal text itself, which is chaos you can read before you generate.
 Four ticks on the meter, each naming the worst thing that can happen past it: DRIFT at 25 (semantic variants — Golden Hour becomes Borrowed Golden Hour, meaning bent, token intact), MISSPELL at 50, LEET at 75, and ZALGO at the last tick only. The zones are cumulative rather than exclusive, so a high setting yields a mix of clean, drifted, misspelled and eaten signals — uniform corruption reads as a filter and breaks every prompt the same way.

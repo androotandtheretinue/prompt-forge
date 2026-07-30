@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "Attribution is not required under CC0, but if you wish to cite Prompt Forge, use this metadata."
 title: "Prompt Forge DARPA v5"
 type: software
-version: 5.3.0
-date-released: 2026-07-26
+version: 5.4.0
+date-released: 2026-07-30
 authors:
   - name: "Root and The Retinue"
     alias: "@OAndroot"
