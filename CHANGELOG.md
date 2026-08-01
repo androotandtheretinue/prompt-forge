@@ -1,5 +1,10 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
+[Unreleased]
+Added
+Added a strum lane down the left of the board. Strumming already worked by dragging across the category labels — the same gesture, but you had to know it, and the surface you dragged on was also the surface you clicked to make careful choices. The lane gives the careless motion somewhere of its own: it runs the height of the board, and dragging down it rerolls whichever row you are level with. Height means axis, so a slow drag walks the axes in order and the same drag played twice does the same thing. Shift still steps instead of randomizing, pinned and muted rows are never touched, and arrow keys plus space reach the same behaviour without a pointer. Hidden below 640px, where there is no gutter to spare and dragging across the rows still works.
+Fixed the strum hint's insertion point. Giving the category panel a flex parent silently changed what `categoriesPanel.before(...)` meant: the hint moved from above the board to beside it as a third column, and the board shrank to make room. Nothing errored. The audit now asserts the arrangement.
+
 [5.4.0] — 2026-07-30
 Added
 Gave the chaos dial teeth. It appended an adjective and called that chaos — a promise the prompt could not cash, since nothing about the output looked wilder at 90 than at 10. It still appends the adjective, and now also damages the signal text itself, which is chaos you can read before you generate.

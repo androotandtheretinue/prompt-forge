@@ -239,6 +239,93 @@
       box-shadow: 0 0 8px rgba(124, 138, 168, 0.6);
     }
 
+    /*
+     * Strum lane. A gesture surface that is not also a control surface — the
+     * category rows are where you make careful choices, so the careless motion
+     * gets its own column beside them rather than on top of them.
+     */
+    .board-with-lane {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .board-with-lane > .panel { flex: 1 1 auto; min-width: 0; }
+
+    .strum-lane {
+      position: relative;
+      flex: 0 0 34px;
+      border: 1px solid #1f1f2b;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #0e0e15 0%, #101018 100%);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .strum-lane:hover,
+    .strum-lane:focus-visible {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.18);
+      outline: none;
+    }
+
+    .strum-lane.strumming {
+      cursor: grabbing;
+      border-color: var(--neon-magenta);
+      box-shadow: 0 0 16px rgba(255, 0, 255, 0.3);
+    }
+
+    /* The string runs the height of the board and lights while played. */
+    .strum-lane-string {
+      position: absolute;
+      top: 26px;
+      bottom: 26px;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, transparent, #2a2a36 12%, #2a2a36 88%, transparent);
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .strum-lane:hover .strum-lane-string { background: linear-gradient(180deg, transparent, #3a4a55 12%, #3a4a55 88%, transparent); }
+
+    .strum-lane.strumming .strum-lane-string {
+      background: linear-gradient(180deg, transparent, var(--neon-magenta) 12%, var(--neon-magenta) 88%, transparent);
+      box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+    }
+
+    .strum-lane-label,
+    .strum-lane-hint {
+      position: relative;
+      font-size: 8px;
+      letter-spacing: 0.14em;
+      color: #3c3c4a;
+      writing-mode: vertical-rl;
+      transition: color 0.2s ease;
+    }
+
+    .strum-lane-hint { writing-mode: horizontal-tb; font-size: 11px; }
+    .strum-lane:hover .strum-lane-label,
+    .strum-lane:hover .strum-lane-hint { color: var(--neon-cyan); }
+    .strum-lane.strumming .strum-lane-label,
+    .strum-lane.strumming .strum-lane-hint { color: var(--neon-magenta); }
+
+    /*
+     * No lane on narrow screens. There is no gutter to spare, and dragging
+     * across the rows still works there — the lane is a second door to the same
+     * gesture, not the only one.
+     */
+    @media (max-width: 640px) {
+      .strum-lane { display: none; }
+    }
+
     /* Chaos dial: the meter carries its own legend. */
     .chaos-ticks {
       position: relative;
@@ -1066,8 +1153,8 @@ Optional. 2,304 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html for the vocabulary. It is a 205 kB single-file
-application and the signal pools begin about 50 kB in, past the point where
+Do not scrape index.html for the vocabulary. It is a 227 kB single-file
+application and the signal pools begin about 59 kB in, past the point where
 many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
@@ -1363,9 +1450,30 @@ rather than operate the instrument, replace `main` with a commit SHA.
       </div>
     </div>
 
-    <!-- Categories Panel -->
-    <div class="panel panel-glow mb-4" id="categoriesPanel">
-      <!-- Categories will be injected here -->
+    <!--
+      Categories, with a strum lane down the left.
+
+      Strumming already worked by dragging across the category labels, which is
+      the same gesture — but you had to know it, and the surface you dragged on
+      was also the surface you clicked to make careful choices. The lane is that
+      gesture given somewhere of its own to happen: it runs the height of the
+      board, and dragging down it rerolls whichever row you are level with.
+
+      Position still means which axis, so it stays an instrument rather than a
+      shuffle button. Locked rows are skipped, because strumRow already refuses
+      them.
+    -->
+    <div class="board-with-lane mb-4">
+      <div class="strum-lane" id="strumLane" role="slider" tabindex="0"
+           aria-label="Strum lane — drag down the board to reroll unlocked axes"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="strum-lane-label">STRUM</span>
+        <span class="strum-lane-string"></span>
+        <span class="strum-lane-hint">↕</span>
+      </div>
+      <div class="panel panel-glow" id="categoriesPanel">
+        <!-- Categories will be injected here -->
+      </div>
     </div>
 
     <!-- Preview Panel -->
@@ -4457,6 +4565,48 @@ rather than operate the instrument, replace `main` with a commit SHA.
     updatePreview();
   }
 
+  /*
+   * The lane maps height to axis. Whatever row you are level with is the row
+   * you are playing, which is what keeps this an instrument rather than a
+   * shuffle button — the same drag played twice does the same thing, and moving
+   * slowly down the board walks the axes in order.
+   */
+  function laneRowAt(clientY) {
+    const rows = document.querySelectorAll('#categoriesPanel .category-row');
+    for (const row of rows) {
+      const box = row.getBoundingClientRect();
+      if (clientY >= box.top && clientY <= box.bottom) return row;
+    }
+    return null;
+  }
+
+  function beginLaneStrum(event) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    strumActive = true;
+    strumPointerId = event.pointerId;
+    strumMode = event.shiftKey ? 'step' : 'random';
+    lastStrumKey = null;
+    lastStrumX = null;
+    lastStrumY = null;
+    document.body.classList.add('strumming');
+    event.currentTarget.classList.add('strumming');
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    const row = laneRowAt(event.clientY);
+    if (row) strumRow(row, event);
+    event.preventDefault();
+  }
+
+  function moveLaneStrum(event) {
+    if (!strumActive || event.pointerId !== strumPointerId) return;
+    const row = laneRowAt(event.clientY);
+    if (row) strumRow(row, event);
+  }
+
+  function endLaneStrum(event) {
+    document.getElementById('strumLane')?.classList.remove('strumming');
+    endStrum(event);
+  }
+
   function beginStrum(event) {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
 
@@ -5101,10 +5251,14 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
       hint.innerHTML =
         '<span class="text-cyan-400">🎸 STRUM:</span> ' +
-        'press and drag across row labels to randomize unlocked rows repeatedly as you move. ' +
-        'Hold <span class="text-yellow-400">Shift</span> to advance each pool by one.';
+        'drag down the lane at the left, or across the row labels, to randomize unlocked rows as you move. ' +
+        'Hold <span class="text-yellow-400">Shift</span> to advance each pool by one instead. ' +
+        'Pinned and muted rows are never touched.';
 
-      categoriesPanel.before(hint);
+      // Above the lane-and-board row, not inside it. `categoriesPanel.before`
+      // used to mean "above the board" and now means "beside the lane", since
+      // the panel gained a flex parent — the same call, a different place.
+      (categoriesPanel.closest('.board-with-lane') || categoriesPanel).before(hint);
     }
 
     if (!document.getElementById('customPoolModal')) {
@@ -5165,6 +5319,35 @@ rather than operate the instrument, replace `main` with a commit SHA.
           if (event.key === 'Enter') addCustomOption();
           if (event.key === 'Escape') closeCustomPool();
         });
+    }
+
+    const strumLane = document.getElementById('strumLane');
+    if (strumLane) {
+      strumLane.addEventListener('pointerdown', beginLaneStrum);
+      strumLane.addEventListener('pointermove', moveLaneStrum);
+      strumLane.addEventListener('pointerup', endLaneStrum);
+      strumLane.addEventListener('pointercancel', endLaneStrum);
+      // Keyboard reaches the same thing: arrows walk the board, space rerolls
+      // the row you are on. A gesture-only control is a control some people
+      // simply do not have.
+      strumLane.addEventListener('keydown', laneKey => {
+        const rows = [...document.querySelectorAll('#categoriesPanel .category-row')];
+        if (!rows.length) return;
+        const current = Number(strumLane.dataset.row || 0);
+        if (laneKey.key === 'ArrowDown' || laneKey.key === 'ArrowUp') {
+          const next = Math.max(0, Math.min(rows.length - 1, current + (laneKey.key === 'ArrowDown' ? 1 : -1)));
+          strumLane.dataset.row = next;
+          strumLane.setAttribute('aria-valuenow', Math.round((next / (rows.length - 1)) * 100));
+          rows[next].classList.add('cluster-preview');
+          setTimeout(() => rows[next].classList.remove('cluster-preview'), 400);
+          laneKey.preventDefault();
+        } else if (laneKey.key === ' ' || laneKey.key === 'Enter') {
+          strumMode = laneKey.shiftKey ? 'step' : 'random';
+          lastStrumKey = null;
+          strumRow(rows[current], null);
+          laneKey.preventDefault();
+        }
+      });
     }
 
     categoriesPanel.addEventListener('pointerdown', beginStrum);

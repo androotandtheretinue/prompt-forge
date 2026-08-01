@@ -16,6 +16,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **Figure**: 80 signals for how the body is arranged, as distinct from what it is doing. Contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up. Action tells you the subject is reclining; Figure tells you how.
 - **Color Logic**: 80 *relational* instructions rather than colors — chromatic skin against achromatic clothing, warm subject in a cool world, pearlescence only in the highlights. It describes a relationship between regions of the image, which is how a colorist thinks and is the axis with no equivalent in other prompt tools.
 - **29 Forge Cards**, including eight warm-figure doctrines — Komorebi, Waterline, Salt and Gold, Poolside Noon, Lido 1972 and others — and the **DARPA** card for phosphor-terminal, scan-line, telemetry, and retro-defense-interface aesthetics.
+- **Strum lane**: a rail down the left of the board. Drag along it to reroll whichever row you are level with — height means axis, so a slow drag walks the axes in order and the same drag played twice does the same thing. Arrow keys and space reach it too.
 - **Drag Strum**: hold and sweep across category labels to repeatedly randomize unlocked axes.
 - **Shift + Drag Step Strum**: advance each crossed category through its pool.
 - **Custom Signals**: add persistent entries to any category pool.
@@ -82,7 +83,7 @@ https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabul
 
 Both paths track `main` and move as the vocabulary grows. Replace `main` with a commit SHA to pin the exact vocabulary a result was built from — `main` for operating the instrument, a pinned SHA for anything you intend to cite.
 
-This exists because `index.html` is ~205 kB and the signal pools begin about 50 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
+This exists because `index.html` is ~227 kB and the signal pools begin about 59 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
 
 Both vocabulary files are generated from the application by `npm run vocabulary`, and the audit fails if they drift from it.
 

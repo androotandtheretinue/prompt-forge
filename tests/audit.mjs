@@ -174,6 +174,28 @@ if (drawnTicks.join(',') !== engineTicks.join(',')) {
   fail(`The meter draws ticks at ${drawnTicks.join(', ')}; the corruption ladder steps at ${engineTicks.join(', ')}. A meter that documents itself has to be right.`);
 }
 
+/*
+ * The strum lane sits beside the board, not inside it.
+ *
+ * Giving categoriesPanel a flex parent silently changed what
+ * `categoriesPanel.before(...)` means: the v5 layer's strum hint went from
+ * above the board to beside it, as a third column, and the board shrank to
+ * make room. Nothing errored. Anything else that inserts relative to the panel
+ * will hit the same edge, so the arrangement is asserted here.
+ */
+const laneWrapper = html.match(/<div class="board-with-lane[^"]*">([\s\S]*?)<\/div>\s*<!-- Preview Panel -->/);
+if (!/<div class="board-with-lane/.test(html)) {
+  fail('The strum lane wrapper is gone; the lane and the board must share a flex row.');
+} else {
+  const region = html.slice(html.indexOf('board-with-lane'), html.indexOf('id="categoriesPanel"'));
+  if (!region.includes('id="strumLane"')) {
+    fail('The strum lane must come before the category board inside the wrapper, so height maps to axis in reading order.');
+  }
+  if (!/\.closest\('\.board-with-lane'\)/.test(html)) {
+    fail('The strum hint is inserted with categoriesPanel.before without reaching for the wrapper, which puts it beside the board instead of above it.');
+  }
+}
+
 // The Signal Rig reads three states out of the two persisted properties.
 const badStates = audit.rigStates.filter(({ observed }) =>
   observed.live !== 'live' ||
@@ -468,18 +490,27 @@ if (embedded === null) {
   fail('The llms.txt copy embedded in index.html does not match llms.txt. Run `npm run vocabulary`.');
 } else {
   /*
-   * It also has to stay early, but "early" is measured against two different
-   * readers. A markdown converter strips the head entirely, so the protocol
-   * lands within the first page of extracted text no matter what the byte
-   * offset says. A raw-HTML reader counts bytes, and the ~19 kB of inline CSS
-   * above the disclosure is unavoidable without moving styles out of the file,
-   * which the single-file rule forbids. 24 kB leaves headroom for the CSS to
-   * grow a little and still fails loudly if the block is ever moved down the
-   * body, which is the regression that would actually matter.
+   * It also has to stay early — but a byte threshold was measuring the wrong
+   * thing, and had to be raised twice by changes that were not regressions.
+   * Inline CSS sits above the disclosure and grows whenever the interface does,
+   * which the single-file rule guarantees; a ceiling tuned close to that number
+   * fails on ordinary work and teaches you to raise it.
+   *
+   * What actually matters is order. The protocol must come before the board, so
+   * a reader that gives up partway through has the instructions rather than the
+   * markup for a control panel — and a markdown converter, which strips the
+   * head entirely, lands on it within the first page of extracted text however
+   * many kilobytes of style preceded it. The byte ceiling stays as a loose
+   * backstop against something genuinely absurd.
    */
-  const offsetKb = Buffer.byteLength(html.slice(0, html.indexOf('BEGIN llms.txt')), 'utf8') / 1024;
-  if (offsetKb > 24) {
-    fail(`The embedded protocol starts ${offsetKb.toFixed(0)} kB into index.html; it must stay near the top to survive a truncated fetch.`);
+  const protocolAt = html.indexOf('BEGIN llms.txt');
+  const boardAt = html.indexOf('id="categoriesPanel"');
+  if (boardAt !== -1 && protocolAt > boardAt) {
+    fail('The embedded protocol appears after the category board. It must come first, so a truncated read gets the instructions rather than a control panel.');
+  }
+  const offsetKb = Buffer.byteLength(html.slice(0, protocolAt), 'utf8') / 1024;
+  if (offsetKb > 48) {
+    fail(`The embedded protocol starts ${offsetKb.toFixed(0)} kB into index.html, which is further in than any amount of styling explains.`);
   }
 }
 
