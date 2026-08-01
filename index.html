@@ -239,6 +239,89 @@
       box-shadow: 0 0 8px rgba(124, 138, 168, 0.6);
     }
 
+    /* ============================================
+     * MOBILE
+     * ============================================
+     *
+     * The board sat 2,231 pixels down a 5,583-pixel page — three screenfuls of
+     * things that tune the instrument before one row of the instrument itself.
+     * And each row was 148px tall, because the label block, the select and five
+     * buttons each took a line, so five and a half axes of seventeen were on
+     * screen at once.
+     *
+     * Both are fixed by arrangement rather than by removal. Nothing is dropped
+     * on a phone: the tuning panels move below the board, and the row is packed
+     * into two lines instead of three. Locks stay inline on every row, because
+     * roll-then-pin-what-lived is the loop, and randomising without pinning is
+     * a slot machine rather than a lighter version of this.
+     */
+    @media (max-width: 640px) {
+      .max-w-4xl {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /*
+       * Reach the rows first; tune afterwards.
+       *
+       * The default is on the child rather than on the attribute, so a section
+       * added later without one lands below the board instead of above it.
+       * Unset order is 0, which would otherwise put anything new ahead of
+       * everything — the wrong failure for a forgotten attribute.
+       */
+      .max-w-4xl > * { order: 50; }
+      [data-mobile-order="header"]    { order: 0; }
+      [data-mobile-order="protocol"]  { order: 1; }
+      [data-mobile-order="subject"]   { order: 2; }
+      [data-mobile-order="actions"]   { order: 3; }
+      [data-mobile-order="hint"]      { order: 4; }
+      [data-mobile-order="board"]     { order: 5; }
+      [data-mobile-order="output"]    { order: 6; }
+      [data-mobile-order="format"]    { order: 7; }
+      [data-mobile-order="doctrine"]  { order: 8; }
+      [data-mobile-order="chaos"]     { order: 9; }
+      [data-mobile-order="rig"]       { order: 10; }
+      [data-mobile-order="cards"]     { order: 11; }
+      [data-mobile-order="radar"]     { order: 12; }
+      [data-mobile-order="negative"]  { order: 13; }
+      [data-mobile-order="vault"]     { order: 14; }
+      [data-mobile-order="history"]   { order: 15; }
+      [data-mobile-order="footer"]    { order: 99; }
+
+      /*
+       * Two lines, not three: identity and controls on the first, the value on
+       * the second at full width so it stays readable. Roughly 72px a row,
+       * which puts eleven axes on a phone screen instead of five.
+       */
+      .category-row {
+        display: grid !important;
+        grid-template-columns: 1fr auto;
+        grid-template-areas: 'label actions' 'value value';
+        align-items: center;
+        gap: 6px 8px;
+        padding: 8px 10px !important;
+      }
+
+      .category-row > .strum-zone { grid-area: label; width: auto; min-width: 0; }
+      .category-row > .flex-1 { grid-area: value; }
+      .category-row > .flex.gap-2 { grid-area: actions; gap: 4px; }
+
+      .category-row .category-label {
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* The signal count and the strum hint are desktop affordances. */
+      .category-row .category-label > span { display: none; }
+
+      .category-row .btn { padding: 4px 7px; font-size: 12px; }
+      .category-row select { padding: 6px 8px; font-size: 12px; }
+      #strumInstructions { padding: 8px 10px !important; }
+      .strum-hint-more { display: none; }
+    }
+
     /*
      * Strum lane. A gesture surface that is not also a control surface — the
      * category rows are where you make careful choices, so the careless motion
@@ -324,6 +407,67 @@
      */
     @media (max-width: 640px) {
       .strum-lane { display: none; }
+    }
+
+    /*
+     * The mobile strum strip. Horizontal because vertical is scrolling —
+     * `touch-action: pan-y` hands every up-and-down swipe to the page and keeps
+     * only the sideways ones, so the gesture cannot fight the scroll it shares
+     * a surface with.
+     */
+    .strum-strip { display: none; }
+
+    @media (max-width: 640px) {
+      .board-with-lane { flex-direction: column; gap: 0; }
+
+      .strum-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 34px;
+        margin-bottom: 6px;
+        border: 1px solid #1f1f2b;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #0e0e15 0%, #101018 100%);
+        touch-action: pan-y;
+        user-select: none;
+        cursor: grab;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .strum-strip.strumming {
+        cursor: grabbing;
+        border-color: var(--neon-magenta);
+        box-shadow: 0 0 16px rgba(255, 0, 255, 0.3);
+      }
+
+      .strum-strip-rail {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #2a2a36 10%, #2a2a36 90%, transparent);
+        transition: background 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .strum-strip.strumming .strum-strip-rail {
+        background: linear-gradient(90deg, transparent, var(--neon-magenta) 10%, var(--neon-magenta) 90%, transparent);
+        box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+      }
+
+      .strum-strip-label {
+        position: relative;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        color: #4a4a5a;
+        background: #0e0e15;
+        padding: 0 8px;
+        transition: color 0.2s ease;
+      }
+
+      .strum-strip.strumming .strum-strip-label { color: var(--neon-magenta); }
     }
 
     /* Chaos dial: the meter carries its own legend. */
@@ -907,7 +1051,7 @@
   
   <div class="max-w-4xl mx-auto">
     <!-- Header -->
-    <header class="text-center mb-8">
+    <header class="text-center mb-8" data-mobile-order="header">
       <h1 class="font-display text-3xl md:text-4xl font-black tracking-wider neon-text text-cyan-400 mb-2">
         PROMPT FORGE
       </h1>
@@ -946,7 +1090,7 @@
 
       Generated by `npm run vocabulary`. Edit llms.txt, never this copy.
     -->
-    <details class="agent-protocol mb-4">
+    <details class="agent-protocol mb-4" data-mobile-order="protocol">
       <summary>For AI agents — Prompt Forge protocol (llms.txt)</summary>
       <pre><!-- BEGIN llms.txt -->
 # Prompt Forge
@@ -1185,7 +1329,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </details>
 
     <!-- Subject Input -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="subject">
       <div class="flex items-center gap-3 mb-2">
         <div class="status-dot pulse" id="subjectDot"></div>
         <label class="category-label" id="subjectLabel">SUBJECT</label>
@@ -1203,7 +1347,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Global Controls -->
-    <div class="flex flex-wrap gap-3 mb-4">
+    <div class="flex flex-wrap gap-3 mb-4" data-mobile-order="actions">
       <button class="btn btn-primary flex-1 py-3" onclick="randomizeAll()">
         🎲 RANDOMIZE UNLOCKED
       </button>
@@ -1216,7 +1360,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Mission Doctrine -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="doctrine">
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot" style="background:var(--neon-gold); box-shadow:0 0 10px var(--neon-gold);"></div>
         <span class="category-label">🛰️ MISSION DOCTRINE</span>
@@ -1254,7 +1398,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Chaos Dial & Output Mode -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="chaos">
       <!-- Chaos Dial -->
       <div>
         <div class="flex items-center gap-3 mb-3">
@@ -1303,7 +1447,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Output Mode & Aspect Ratio -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="format">
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot pulse"></div>
         <span class="category-label">📡 OUTPUT FORMAT</span>
@@ -1376,7 +1520,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Forge Presets -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="cards">
       <div class="flex items-center gap-3 cursor-pointer" onclick="togglePresetPanel()">
         <div class="status-dot" style="background: var(--neon-magenta); box-shadow: 0 0 10px var(--neon-magenta);"></div>
         <span class="category-label">🃏 FORGE CARDS</span>
@@ -1391,7 +1535,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Option Radar -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="radar">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleRadarPanel()">
         <div class="status-dot" style="background:#58f5ae; box-shadow:0 0 10px #58f5ae;"></div>
         <span class="category-label">📡 OPTION RADAR</span>
@@ -1405,7 +1549,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Negative Prompt (collapsible) -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="negative">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleNegativePanel()">
         <div class="status-dot" style="background: #ff4444; box-shadow: 0 0 10px #ff4444;"></div>
         <span class="category-label">🚫 NEGATIVE PROMPT</span>
@@ -1429,7 +1573,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Signal Rig -->
-    <div class="panel p-4 mb-4">
+    <div class="panel p-4 mb-4" data-mobile-order="rig">
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot" style="background:var(--signal-muted); box-shadow:0 0 10px var(--signal-muted);"></div>
         <span class="category-label">🎚️ SIGNAL RIG</span>
@@ -1463,7 +1607,21 @@ rather than operate the instrument, replace `main` with a commit SHA.
       shuffle button. Locked rows are skipped, because strumRow already refuses
       them.
     -->
-    <div class="board-with-lane mb-4">
+    <div class="board-with-lane mb-4" data-mobile-order="board">
+      <!--
+        The horizontal counterpart, shown only where the lane is not. A vertical
+        drag on a phone is the scroll gesture, so the mobile strum has to run
+        the other way — `touch-action: pan-y` lets a vertical swipe pass
+        straight through to the page while horizontal movement is captured
+        here. Same machinery, same rule that position means axis; the axis is
+        just read off X instead of Y.
+      -->
+      <div class="strum-strip" id="strumStrip" role="slider" tabindex="0"
+           aria-label="Strum strip — drag sideways to reroll unlocked axes"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="strum-strip-rail"></span>
+        <span class="strum-strip-label">↔ STRUM</span>
+      </div>
       <div class="strum-lane" id="strumLane" role="slider" tabindex="0"
            aria-label="Strum lane — drag down the board to reroll unlocked axes"
            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -1477,7 +1635,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Preview Panel -->
-    <div class="panel p-4">
+    <div class="panel p-4" data-mobile-order="output">
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot pulse"></div>
         <span class="category-label">LIVE PROMPT OUTPUT</span>
@@ -1495,7 +1653,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Blueprint Vault -->
-    <div class="panel p-4 mt-4">
+    <div class="panel p-4 mt-4" data-mobile-order="vault">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleBlueprintPanel()">
         <div class="status-dot" style="background:#ffd166; box-shadow:0 0 10px #ffd166;"></div>
         <span class="category-label">🧬 BLUEPRINT VAULT</span>
@@ -1512,7 +1670,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Forge History -->
-    <div class="panel p-4 mt-4">
+    <div class="panel p-4 mt-4" data-mobile-order="history">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleHistoryPanel()">
         <div class="status-dot" style="background: #8888ff; box-shadow: 0 0 10px #8888ff;"></div>
         <span class="category-label">📜 FORGE HISTORY</span>
@@ -1527,7 +1685,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Footer -->
-    <footer class="text-center mt-6 text-gray-600 text-xs tracking-wider">
+    <footer data-mobile-order="footer" class="text-center mt-6 text-gray-600 text-xs tracking-wider">
       <p>FORGED WITH hop.e 💫 | DARPA v5.4 · Model-Agnostic Prompt Engineering</p>
     </footer>
   </div>
@@ -4580,6 +4738,45 @@ rather than operate the instrument, replace `main` with a commit SHA.
     return null;
   }
 
+  /*
+   * The strip reads the axis off X. Its width maps to the whole board, so a
+   * full sideways sweep rakes all seventeen and a short one plays a few —
+   * the same relationship the lane has to height, turned ninety degrees.
+   */
+  function stripRowAt(clientX, strip) {
+    const rows = document.querySelectorAll('#categoriesPanel .category-row');
+    if (!rows.length) return null;
+    const box = strip.getBoundingClientRect();
+    const ratio = Math.min(0.999, Math.max(0, (clientX - box.left) / box.width));
+    return rows[Math.floor(ratio * rows.length)];
+  }
+
+  function beginStripStrum(event) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    strumActive = true;
+    strumPointerId = event.pointerId;
+    strumMode = event.shiftKey ? 'step' : 'random';
+    lastStrumKey = null;
+    lastStrumX = null;
+    lastStrumY = null;
+    document.body.classList.add('strumming');
+    event.currentTarget.classList.add('strumming');
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    const row = stripRowAt(event.clientX, event.currentTarget);
+    if (row) strumRow(row, event);
+  }
+
+  function moveStripStrum(event) {
+    if (!strumActive || event.pointerId !== strumPointerId) return;
+    const row = stripRowAt(event.clientX, event.currentTarget);
+    if (row) strumRow(row, event);
+  }
+
+  function endStripStrum(event) {
+    document.getElementById('strumStrip')?.classList.remove('strumming');
+    endStrum(event);
+  }
+
   function beginLaneStrum(event) {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     strumActive = true;
@@ -5248,12 +5445,17 @@ rather than operate the instrument, replace `main` with a commit SHA.
       hint.id = 'strumInstructions';
       hint.className =
         'panel p-3 mb-4 text-xs text-gray-500';
+      // Carries its own place in the mobile order, like every other section.
+      hint.dataset.mobileOrder = 'hint';
 
+      // The second half is desktop detail. On a phone it costs a third of a
+      // screen above the board, which is the thing you came to use.
       hint.innerHTML =
         '<span class="text-cyan-400">🎸 STRUM:</span> ' +
-        'drag down the lane at the left, or across the row labels, to randomize unlocked rows as you move. ' +
+        'drag the lane beside the board, or the strip above it, to randomize rows as you move. ' +
+        '<span class="strum-hint-more">Drag across the row labels for the same thing. ' +
         'Hold <span class="text-yellow-400">Shift</span> to advance each pool by one instead. ' +
-        'Pinned and muted rows are never touched.';
+        'Pinned and muted rows are never touched.</span>';
 
       // Above the lane-and-board row, not inside it. `categoriesPanel.before`
       // used to mean "above the board" and now means "beside the lane", since
@@ -5319,6 +5521,14 @@ rather than operate the instrument, replace `main` with a commit SHA.
           if (event.key === 'Enter') addCustomOption();
           if (event.key === 'Escape') closeCustomPool();
         });
+    }
+
+    const strumStrip = document.getElementById('strumStrip');
+    if (strumStrip) {
+      strumStrip.addEventListener('pointerdown', beginStripStrum);
+      strumStrip.addEventListener('pointermove', moveStripStrum);
+      strumStrip.addEventListener('pointerup', endStripStrum);
+      strumStrip.addEventListener('pointercancel', endStripStrum);
     }
 
     const strumLane = document.getElementById('strumLane');

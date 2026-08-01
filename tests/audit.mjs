@@ -196,6 +196,40 @@ if (!/<div class="board-with-lane/.test(html)) {
   }
 }
 
+/*
+ * Mobile ordering: every section named in the markup must have a rule, and
+ * every rule must name a section that exists.
+ *
+ * The phone layout reorders the page with flexbox so the board comes before
+ * the panels that tune it — 2,231px of scrolling before the first axis, until
+ * it did not. That mapping lives in two places, an attribute and a stylesheet,
+ * and a section whose name matches nothing silently keeps the fallback order
+ * while looking deliberate. Neither half is visible from the other.
+ */
+const orderedSections = [...html.matchAll(/data-mobile-order="([a-z]+)"/g)].map(match => match[1]);
+const styledSections = [...html.matchAll(/\[data-mobile-order="([a-z]+)"\]\s*\{\s*order:/g)].map(match => match[1]);
+const markupSections = orderedSections.filter(name => !styledSections.includes(name));
+const orphanRules = styledSections.filter(name => !orderedSections.includes(name));
+if (markupSections.length) {
+  fail(`These sections carry data-mobile-order with no rule to place them: ${[...new Set(markupSections)].join(', ')}.`);
+}
+if (orphanRules.length) {
+  fail(`These mobile order rules name sections that no longer exist: ${[...new Set(orphanRules)].join(', ')}.`);
+}
+if (!/\.max-w-4xl > \*\s*\{\s*order:/.test(html)) {
+  fail('The mobile order has no default for unlabelled sections, so a new panel would sort above the board rather than below it.');
+}
+
+/*
+ * The mobile strum runs sideways, and must not fight the scroll it shares a
+ * surface with. `touch-action: pan-y` is the whole mechanism: it hands vertical
+ * swipes to the page and keeps only horizontal ones. Without it the strip
+ * captures both and the page stops scrolling under the thumb.
+ */
+if (!/\.strum-strip\b[\s\S]{0,600}?touch-action:\s*pan-y/.test(html)) {
+  fail('The mobile strum strip does not set touch-action: pan-y, so a vertical swipe on it would fight the page scroll.');
+}
+
 // The Signal Rig reads three states out of the two persisted properties.
 const badStates = audit.rigStates.filter(({ observed }) =>
   observed.live !== 'live' ||
