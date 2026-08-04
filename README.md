@@ -1,4 +1,6 @@
-# Prompt Forge DARPA v5
+# Prompt Forge
+
+*Distributed Axis Randomization & Prompt Assembly*
 
 **A public-domain, user-extensible visual prompt instrument: 2,304 signals, 17 creative axes, drag-strumming, custom pools, a three-state signal rig, and no permission required.**
 
@@ -15,7 +17,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **2,304 signals** across **17 axes**, including a **160-medium** bank that covers still images and images in motion — Claymation, Rotoscoping, Stop Motion, Cel Animation, Machinima, and the pre-cinema motion studies they came from.
 - **Figure**: 80 signals for how the body is arranged, as distinct from what it is doing. Contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up. Action tells you the subject is reclining; Figure tells you how.
 - **Color Logic**: 80 *relational* instructions rather than colors — chromatic skin against achromatic clothing, warm subject in a cool world, pearlescence only in the highlights. It describes a relationship between regions of the image, which is how a colorist thinks and is the axis with no equivalent in other prompt tools.
-- **29 Forge Cards**, including eight warm-figure doctrines — Komorebi, Waterline, Salt and Gold, Poolside Noon, Lido 1972 and others — and the **DARPA** card for phosphor-terminal, scan-line, telemetry, and retro-defense-interface aesthetics.
+- **29 Forge Cards**, including eight warm-figure doctrines — Komorebi, Waterline, Salt and Gold, Poolside Noon, Lido 1972 and others — and the **PHOSPHOR** card for phosphor-terminal, scan-line, telemetry, and retro-interface aesthetics.
 - **Mobile layout** puts the board first: the panels that tune the instrument sit below the rows rather than above them, and the rows pack into two lines. Nothing is removed — locks stay inline on every row, and the heavy panels are a tap away.
 - **Strum lane**: a rail down the left of the board. Drag along it to reroll whichever row you are level with — height means axis, so a slow drag walks the axes in order and the same drag played twice does the same thing. Arrow keys and space reach it too.
 - **Drag Strum**: hold and sweep across category labels to repeatedly randomize unlocked axes.
@@ -149,9 +151,9 @@ Custom signals:
 - remain separate from the canonical built-in signal banks
 - can be deleted from their category's custom-signal panel
 
-## The DARPA card
+## The PHOSPHOR card
 
-The DARPA Forge Card treats the aesthetic as a rendering doctrine rather than forcing an operator or control-room scene.
+The PHOSPHOR Forge Card treats the aesthetic as a rendering doctrine rather than forcing an operator or control-room scene.
 
 It emphasizes phosphor monochrome, CRT raster and scan lines, telemetry overlays, command-display composition, archival display fidelity, and cold-war interface paranoia while leaving scene-dependent axes such as setting and wardrobe blank.
 

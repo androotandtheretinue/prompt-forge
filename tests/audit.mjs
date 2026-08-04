@@ -584,14 +584,41 @@ if (!/<link\s[^>]*rel=["']alternate["'][^>]*href=["']vocabulary\.json["']/.test(
 const shortVersion = version.replace(/\.\d+$/, '');
 const versionClaims = [
   { label: 'PF_VERSION', found: (html.match(/const PF_VERSION = '([^']+)'/) || [])[1], want: shortVersion },
-  { label: 'static footer', found: (html.match(/FORGED WITH hop\.e[^<]*DARPA v([\d.]+)/) || [])[1], want: shortVersion },
-  { label: 'static header', found: (html.match(/id="optionCountHeader">[^<]*DARPA v([\d.]+)/) || [])[1], want: shortVersion },
-  { label: '<title>', found: (html.match(/<title>PROMPT FORGE DARPA v(\d+)/) || [])[1], want: shortVersion.split('.')[0] },
-  { label: 'og:title', found: (html.match(/og:title["'] content=["']Prompt Forge DARPA v(\d+)/) || [])[1], want: shortVersion.split('.')[0] }
+  { label: 'static footer', found: (html.match(/FORGED WITH hop\.e[^<]*?v([\d.]+)/) || [])[1], want: shortVersion },
+  { label: 'static header', found: (html.match(/id="optionCountHeader">[^<]*·\s*v([\d.]+)/) || [])[1], want: shortVersion }
 ];
 for (const { label, found, want } of versionClaims) {
   if (found === undefined) fail(`Could not find the ${label} version string in index.html.`);
   else if (found !== want) fail(`${label} says v${found}; package.json is ${version} (expected v${want}).`);
+}
+
+/*
+ * No agency name on the masthead.
+ *
+ * The project is called Prompt Forge, and the subtitle — Distributed Axis
+ * Randomization & Prompt Assembly — describes what it does. The initials of
+ * that phrase spell a federal agency, which is the joke, and the joke works
+ * because a reader notices it rather than because the page announces it.
+ *
+ * Spelling the agency out is what would turn an easter egg into an implied
+ * affiliation, so the surfaces a stranger meets first are kept clear of it. The
+ * DARPA Forge Card and two of its signal values still carry the word, and are
+ * meant to: a card inside a tool reads as a citation, the way a film emulation
+ * names a film stock. That is content. This is the masthead.
+ */
+const brandSurfaces = [
+  ['<title>', (html.match(/<title>([^<]*)<\/title>/) || [])[1]],
+  ['og:title', (html.match(/og:title["'] content=["']([^"']*)/) || [])[1]],
+  ['twitter:title', (html.match(/twitter:title["'] content=["']([^"']*)/) || [])[1]],
+  ['static header', (html.match(/id="optionCountHeader">([^<]*)/) || [])[1]],
+  ['static footer', (html.match(/<p>(FORGED WITH[^<]*)/) || [])[1]]
+];
+const brandedWithAgency = brandSurfaces.filter(([, text]) => text && /darpa/i.test(text));
+if (brandedWithAgency.length) {
+  fail(`These brand surfaces name a federal agency: ${brandedWithAgency.map(([where]) => where).join(', ')}. The subtitle spells it; the masthead should not.`);
+}
+if (!/Distributed Axis Randomization/i.test(html)) {
+  fail('index.html no longer carries the Distributed Axis Randomization & Prompt Assembly subtitle, which is the whole of the naming.');
 }
 
 /*
@@ -628,7 +655,7 @@ if (statedCounts.length) {
 }
 
 // The runtime footer must derive its version rather than restate it.
-if (/DARPA v[\d.]+ ·/.test(html.slice(html.indexOf('footer.textContent')))) {
+if (/v\d+\.\d+ ·/.test(html.slice(html.indexOf('footer.textContent'), html.indexOf('footer.textContent') + 400))) {
   fail('The runtime footer hardcodes a version instead of interpolating PF_VERSION.');
 }
 

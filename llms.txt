@@ -1,5 +1,7 @@
 # Prompt Forge
 
+Distributed Axis Randomization & Prompt Assembly
+
 > A public-domain protocol for building image prompts: 17 axes, at most one
 > value per axis, in service of one stated idea.
 

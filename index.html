@@ -6,7 +6,7 @@
   <meta name="description" content="A free, public-domain visual prompt instrument with 2,304 signals across 17 creative axes.">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="color-scheme" content="dark">
-  <meta property="og:title" content="Prompt Forge DARPA v5">
+  <meta property="og:title" content="Prompt Forge">
   <meta property="og:description" content="Forge image prompts from 2,304 signals, 28 curated cards, and model-aware controls.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://androotandtheretinue.github.io/prompt-forge/">
@@ -20,10 +20,10 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="The Prompt Forge control board: subject field, randomize and mutate controls, mission doctrine payload sizes, cluster reroll scopes, and the chaos dial.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Prompt Forge DARPA v5">
+  <meta name="twitter:title" content="Prompt Forge">
   <meta name="twitter:description" content="Forge image prompts from 2,304 signals across 17 creative axes. Public domain, no account required.">
   <meta name="twitter:image" content="https://androotandtheretinue.github.io/prompt-forge/social-card.png">
-  <title>PROMPT FORGE DARPA v5 | AI Image Generation Board</title>
+  <title>Prompt Forge — Distributed Axis Randomization &amp; Prompt Assembly</title>
 
   <!--
     For machine readers. This file is ~175 kB and the signal pools begin around
@@ -1063,7 +1063,7 @@
         cannot see. An outside audit of the live page reported the version as
         v4.0.0 for exactly this reason. The audit checks it now.
       -->
-      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · DARPA v5.4 · 2,304 Options · 17 Axes</p>
+      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · v5.4 · 2,304 Options · 17 Axes</p>
     </header>
 
     <!--
@@ -1094,6 +1094,8 @@
       <summary>For AI agents — Prompt Forge protocol (llms.txt)</summary>
       <pre><!-- BEGIN llms.txt -->
 # Prompt Forge
+
+Distributed Axis Randomization &amp; Prompt Assembly
 
 &gt; A public-domain protocol for building image prompts: 17 axes, at most one
 &gt; value per axis, in service of one stated idea.
@@ -1686,7 +1688,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     <!-- Footer -->
     <footer data-mobile-order="footer" class="text-center mt-6 text-gray-600 text-xs tracking-wider">
-      <p>FORGED WITH hop.e 💫 | DARPA v5.4 · Model-Agnostic Prompt Engineering</p>
+      <p>FORGED WITH hop.e 💫 | v5.4 · Distributed Axis Randomization &amp; Prompt Assembly</p>
     </footer>
   </div>
 
@@ -3774,7 +3776,13 @@ rather than operate the instrument, replace `main` with a commit SHA.
         sum + cat.options.filter(option => !option.startsWith('—')).length, 0);
       const axisCount = Object.keys(categories).length;
       document.getElementById('optionCountHeader').textContent =
-        `AI Image Generation Control Board · DARPA v4.0 · ${total.toLocaleString()} Options · ${axisCount} Axes`;
+        // No version here on purpose. PF_VERSION lives in the v5 layer, which
+        // overrides this function anyway; this line only renders if that layer
+        // never runs. It carried a hardcoded v4.0 for three releases precisely
+        // because nothing could see it. A number it cannot derive is a number
+        // that goes stale, so it states the counts it can compute and nothing
+        // it cannot.
+        `AI Image Generation Control Board · ${total.toLocaleString()} Options · ${axisCount} Axes`;
     }
 
     function renderCategories() {
@@ -5152,7 +5160,16 @@ rather than operate the instrument, replace `main` with a commit SHA.
   };
 
   // ------------------------------------------------------------
-  // DARPA CARD + VOCABULARY
+  /*
+   * PHOSPHOR CARD + VOCABULARY
+   *
+   * The card was called DARPA until the name left the masthead. Two of its
+   * signal values still carry the word — DARPA Scan Lines, DARPA Interface —
+   * and stay that way on purpose: a value inside a 2,304-item vocabulary reads
+   * as a citation the way a film emulation names a stock, and renaming them
+   * would silently blank those axes in every blueprint that used the card,
+   * since applyConfiguration drops any saved value no longer in its pool.
+   */
   // ------------------------------------------------------------
 
   function ensureBuiltInOption(key, option) {
@@ -5176,7 +5193,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       options.forEach((option) => ensureBuiltInOption(key, option));
     });
 
-    presets.DARPA = {
+    presets.PHOSPHOR = {
       medium: 'Vector Graphics',
       texture: 'DARPA Scan Lines',
       style: 'DARPA Interface',
@@ -5191,7 +5208,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       narrative: 'The Interface Knows Before You Do'
     };
 
-    presetMeta.DARPA = [
+    presetMeta.PHOSPHOR = [
       '📟',
       'Cold-war terminal authority, phosphor raster, and classified telemetry.',
       '#73ff75'
@@ -5209,7 +5226,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     );
 
     document.getElementById('optionCountHeader').textContent =
-      `AI Image Generation Control Board · DARPA v${PF_VERSION} · ` +
+      `AI Image Generation Control Board · v${PF_VERSION} · ` +
       `${total.toLocaleString()} Options · ` +
       `${Object.keys(categories).length} Axes`;
   };
@@ -5577,11 +5594,11 @@ rather than operate the instrument, replace `main` with a commit SHA.
     injectV5Ui();
 
     document.title =
-      'PROMPT FORGE DARPA v5 | AI Image Generation Board';
+      'Prompt Forge — Distributed Axis Randomization & Prompt Assembly';
 
     document
       .querySelector('meta[property="og:title"]')
-      ?.setAttribute('content', 'Prompt Forge DARPA v5');
+      ?.setAttribute('content', 'Prompt Forge');
 
     document
       .querySelector('meta[property="og:description"]')
@@ -5594,8 +5611,8 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     if (footer) {
       footer.textContent =
-        `FORGED WITH hop.e 💫 | DARPA v${PF_VERSION} · ` +
-        'User-Extensible Prompt Instrument';
+        `FORGED WITH hop.e 💫 | v${PF_VERSION} · ` +
+        'Distributed Axis Randomization & Prompt Assembly';
     }
 
     renderCategories();
