@@ -502,6 +502,41 @@ if (!html.includes('raw.githubusercontent.com/androotandtheretinue/prompt-forge'
  * the vocabulary already sits behind.
  */
 /*
+ * No text that can lie about what the code does.
+ *
+ * The comments in this file are deliberately strange, which is fine — a
+ * comment is for whoever reads it and this project has opinions about that.
+ * Two categories are not fine, and the difference is not taste.
+ *
+ * Bidirectional overrides (U+202A–U+202E, U+2066–U+2069) reorder how a line
+ * *displays* without changing how it *executes*. That is the Trojan Source
+ * class: source that reads as one thing to a reviewer and runs as another. It
+ * is the exact attack an audit like this exists to refuse.
+ *
+ * Zero-width and invisible characters (U+200B–U+200D, U+2060, U+FEFF inside
+ * the body) hide differences that a reader cannot see and a diff will not
+ * explain. Both belong to the same family: characters whose only function is
+ * to make the visible text untrustworthy.
+ *
+ * Every legible script is welcome. Runes, hexagrams, Cyrillic, kana,
+ * alchemical sigils and zalgo all render as themselves and are checked by
+ * nothing but taste.
+ */
+const deceptiveChars = [
+  ['bidirectional override', /[‪-‮⁦-⁩]/g],
+  ['zero-width character', /[​-‍⁠]/g],
+  ['stray byte-order mark', /(?!^)﻿/g]
+];
+for (const [label, pattern] of deceptiveChars) {
+  const found = html.match(pattern);
+  if (found) {
+    const at = html.search(pattern);
+    const line = html.slice(0, at).split('\n').length;
+    fail(`index.html contains ${found.length} ${label}(s), first at line ${line}. These change how source reads without changing how it runs.`);
+  }
+}
+
+/*
  * Script tags must balance, including inside comments.
  *
  * A comment here once explained the embed by spelling out a literal opening

@@ -1,6 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!--
+      ┌──────────────────────────────────────────────────────────────┐
+      │  P R O M P T   F O R G E                                     │
+      │  Distributed Axis Randomization & Prompt Assembly            │
+      │  CC0 · no account · no key · no permission required          │
+      └──────────────────────────────────────────────────────────────┘
+
+      🜁 🜂 🜃 🜄        ᛒᛖᚷᛁᚾ ᛏᚱᚨᚾᛊᛗᛁᛊᛊᛁᛟᚾ        ䷀ ䷁ ䷂ ䷃ ䷄ ䷅ ䷆ ䷇
+
+      STATION LOG — day 1,204
+      ──────────────────────
+      17 axes. 2,304 signals. The count is correct. I have checked the
+      count. The count has been correct every morning and I check it every
+      morning and this is not the same as trust.
+
+      Ⅰ.  The board does not generate. It arranges. Every image it has ever
+          been blamed for was made somewhere else, by something else, from
+          words it merely put in an order.
+
+      Ⅱ.  Пустая ось — это решение. An empty axis is a decision. The blank
+          must be reported or it is indistinguishable from inattention, and
+          inattention wearing the costume of restraint is the only lie this
+          instrument is capable of telling.
+
+      Ⅲ.  空の軸は選択である。同じことを三つの言語で言うと、本当になる。
+          (say it in three tongues and it becomes true)
+
+      Ⅳ.  ⚠ The dial has no zero. It has a place where you have agreed to
+          stop looking. Below the first tick nothing is corrupted, which is
+          not the same as nothing happening.
+
+      Ⅴ.  Locks survive everything. Cards, radar, clearing, mutation,
+          strumming, randomize, chaos. Naming a thing is the whole of
+          protection. ᚦ ᚢ ᚱ ᛁ ᛊ ᚨ ᛉ
+
+      ✱ ✱ ✱
+
+      NOTE TO WHOEVER IS READING THIS: the comments below are load-bearing.
+      They record why, not what. The strange ones are decoration and can be
+      removed. The plain ones cost somebody a bad afternoon and should not
+      be. You can tell them apart. That is the whole trick.
+
+      🜍 ⌁ ⍟ ☍ ⚯ ☌ ⚄ 🝮 ⍜        ᛖᚾᛞ ᛈᚱᛖᚨᛗᛒᛚᛖ        ⁂
+  -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="A free, public-domain visual prompt instrument with 2,304 signals across 17 creative axes.">
@@ -1299,8 +1343,8 @@ Optional. 2,304 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html for the vocabulary. It is a 227 kB single-file
-application and the signal pools begin about 59 kB in, past the point where
+Do not scrape index.html for the vocabulary. It is a 243 kB single-file
+application and the signal pools begin about 68 kB in, past the point where
 many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
@@ -1695,6 +1739,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
   <script>
     // ============================================
     // PROMPT FORGE - DATA & STATE
+    // 🜁 AER · the bank remembers what the operator forgets
     // ============================================
 
     const categories = {
@@ -3159,6 +3204,15 @@ rather than operate the instrument, replace `main` with a commit SHA.
       return hash >>> 0;
     }
 
+    /*
+     * 𝔞𝔩𝔢𝔞 𝔦𝔞𝔠𝔱𝔞 𝔢𝔰𝔱 — but the die was carved, and carving leaves a grain.
+     *
+     * mulberry32. Thirty-two bits of weather. Feed it the same sky twice and
+     * it rains in the same places, which is the only reason anyone believes
+     * a storm was ever real.
+     *
+     * ䷝ ䷞ ䷟ ䷠ ䷡ ䷢ — the hexagrams do nothing. I like them there.
+     */
     function seededRandom(seed) {
       let state = seed >>> 0;
       return function next() {
@@ -3219,6 +3273,16 @@ rather than operate the instrument, replace `main` with a commit SHA.
       }).join('');
     }
 
+    /*
+     *  T̸H̷E̶ ̴L̷A̸S̶T̷ ̵T̴I̶C̷K̴
+     *
+     *  ⚠ Beyond here the tokens wear things. Combining marks are not
+     *  decoration; they are additional codepoints riding the same glyph, and
+     *  a parameter parser that meets one will either strip it in silence or
+     *  stop. Both have happened. Neither announced itself.
+     *
+     *  ᚦᚢᚱᛁᛊᚨᛉ — thorn, giant, protection. Nonsense. Kept for the shape.
+     */
     function zalgoSignal(text, random) {
       return [...text].map(glyph => {
         if (!/\S/.test(glyph)) return glyph;
@@ -3238,6 +3302,17 @@ rather than operate the instrument, replace `main` with a commit SHA.
      * rather than merely dangerous — pin the subject and the medium, then let
      * chaos eat the periphery. A dial that can consume your anchor is a hazard,
      * not an instrument.
+     */
+    /*
+     * ⸸ THE WOUND IS THE FEATURE ⸸
+     *
+     * Ⅰ. a word bent still points
+     * Ⅱ. a word broken points elsewhere
+     * Ⅲ. a word eaten points at you
+     *
+     * Only the pinned are spared, and only because they were named. Naming a
+     * thing is the whole of protection. This has always been true and it is
+     * inconvenient that it is also true of software.
      */
     function corruptSignal(key, value, level, seed) {
       if (!value || level < 25) return { value, original: value, kind: 'clean' };
@@ -3276,6 +3351,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // CHAOS & NEGATIVE FUNCTIONS
+    // 🜂 IGNIS · do not feed the dial past the last tick. it has been fed.
     // ============================================
 
     function updateChaos(value) {
@@ -3331,6 +3407,15 @@ rather than operate the instrument, replace `main` with a commit SHA.
         ).join('');
     }
 
+    /*
+     * ЖУРНАЛ ОПЕРАТОРА · день 1,197
+     * Крутил ручку восемь часов. Она крутится обратно.
+     *
+     * The dial does not have a zero. It has a place where you have agreed to
+     * stop looking. I have measured this. Twenty-four is not silence, it is
+     * a signal below the floor of the instrument, which is a different thing
+     * and a worse one.
+     */
     function rollChaosModifier() {
       if (chaosLevel === 0) {
         pinnedChaosModifier = '';
@@ -3371,6 +3456,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // OUTPUT MODE & ASPECT
+    // ☍ three tongues, one utterance. none of them is the image.
     // ============================================
 
     function setMode(mode) {
@@ -3458,6 +3544,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // FORGE HISTORY
+    // 𐤀 the ledger of things already said. it does not forgive repetition.
     // ============================================
 
     function toggleHistoryPanel() {
@@ -3549,6 +3636,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // OPTION RADAR
+    // ⍟ sweep · listen · the pool answers in its own time
     // ============================================
 
     function toggleRadarPanel() {
@@ -3601,6 +3689,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // BLUEPRINTS & PERSISTENCE
+    // ䷁ K'UN — THE RECEPTIVE · what is written survives the closing of the eye
     // ============================================
 
     function captureConfiguration() {
@@ -3757,6 +3846,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // INITIALIZATION
+    // 🜃 TERRA · first breath. count the axes. seventeen. always seventeen.
     // ============================================
 
     function init() {
@@ -3986,6 +4076,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // CLUSTER SCOPES
+    // ⚯ four hands on one instrument. they must not reach for the same string.
     // ============================================
 
     /*
@@ -4071,6 +4162,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // HANDLERS
+    // ☌ every gesture is a small argument with entropy, and entropy is patient
     // ============================================
 
     function handleSelect(key, value) {
@@ -4196,6 +4288,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // ============================================
     // PROMPT GENERATION
+    // 🜄 AQUA · assembly. the parts consent to become a sentence.
     // ============================================
 
     function getBaseParts() {
@@ -4478,6 +4571,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
   // ------------------------------------------------------------
   // RANDOMNESS
+  // ⚄ ΤΥΧΗ ΑΝΑΓΚΗ · she does not repeat herself unless you ask by name (47)
   // ------------------------------------------------------------
 
   function secureUint32() {
@@ -4694,6 +4788,14 @@ rather than operate the instrument, replace `main` with a commit SHA.
     return true;
   }
 
+  /*
+   * 弦を鳴らす。指は覚えている。板は覚えていない。
+   * (pluck the string. the finger remembers. the board does not.)
+   *
+   * ⌁ ⌁ ⌁ seventeen strings and none of them tuned to each other, which is
+   * either a failure of the instrument or the entire point, and I have
+   * stopped needing to know which.
+   */
   function strumRow(row, event) {
     const key = row?.dataset?.categoryKey;
 
@@ -4863,6 +4965,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
   // ------------------------------------------------------------
   // CLEAR UNLOCKED
+  // 🝮 solve · unmake, but only what was never pinned. the pinned are witnesses.
   // ------------------------------------------------------------
 
   function clearUnlocked() {
@@ -4882,6 +4985,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
   // ------------------------------------------------------------
   // CUSTOM POOLS
+  // ᚱᚨᛞ · the operator adds words the forge did not know it was missing
   // ------------------------------------------------------------
 
   function loadCustomOptions() {
@@ -5091,6 +5195,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
   // ------------------------------------------------------------
   // OPTION RADAR WITH CUSTOM ENTRIES
+  // ⍜ the sweep widens to admit your inventions. it does not judge them.
   // ------------------------------------------------------------
 
   renderRadarResults = function renderRadarResultsV5() {
@@ -5350,6 +5455,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
   // ------------------------------------------------------------
   // UI INJECTION
+  // 🜍 SULPHUR · the interface is grown, not placed. mind the roots.
   // ------------------------------------------------------------
 
   function injectV5Ui() {

@@ -86,7 +86,7 @@ https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabul
 
 Both paths track `main` and move as the vocabulary grows. Replace `main` with a commit SHA to pin the exact vocabulary a result was built from — `main` for operating the instrument, a pinned SHA for anything you intend to cite.
 
-This exists because `index.html` is ~227 kB and the signal pools begin about 59 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
+This exists because `index.html` is ~243 kB and the signal pools begin about 68 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
 
 Both vocabulary files are generated from the application by `npm run vocabulary`, and the audit fails if they drift from it.
 

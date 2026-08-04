@@ -2,6 +2,8 @@ Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
 Added
+Added a station log to the head of `index.html` and esoteric epigraphs under every section banner — alchemical sigils, runes, hexagrams, Cyrillic, kana, Roman numerals. Decoration, addressed to whoever opens the source. The log ends by saying which comments are load-bearing and which can be deleted, because the joke should not cost the next reader an afternoon.
+Added an audit check refusing bidirectional overrides, zero-width characters and stray byte-order marks. Every legible script is welcome; characters whose only function is to make source read differently than it runs are the Trojan Source class and are refused by name.
 Renamed the project's public identity. It is Prompt Forge, subtitled Distributed Axis Randomization & Prompt Assembly. The agency name no longer appears on the title, the Open Graph and Twitter titles, the page header, or the footer — the initials of the subtitle still spell it, and that is the joke, but a reader finds it rather than being told. Spelling it out is what would turn an easter egg into an implied affiliation.
 Renamed the DARPA Forge Card to PHOSPHOR, after the phosphor-terminal aesthetic it actually describes. Its two signal values, DARPA Scan Lines and DARPA Interface, deliberately keep their names: a value inside a 2,304-item vocabulary reads as a citation, and renaming them would silently blank those axes in every saved blueprint that used the card, since applyConfiguration drops any value no longer in its pool.
 Added an audit check that no brand surface names a federal agency, and that the subtitle is present.
