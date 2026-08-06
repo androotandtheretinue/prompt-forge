@@ -77,6 +77,25 @@ globalThis.__forgeAudit = {
       tickCount: Array.isArray(CHAOS_TICKS) ? CHAOS_TICKS.length : 0
     };
   })(),
+  elimination: (() => {
+    const pool = categories.colorlogic.options.filter(option => !option.startsWith('—'));
+    const inertWhenReleased = applyElimination('colorlogic', pool).length === pool.length;
+    setEliminationHeld(true);
+    recordElimination('colorlogic', pool[0]);
+    const refusedGone = !applyElimination('colorlogic', pool).includes(pool[0]);
+    pool.forEach(value => recordElimination('colorlogic', value));
+    const afterExhaustion = applyElimination('colorlogic', pool);
+    const exhaustionResets = afterExhaustion.length === pool.length && afterExhaustion.length > 0;
+    // Two fresh axes: colorlogic was just cleared by its own exhaustion reset.
+    recordElimination('mood', 'Serene');
+    recordElimination('style', 'Noir');
+    const counts = eliminationCount();
+    setEliminationHeld(false);
+    const releaseClears = eliminationCount() === 0;
+    recordElimination('mood', 'Serene');
+    const inertAfterRelease = eliminationCount() === 0;
+    return { inertWhenReleased, refusedGone, exhaustionResets, counts, releaseClears, inertAfterRelease };
+  })(),
   rigStates: Object.keys(categories).map(key => {
     const cat = categories[key];
     const read = value => { cat.value = value.value; cat.locked = value.locked; return categoryStateOf(cat); };
@@ -93,9 +112,24 @@ globalThis.__forgeAudit = {
   })
 };`;
 
+/*
+ * A document stub wide enough to execute the block, not to render it.
+ *
+ * Functions in the application block increasingly touch the DOM to reflect
+ * state — the elimination readout, the chaos zone. They all guard against a
+ * missing element, so returning null from every lookup lets them run to
+ * completion and lets checks below call them. A stub that omits a method
+ * throws instead, which reads as a broken application rather than a stub that
+ * needs a line adding.
+ */
 const context = {
   console,
-  document: { addEventListener() {} }
+  document: {
+    addEventListener() {},
+    getElementById: () => null,
+    querySelector: () => null,
+    querySelectorAll: () => []
+  }
 };
 vm.createContext(context);
 
@@ -228,6 +262,36 @@ if (!/\.max-w-4xl > \*\s*\{\s*order:/.test(html)) {
  */
 if (!/\.strum-strip\b[\s\S]{0,600}?touch-action:\s*pan-y/.test(html)) {
   fail('The mobile strum strip does not set touch-action: pan-y, so a vertical swipe on it would fight the page scroll.');
+}
+
+/*
+ * Elimination: a survey, and a survey that ends.
+ *
+ * Holding the modifier sets aside every value rolled past, so each draw shows
+ * something unseen. Three properties make that a feature rather than a trap.
+ *
+ * It must be inert when released, or a mode nobody is in still changes what the
+ * dice can return. It must reset on exhaustion rather than deadlock — an axis
+ * with nothing left to draw would silently stop responding, which reads as a
+ * broken button rather than a completed sweep. And releasing must clear, since
+ * the state describes an act of looking and a survey resumed later is a
+ * different survey.
+ */
+const elim = audit.elimination;
+if (!elim.inertWhenReleased) fail('Elimination filters candidates while released; it must do nothing unless the modifier is held.');
+if (!elim.refusedGone) fail('A value rolled past is still offered while eliminating.');
+if (!elim.exhaustionResets) fail('Elimination deadlocks on an exhausted pool instead of starting the sweep again. An axis with no candidates stops responding.');
+if (elim.counts < 2) fail(`Elimination counted ${elim.counts} set-aside signals across two axes; the readout would understate what it has refused.`);
+if (!elim.releaseClears) fail('Releasing the modifier does not clear the set-aside signals.');
+if (!elim.inertAfterRelease) fail('Elimination keeps accumulating after release, so the next survey starts dirty.');
+
+/*
+ * The blur handler is not optional. A keyup fired while the window is unfocused
+ * never arrives, so alt-tabbing mid-survey would strand the mode on with no key
+ * held and nothing to explain it.
+ */
+if (!/window\.addEventListener\('blur',\s*\(\)\s*=>\s*setEliminationHeld\(false\)\)/.test(html)) {
+  fail('Nothing clears elimination on window blur, so losing focus mid-survey would leave the mode stuck on.');
 }
 
 // The Signal Rig reads three states out of the two persisted properties.

@@ -2,6 +2,10 @@ Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
 Added
+Added elimination to rerolling: hold Shift and every value rolled past is set aside, so each draw comes from what remains. A plain reroll samples with replacement and only refuses the value already on screen, which on a 176-option axis shows you the same handful all afternoon — good for stumbling onto something, useless for surveying. Release and the whole pool returns.
+The state is transient by design: not saved to Blueprints, not persisted, cleared on release and on window blur. It records an act of looking rather than a decision, and a survey resumed an hour later is a different survey.
+Exhausting an axis restarts its sweep rather than deadlocking. A pool with no candidates left would silently stop responding, which reads as a broken button rather than a completed pass.
+The Randomize button reports the mode while the key is held, showing how many signals are currently set aside. A mode that changes what the dice can return should not be invisible.
 Added a station log to the head of `index.html` and esoteric epigraphs under every section banner — alchemical sigils, runes, hexagrams, Cyrillic, kana, Roman numerals. Decoration, addressed to whoever opens the source. The log ends by saying which comments are load-bearing and which can be deleted, because the joke should not cost the next reader an afternoon.
 Added an audit check refusing bidirectional overrides, zero-width characters and stray byte-order marks. Every legible script is welcome; characters whose only function is to make source read differently than it runs are the Trojan Source class and are refused by name.
 Renamed the project's public identity. It is Prompt Forge, subtitled Distributed Axis Randomization & Prompt Assembly. The agency name no longer appears on the title, the Open Graph and Twitter titles, the page header, or the footer — the initials of the subtitle still spell it, and that is the joke, but a reader finds it rather than being told. Spelling it out is what would turn an easter egg into an implied affiliation.

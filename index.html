@@ -514,6 +514,15 @@
       .strum-strip.strumming .strum-strip-label { color: var(--neon-magenta); }
     }
 
+    /* Elimination: the button says what it will do while the key is down. */
+    .btn.eliminating {
+      border-color: var(--neon-gold);
+      color: var(--neon-gold);
+      background: rgba(255, 215, 0, 0.12);
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.25);
+      letter-spacing: 0.06em;
+    }
+
     /* Chaos dial: the meter carries its own legend. */
     .chaos-ticks {
       position: relative;
@@ -1394,8 +1403,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     <!-- Global Controls -->
     <div class="flex flex-wrap gap-3 mb-4" data-mobile-order="actions">
-      <button class="btn btn-primary flex-1 py-3" onclick="randomizeAll()">
-        🎲 RANDOMIZE UNLOCKED
+      <button class="btn btn-primary flex-1 py-3" id="randomizeButton" onclick="randomizeAll()"
+              title="Roll every live axis. Hold Shift to set aside what you roll past, so each roll shows you something new.">
+        <span id="randomizeLabel">🎲 RANDOMIZE UNLOCKED</span>
       </button>
       <button class="btn btn-random py-3 px-5" onclick="mutateRandom(3)" title="Reroll three unlocked dimensions">
         🧬 MUTATE 3
@@ -3354,6 +3364,82 @@ rather than operate the instrument, replace `main` with a commit SHA.
     // 🜂 IGNIS · do not feed the dial past the last tick. it has been fed.
     // ============================================
 
+    /* ============================================
+     * ELIMINATION — sampling without replacement
+     * ============================================
+     * ⚗ SOLVE ET COAGULA · to survey a pool you must refuse it in pieces
+     *
+     * A plain reroll draws with replacement. It declines to hand back the value
+     * you are already looking at, and nothing more — so on a 176-option axis it
+     * will show you the same handful all afternoon and you will never learn what
+     * else was in there. Fine for stumbling onto something. Useless for looking.
+     *
+     * Hold the modifier and every value you roll past is set aside. The next
+     * draw comes from what remains, so each roll is something you have not seen
+     * and the pool narrows as you refuse it. Release and everything returns.
+     *
+     * The state is deliberately transient — not saved to Blueprints, not
+     * persisted. It describes an act of looking rather than a decision, and a
+     * survey resumed an hour later is a different survey.
+     */
+    let eliminationHeld = false;
+    const eliminatedSignals = new Map();
+
+    function setEliminationHeld(active) {
+      if (active === eliminationHeld) return;
+      eliminationHeld = active;
+      if (!active) eliminatedSignals.clear();
+      if (typeof syncEliminationUI === 'function') syncEliminationUI();
+    }
+
+    /*
+     * Say so, and say how much. A mode with no readout is a mode nobody knows
+     * they are in — and this one changes what the dice can return, which is
+     * exactly the kind of hidden state that makes a tool feel haunted.
+     */
+    function syncEliminationUI() {
+      const button = document.getElementById('randomizeButton');
+      const label = document.getElementById('randomizeLabel');
+      if (!button || !label) return;
+      const count = eliminationCount();
+      button.classList.toggle('eliminating', eliminationHeld);
+      label.textContent = eliminationHeld
+        ? `⚗ ELIMINATING · ${count} SET ASIDE`
+        : '🎲 RANDOMIZE UNLOCKED';
+    }
+
+    function eliminationCount() {
+      let total = 0;
+      eliminatedSignals.forEach(set => { total += set.size; });
+      return total;
+    }
+
+    /*
+     * Narrow the candidates to what has not been set aside.
+     *
+     * Exhaustion resets rather than deadlocks. An axis whose every option had
+     * been refused would have nothing left to draw and would silently stop
+     * responding — which reads as a broken button, not as a completed sweep. The
+     * sweep begins again instead, which is the honest answer: you have seen them
+     * all, so seeing them again is the only thing left to offer.
+     */
+    function applyElimination(key, candidates) {
+      if (!eliminationHeld || !candidates.length) return candidates;
+      const seen = eliminatedSignals.get(key);
+      if (!seen || !seen.size) return candidates;
+      const fresh = candidates.filter(option => !seen.has(option));
+      if (fresh.length) return fresh;
+      seen.clear();
+      return candidates;
+    }
+
+    // The value being left behind is the one that gets refused.
+    function recordElimination(key, value) {
+      if (!eliminationHeld || !value) return;
+      if (!eliminatedSignals.has(key)) eliminatedSignals.set(key, new Set());
+      eliminatedSignals.get(key).add(value);
+    }
+
     function updateChaos(value) {
       chaosLevel = parseInt(value);
       document.getElementById('chaosValue').textContent = value + '%';
@@ -4428,6 +4514,8 @@ rather than operate the instrument, replace `main` with a commit SHA.
       updateTelemetry(prompt);
       renderDiagnostics(prompt);
       renderCorruptionReport();
+      // Once per roll rather than once per axis; randomizeAll touches seventeen.
+      syncEliminationUI();
       // Every mutation path ends here, so the rig can never drift from state.
       syncRig();
       persistState();
@@ -4669,12 +4757,17 @@ rather than operate the instrument, replace `main` with a commit SHA.
     if (!pool.length) return false;
 
     // A reroll should normally produce a visible change.
-    const candidates =
+    const base =
       pool.length > 1
         ? pool.filter((option) => option !== category.value)
         : pool;
 
+    // While the modifier is held, also refuse everything already rolled past.
+    const candidates = applyElimination(key, base);
+    const previous = category.value;
+
     category.value = candidates[randInt(candidates.length)];
+    recordElimination(key, previous);
     setSelectValue(key);
 
     if (animate) animateRow(key);
@@ -5645,6 +5738,27 @@ rather than operate the instrument, replace `main` with a commit SHA.
           if (event.key === 'Escape') closeCustomPool();
         });
     }
+
+    /*
+     * Elimination is a held mode, not a per-click flag.
+     *
+     * Shift on a drag surface already means step-strum, which advances a pool
+     * by one and never calls the randomizer — so the two readings of the key
+     * cannot collide. Shift while rerolling means refuse; Shift while dragging
+     * means step; neither is ever asked to be both.
+     *
+     * The blur handler is the load-bearing one. A keyup that happens while the
+     * window is unfocused never arrives, so alt-tabbing mid-survey would leave
+     * the mode stuck on with no key held and no way to see why. Losing focus
+     * ends the survey.
+     */
+    window.addEventListener('keydown', event => {
+      if (event.key === 'Shift') setEliminationHeld(true);
+    });
+    window.addEventListener('keyup', event => {
+      if (event.key === 'Shift') setEliminationHeld(false);
+    });
+    window.addEventListener('blur', () => setEliminationHeld(false));
 
     const strumStrip = document.getElementById('strumStrip');
     if (strumStrip) {
