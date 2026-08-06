@@ -2,6 +2,11 @@ Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
 Added
+Added a bank: hold Ctrl+Shift (or Cmd+Shift) while rerolling and every signal rolled past is banished rather than merely set aside. Banked signals are filtered from every draw whether or not a key is held, and stay out until released. Shift records looking and clears when you let go; Ctrl+Shift records deciding and does not.
+Added the BANISHED SIGNALS panel, listing everything banked grouped by axis. Each entry is its own undo and one button empties the lot. A store the board keeps honouring must be readable and reversible, or it becomes a haunting — the pool quietly smaller every month with nothing to point at.
+The bank persists across sessions, like custom pools and unlike a strum, because it records a decision rather than a gesture.
+The bank refuses to take an axis below two remaining signals. A survey rescues itself on release; a permanent ban has no such moment, and an axis refused down to nothing would stay unrollable and read as a broken board rather than an obeyed one.
+The roll controls report which mode is armed: ⚱ while banking, ⚗ while surveying, 🎲 at rest, with per-axis counts on each row's dice.
 Added elimination to rerolling: hold Shift and every value rolled past is set aside, so each draw comes from what remains. A plain reroll samples with replacement and only refuses the value already on screen, which on a 176-option axis shows you the same handful all afternoon — good for stumbling onto something, useless for surveying. Release and the whole pool returns.
 The state is transient by design: not saved to Blueprints, not persisted, cleared on release and on window blur. It records an act of looking rather than a decision, and a survey resumed an hour later is a different survey.
 Exhausting an axis restarts its sweep rather than deadlocking. A pool with no candidates left would silently stop responding, which reads as a broken button rather than a completed pass.

@@ -96,6 +96,36 @@ globalThis.__forgeAudit = {
     const inertAfterRelease = eliminationCount() === 0;
     return { inertWhenReleased, refusedGone, exhaustionResets, counts, releaseClears, inertAfterRelease };
   })(),
+  bank: (() => {
+    const pool = categories.colorlogic.options.filter(option => !option.startsWith('—'));
+    clearBank();
+    banSignal('colorlogic', pool[0]);
+    // The bank filters with nothing held — that is what "until I clear it" means.
+    const filtersUnheld = !applyElimination('colorlogic', pool).includes(pool[0]);
+    unbanSignal('colorlogic', pool[0]);
+    const unbanRestores = applyElimination('colorlogic', pool).includes(pool[0]);
+
+    let refused = false;
+    for (const value of pool) { if (!banSignal('colorlogic', value).ok) { refused = true; break; } }
+    const leftStanding = pool.length - (bannedFor('colorlogic').length);
+    const stillDrawable = applyElimination('colorlogic', pool).length > 0;
+
+    clearBank();
+    const clears = bannedCount() === 0;
+
+    setEliminationHeld(true);
+    setBanHeld(true);
+    recordElimination('mood', 'Serene');
+    const banksOnBanHeld = bannedCount() === 1;
+    setBanHeld(false);
+    recordElimination('mood', 'Wistful');
+    const surveyDoesNotBank = bannedCount() === 1;
+    setEliminationHeld(false);
+    const outlivesRelease = bannedCount() === 1;
+    clearBank();
+
+    return { filtersUnheld, unbanRestores, refused, leftStanding, stillDrawable, clears, banksOnBanHeld, surveyDoesNotBank, outlivesRelease };
+  })(),
   rigStates: Object.keys(categories).map(key => {
     const cat = categories[key];
     const read = value => { cat.value = value.value; cat.locked = value.locked; return categoryStateOf(cat); };
@@ -122,10 +152,28 @@ globalThis.__forgeAudit = {
  * throws instead, which reads as a broken application rather than a stub that
  * needs a line adding.
  */
+/*
+ * createElement returns a node just real enough for escapeHtml, which builds a
+ * detached div, assigns textContent and reads innerHTML back. That idiom is how
+ * the application escapes everything it injects, so a stub without it cannot
+ * execute any render path — and those are exactly the paths worth reaching.
+ */
+const makeStubNode = () => {
+  const node = { textContent: '', style: {}, classList: { add() {}, remove() {}, toggle() {}, contains: () => false } };
+  Object.defineProperty(node, 'innerHTML', {
+    get: () => String(node.textContent)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
+    set(value) { node.textContent = value; }
+  });
+  return node;
+};
+
 const context = {
   console,
   document: {
     addEventListener() {},
+    createElement: makeStubNode,
     getElementById: () => null,
     querySelector: () => null,
     querySelectorAll: () => []
@@ -286,12 +334,41 @@ if (!elim.releaseClears) fail('Releasing the modifier does not clear the set-asi
 if (!elim.inertAfterRelease) fail('Elimination keeps accumulating after release, so the next survey starts dirty.');
 
 /*
+ * The bank: elimination that outlives the key.
+ *
+ * Shift records looking and clears when released. Ctrl+Shift records deciding
+ * and does not — banked signals are filtered from every draw whether or not
+ * anything is held, and only clearing the bank brings them back. Those are
+ * different lifetimes and the difference is the feature.
+ *
+ * The dangerous property is that it is permanent. A survey rescued itself on
+ * release; a bank has no such moment, so an axis refused down to nothing would
+ * stay unrollable and read as a broken board. banSignal therefore refuses to
+ * take an axis below two remaining signals, which is better than accepting the
+ * ban and quietly ignoring it later.
+ */
+const bank = audit.bank;
+if (!bank.filtersUnheld) fail('Banked signals are only filtered while a key is held; the bank must apply to every draw or "until I clear it" means nothing.');
+if (!bank.unbanRestores) fail('Restoring a banked signal does not return it to the pool.');
+if (!bank.refused) fail('The bank accepted every signal on an axis. It must refuse before a pool can be emptied, since nothing rescues a permanent ban.');
+if (bank.leftStanding < 2) fail(`The bank left ${bank.leftStanding} signal(s) on an axis; it must leave at least two so the axis can still be rolled.`);
+if (!bank.stillDrawable) fail('An axis with a full bank has no candidates left to draw.');
+if (!bank.clears) fail('Emptying the bank does not empty the bank.');
+if (!bank.banksOnBanHeld) fail('Ctrl+Shift does not route a passed-over signal into the bank.');
+if (!bank.surveyDoesNotBank) fail('Shift alone banks signals permanently; only the deciding modifier may do that.');
+if (!bank.outlivesRelease) fail('The bank clears when the modifier is released, which makes it a survey rather than a bank.');
+
+/*
  * The blur handler is not optional. A keyup fired while the window is unfocused
  * never arrives, so alt-tabbing mid-survey would strand the mode on with no key
  * held and nothing to explain it.
  */
-if (!/window\.addEventListener\('blur',\s*\(\)\s*=>\s*setEliminationHeld\(false\)\)/.test(html)) {
+const blurHandler = (html.match(/window\.addEventListener\('blur',[\s\S]{0,220}?\}\)|window\.addEventListener\('blur',[^\n]*/) || [''])[0];
+if (!/setEliminationHeld\(false\)/.test(blurHandler)) {
   fail('Nothing clears elimination on window blur, so losing focus mid-survey would leave the mode stuck on.');
+}
+if (!/setBanHeld\(false\)/.test(blurHandler)) {
+  fail('Losing focus does not clear the banking modifier, so the next reroll after alt-tabbing could bank a signal permanently without the key being held.');
 }
 
 /*

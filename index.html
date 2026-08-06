@@ -328,8 +328,9 @@
       [data-mobile-order="cards"]     { order: 11; }
       [data-mobile-order="radar"]     { order: 12; }
       [data-mobile-order="negative"]  { order: 13; }
-      [data-mobile-order="vault"]     { order: 14; }
-      [data-mobile-order="history"]   { order: 15; }
+      [data-mobile-order="banished"]  { order: 14; }
+      [data-mobile-order="vault"]     { order: 15; }
+      [data-mobile-order="history"]   { order: 16; }
       [data-mobile-order="footer"]    { order: 99; }
 
       /*
@@ -512,6 +513,49 @@
       }
 
       .strum-strip.strumming .strum-strip-label { color: var(--neon-magenta); }
+    }
+
+    /* The bank, listed by axis. Each chip is its own undo. */
+    .bank-axis { margin-bottom: 8px; line-height: 2; }
+
+    .bank-axis-name {
+      display: inline-block;
+      min-width: 96px;
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: #4a4a5a;
+      vertical-align: middle;
+    }
+
+    .bank-chip {
+      display: inline-block;
+      margin: 0 4px 4px 0;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-family: inherit;
+      color: var(--signal-muted);
+      background: rgba(124, 138, 168, 0.10);
+      border: 1px solid #2a2a36;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .bank-chip:hover {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.08);
+    }
+
+    .bank-chip span { opacity: 0.5; margin-left: 2px; }
+
+    /* Banking is a heavier act than surveying, and says so. */
+    .btn.banking {
+      border-color: var(--signal-muted);
+      color: var(--signal-muted);
+      background: rgba(124, 138, 168, 0.18);
+      box-shadow: 0 0 16px rgba(124, 138, 168, 0.28);
+      letter-spacing: 0.06em;
     }
 
     /* Elimination: the button says what it will do while the key is down. */
@@ -1601,6 +1645,31 @@ rather than operate the instrument, replace `main` with a commit SHA.
         <input id="radarInput" class="subject-input" placeholder="Search all 2,000 options… e.g. rust, moon, tenderness" oninput="renderRadarResults()">
         <p class="text-xs text-gray-600 my-2">Click a return to load it directly into its category.</p>
         <div id="radarResults" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+      </div>
+    </div>
+
+    <!--
+      The bank, made inspectable.
+
+      Ctrl+Shift refuses a signal until it is let back in, which is a decision
+      the board will keep honouring long after the afternoon that produced it.
+      A store like that must be readable and reversible or it becomes a haunting
+      — the pool quietly smaller every month and nothing to point at.
+    -->
+    <div class="panel p-4 mb-4" data-mobile-order="banished">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="toggleBankPanel()">
+        <div class="status-dot" style="background: #7c8aa8; box-shadow: 0 0 10px #7c8aa8;"></div>
+        <span class="category-label">⚱ BANISHED SIGNALS</span>
+        <span class="text-xs text-gray-500 ml-auto" id="bankCount">0 banked</span>
+        <span class="text-xs text-gray-500" id="bankToggle">▶ Show</span>
+      </div>
+      <div id="bankPanel" class="hidden mt-4">
+        <p class="text-xs text-gray-600 mb-3">
+          Hold <span class="text-yellow-400">Ctrl+Shift</span> while rerolling and every signal you roll past is banked —
+          filtered out of every draw until you let it back in. Shift alone only sets things aside until you release it.
+        </p>
+        <div id="bankList" class="text-xs"></div>
+        <button class="btn btn-clear text-xs mt-3" onclick="clearBankWithReport()">✕ EMPTY THE BANK</button>
       </div>
     </div>
 
@@ -3385,6 +3454,103 @@ rather than operate the instrument, replace `main` with a commit SHA.
     let eliminationHeld = false;
     const eliminatedSignals = new Map();
 
+    /*
+     * The bank — elimination that outlives the key.
+     *
+     * Shift is a survey: refuse things, see what is left, let go, everything
+     * returns. Ctrl+Shift is a judgement: this signal and I are done. Banked
+     * values are filtered out of every draw whether or not anything is held,
+     * and they stay out until the bank is cleared, which is the only way they
+     * come back.
+     *
+     * That is a different kind of state and it is stored differently. The
+     * survey is transient because it records looking. The bank persists because
+     * it records deciding — the same reason custom pools persist and a strum
+     * does not.
+     */
+    const BANK_STORAGE_KEY = 'promptForgeBanishedV1';
+    let banHeld = false;
+    const bannedSignals = new Map();
+
+    function setBanHeld(active) {
+      if (active === banHeld) return;
+      banHeld = active;
+      if (typeof syncEliminationUI === 'function') syncEliminationUI();
+    }
+
+    function bannedCount() {
+      let total = 0;
+      bannedSignals.forEach(set => { total += set.size; });
+      return total;
+    }
+
+    function bannedFor(key) {
+      const set = bannedSignals.get(key);
+      return set ? [...set] : [];
+    }
+
+    function saveBank() {
+      if (typeof localStorage === 'undefined') return;
+      try {
+        const flat = {};
+        bannedSignals.forEach((set, key) => { if (set.size) flat[key] = [...set]; });
+        localStorage.setItem(BANK_STORAGE_KEY, JSON.stringify(flat));
+      } catch (error) { /* storage refused; the bank is still live in memory */ }
+    }
+
+    function loadBank() {
+      if (typeof localStorage === 'undefined') return;
+      try {
+        const saved = JSON.parse(localStorage.getItem(BANK_STORAGE_KEY) || '{}');
+        Object.entries(saved).forEach(([key, values]) => {
+          if (!categories[key] || !Array.isArray(values)) return;
+          bannedSignals.set(key, new Set(values));
+        });
+      } catch (error) { /* unreadable bank is an empty bank, not a broken board */ }
+    }
+
+    /*
+     * A bank must never be able to empty an axis.
+     *
+     * Banking is permanent until cleared, so unlike the survey there is no
+     * release to rescue a pool that has been refused down to nothing. An axis
+     * with no candidates cannot be rolled, and a button that stops responding
+     * reads as broken rather than as obeyed. The last two signals are therefore
+     * unbannable, and saying so is better than silently ignoring the bank on
+     * that axis later.
+     */
+    function banSignal(key, value) {
+      if (!categories[key] || !value) return { ok: false, reason: 'unknown signal' };
+      const pool = categories[key].options.filter(option => !option.startsWith('—'));
+      const set = bannedSignals.get(key) || new Set();
+      if (set.has(value)) return { ok: true, reason: 'already banked' };
+      if (pool.length - set.size <= 2) {
+        return { ok: false, reason: `${categories[key].label} has too few signals left to bank another` };
+      }
+      set.add(value);
+      bannedSignals.set(key, set);
+      saveBank();
+      return { ok: true, reason: 'banked' };
+    }
+
+    function unbanSignal(key, value) {
+      const set = bannedSignals.get(key);
+      if (!set) return false;
+      const removed = set.delete(value);
+      if (!set.size) bannedSignals.delete(key);
+      if (removed) saveBank();
+      return removed;
+    }
+
+    function clearBank() {
+      const had = bannedCount();
+      bannedSignals.clear();
+      saveBank();
+      if (typeof renderBankPanel === 'function') renderBankPanel();
+      if (typeof syncEliminationUI === 'function') syncEliminationUI();
+      return had;
+    }
+
     function setEliminationHeld(active) {
       if (active === eliminationHeld) return;
       eliminationHeld = active;
@@ -3401,10 +3567,21 @@ rather than operate the instrument, replace `main` with a commit SHA.
       const button = document.getElementById('randomizeButton');
       const label = document.getElementById('randomizeLabel');
       if (button && label) {
-        button.classList.toggle('eliminating', eliminationHeld);
-        label.textContent = eliminationHeld
-          ? `⚗ ELIMINATING · ${eliminationCount()} SET ASIDE`
-          : '🎲 RANDOMIZE UNLOCKED';
+        // Banking is the heavier of the two and takes precedence in the label,
+        // because it is the one whose effect outlives the key.
+        button.classList.toggle('eliminating', eliminationHeld && !banHeld);
+        button.classList.toggle('banking', banHeld);
+        label.textContent = banHeld
+          ? `⚱ BANKING · ${bannedCount()} BANISHED`
+          : eliminationHeld
+            ? `⚗ ELIMINATING · ${eliminationCount()} SET ASIDE`
+            : '🎲 RANDOMIZE UNLOCKED';
+      }
+
+      const bankCount = document.getElementById('bankCount');
+      if (bankCount) {
+        const total = bannedCount();
+        bankCount.textContent = total === 1 ? '1 banked' : `${total} banked`;
       }
 
       /*
@@ -3419,11 +3596,18 @@ rather than operate the instrument, replace `main` with a commit SHA.
         if (!roll) return;
         const set = eliminatedSignals.get(key);
         const aside = set ? set.size : 0;
-        roll.classList.toggle('eliminating', eliminationHeld);
-        roll.textContent = eliminationHeld && aside ? '⚗' : '🎲';
-        roll.title = eliminationHeld
-          ? `${aside} set aside on this axis · release Shift to restore the pool`
-          : 'Randomize this axis · hold Shift to set aside what you roll past';
+        const banked = bannedSignals.get(key);
+        const banishedHere = banked ? banked.size : 0;
+        roll.classList.toggle('eliminating', eliminationHeld && !banHeld);
+        roll.classList.toggle('banking', banHeld);
+        roll.textContent = banHeld ? '⚱' : (eliminationHeld && aside ? '⚗' : '🎲');
+        roll.title = banHeld
+          ? `${banishedHere} banished on this axis · rerolling now banks what you pass`
+          : eliminationHeld
+            ? `${aside} set aside on this axis · release Shift to restore the pool`
+            : banishedHere
+              ? `Randomize this axis · ${banishedHere} banished, see BANISHED SIGNALS to restore`
+              : 'Randomize this axis · hold Shift to set aside what you roll past';
       });
     }
 
@@ -3443,18 +3627,36 @@ rather than operate the instrument, replace `main` with a commit SHA.
      * all, so seeing them again is the only thing left to offer.
      */
     function applyElimination(key, candidates) {
-      if (!eliminationHeld || !candidates.length) return candidates;
+      if (!candidates.length) return candidates;
+
+      // The bank applies whether or not anything is held. That is the whole of
+      // what "until I clear it" means.
+      const banked = bannedSignals.get(key);
+      let remaining = banked && banked.size
+        ? candidates.filter(option => !banked.has(option))
+        : candidates;
+
+      // banSignal refuses to empty an axis, so this should be unreachable — but
+      // a pool can shrink under a saved bank (a custom signal deleted, a
+      // vocabulary trimmed), and a board that cannot roll is worse than a bank
+      // that is briefly ignored.
+      if (!remaining.length) remaining = candidates;
+
+      if (!eliminationHeld) return remaining;
       const seen = eliminatedSignals.get(key);
-      if (!seen || !seen.size) return candidates;
-      const fresh = candidates.filter(option => !seen.has(option));
+      if (!seen || !seen.size) return remaining;
+      const fresh = remaining.filter(option => !seen.has(option));
       if (fresh.length) return fresh;
       seen.clear();
-      return candidates;
+      return remaining;
     }
 
-    // The value being left behind is the one that gets refused.
+    // The value being left behind is the one that gets refused — to the bank if
+    // the deciding modifier is down, to the survey otherwise.
     function recordElimination(key, value) {
-      if (!eliminationHeld || !value) return;
+      if (!value) return;
+      if (banHeld) { banSignal(key, value); return; }
+      if (!eliminationHeld) return;
       if (!eliminatedSignals.has(key)) eliminatedSignals.set(key, new Set());
       eliminatedSignals.get(key).add(value);
     }
@@ -3694,6 +3896,53 @@ rather than operate the instrument, replace `main` with a commit SHA.
     function copyHistory(index) {
       const p = promptHistory[index];
       if (p) navigator.clipboard.writeText(p);
+    }
+
+    function toggleBankPanel() {
+      const panel = document.getElementById('bankPanel');
+      const toggle = document.getElementById('bankToggle');
+      if (!panel || !toggle) return;
+      panel.classList.toggle('hidden');
+      toggle.textContent = panel.classList.contains('hidden') ? '▶ Show' : '▼ Hide';
+      if (!panel.classList.contains('hidden')) renderBankPanel();
+    }
+
+    // Every banked signal, by axis, each one individually reversible.
+    function renderBankPanel() {
+      const count = document.getElementById('bankCount');
+      if (count) {
+        const total = bannedCount();
+        count.textContent = total === 1 ? '1 banked' : `${total} banked`;
+      }
+      const list = document.getElementById('bankList');
+      if (!list) return;
+      if (!bannedCount()) {
+        list.innerHTML = '<div class="text-gray-600">Nothing banked. The whole vocabulary is in play.</div>';
+        return;
+      }
+      list.innerHTML = promptOrder
+        .filter(key => bannedFor(key).length)
+        .map(key => {
+          const chips = bannedFor(key).map(value =>
+            `<button class="bank-chip" onclick="restoreSignal('${escapeAttribute(key)}', '${escapeAttribute(value)}')"` +
+            ` title="Let this back into the pool">${escapeHtml(value)} <span>✕</span></button>`
+          ).join('');
+          return `<div class="bank-axis"><span class="bank-axis-name">${escapeHtml(categories[key].label)}</span>${chips}</div>`;
+        }).join('');
+    }
+
+    function restoreSignal(key, value) {
+      unbanSignal(key, value);
+      renderBankPanel();
+      syncEliminationUI();
+    }
+
+    function clearBankWithReport() {
+      const had = clearBank();
+      const list = document.getElementById('bankList');
+      if (list && had) {
+        list.innerHTML = `<div class="text-gray-600">Released ${had} signal${had === 1 ? '' : 's'} back into the pools.</div>`;
+      }
     }
 
     function toggleNegativePanel() {
@@ -5772,13 +6021,17 @@ rather than operate the instrument, replace `main` with a commit SHA.
      * the mode stuck on with no key held and no way to see why. Losing focus
      * ends the survey.
      */
-    window.addEventListener('keydown', event => {
-      if (event.key === 'Shift') setEliminationHeld(true);
+    const readEliminationModifiers = event => {
+      setEliminationHeld(Boolean(event.shiftKey));
+      // Cmd stands in for Ctrl so the gesture exists on a Mac.
+      setBanHeld(Boolean(event.shiftKey && (event.ctrlKey || event.metaKey)));
+    };
+    window.addEventListener('keydown', readEliminationModifiers);
+    window.addEventListener('keyup', readEliminationModifiers);
+    window.addEventListener('blur', () => {
+      setEliminationHeld(false);
+      setBanHeld(false);
     });
-    window.addEventListener('keyup', event => {
-      if (event.key === 'Shift') setEliminationHeld(false);
-    });
-    window.addEventListener('blur', () => setEliminationHeld(false));
 
     const strumStrip = document.getElementById('strumStrip');
     if (strumStrip) {
@@ -5830,6 +6083,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
   function bootV5() {
     loadCustomOptions();
+    // The bank outlives the session that made it; that is the point of it.
+    loadBank();
+    renderBankPanel();
     installDarpaCard();
     injectV5Ui();
 
