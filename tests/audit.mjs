@@ -124,7 +124,22 @@ globalThis.__forgeAudit = {
     const outlivesRelease = bannedCount() === 1;
     clearBank();
 
-    return { filtersUnheld, unbanRestores, refused, leftStanding, stillDrawable, clears, banksOnBanHeld, surveyDoesNotBank, outlivesRelease };
+    // A strum surveys but never banks: one drag refuses hundreds of signals,
+    // and permanence should not be reachable by a gesture built to be careless.
+    clearBank();
+    setEliminationHeld(true);
+    setBanHeld(true);
+    setBanSuppressed(true);
+    recordElimination('style', 'Noir');
+    const strumNeverBanks = bannedCount() === 0;
+    setBanSuppressed(false);
+    recordElimination('texture', 'Satin');
+    const bankingReturnsAfterStrum = bannedCount() === 1;
+    clearBank();
+    setBanHeld(false);
+    setEliminationHeld(false);
+
+    return { filtersUnheld, unbanRestores, refused, leftStanding, stillDrawable, clears, banksOnBanHeld, surveyDoesNotBank, outlivesRelease, strumNeverBanks, bankingReturnsAfterStrum };
   })(),
   rigStates: Object.keys(categories).map(key => {
     const cat = categories[key];
@@ -357,6 +372,25 @@ if (!bank.clears) fail('Emptying the bank does not empty the bank.');
 if (!bank.banksOnBanHeld) fail('Ctrl+Shift does not route a passed-over signal into the bank.');
 if (!bank.surveyDoesNotBank) fail('Shift alone banks signals permanently; only the deciding modifier may do that.');
 if (!bank.outlivesRelease) fail('The bank clears when the modifier is released, which makes it a survey rather than a bank.');
+if (!bank.strumNeverBanks) fail('A strum can bank signals. One drag refuses hundreds; permanence must not be reachable by a gesture designed to be careless.');
+if (!bank.bankingReturnsAfterStrum) fail('Banking stays suppressed after the strum ends, so a click can no longer bank.');
+
+/*
+ * One modifier, one meaning, on every surface.
+ *
+ * Shift used to mean step-strum on a drag and survey on a click, which was
+ * defensible only because step never randomises. It still read as two rules.
+ * Shift now surveys everywhere and Ctrl steps, so the drag surfaces must not
+ * be deciding step from shiftKey any more.
+ */
+const stepFromShift = (html.match(/strumMode = [^;]*shiftKey[^;]*'step'/g) || []).length;
+if (stepFromShift) {
+  fail(`${stepFromShift} strum surface(s) still choose step mode from Shift. Shift surveys everywhere; Ctrl steps.`);
+}
+const stepFromCtrl = (html.match(/strumMode = \((?:event|laneKey)\.ctrlKey \|\| (?:event|laneKey)\.metaKey\) \? 'step' : 'random'/g) || []).length;
+if (stepFromCtrl !== 4) {
+  fail(`${stepFromCtrl} of 4 strum surfaces choose step from Ctrl; the rest would be unreachable or inconsistent.`);
+}
 
 /*
  * The blur handler is not optional. A keyup fired while the window is unfocused

@@ -3651,11 +3651,34 @@ rather than operate the instrument, replace `main` with a commit SHA.
       return remaining;
     }
 
+    /*
+     * Banking is unavailable to a strum, and that is a safety rule rather than
+     * a limitation.
+     *
+     * A click refuses one signal. A drag down the board refuses seventeen in
+     * under a second, and a strum across a lane can pass hundreds — that is the
+     * point of it. Surveying at that speed is fine, because letting go undoes
+     * everything. Banishing at that speed is a permanent decision made by a
+     * gesture explicitly designed to be careless, and the cost is asymmetric:
+     * the survey costs nothing to redo and the bank costs an afternoon to
+     * unpick.
+     *
+     * So a strum with the deciding modifier down still surveys. It does not
+     * refuse the gesture, it just refuses to make it permanent.
+     */
+    let banSuppressed = false;
+
+    function setBanSuppressed(active) {
+      banSuppressed = Boolean(active);
+      if (typeof syncEliminationUI === 'function') syncEliminationUI();
+    }
+
     // The value being left behind is the one that gets refused — to the bank if
-    // the deciding modifier is down, to the survey otherwise.
+    // the deciding modifier is down and the gesture is one that can afford it,
+    // to the survey otherwise.
     function recordElimination(key, value) {
       if (!value) return;
-      if (banHeld) { banSignal(key, value); return; }
+      if (banHeld && !banSuppressed) { banSignal(key, value); return; }
       if (!eliminationHeld) return;
       if (!eliminatedSignals.has(key)) eliminatedSignals.set(key, new Set());
       eliminatedSignals.get(key).add(value);
@@ -5226,11 +5249,12 @@ rather than operate the instrument, replace `main` with a commit SHA.
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     strumActive = true;
     strumPointerId = event.pointerId;
-    strumMode = event.shiftKey ? 'step' : 'random';
+    strumMode = (event.ctrlKey || event.metaKey) ? 'step' : 'random';
     lastStrumKey = null;
     lastStrumX = null;
     lastStrumY = null;
     document.body.classList.add('strumming');
+    setBanSuppressed(true);
     event.currentTarget.classList.add('strumming');
     event.currentTarget.setPointerCapture?.(event.pointerId);
     const row = stripRowAt(event.clientX, event.currentTarget);
@@ -5252,11 +5276,12 @@ rather than operate the instrument, replace `main` with a commit SHA.
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     strumActive = true;
     strumPointerId = event.pointerId;
-    strumMode = event.shiftKey ? 'step' : 'random';
+    strumMode = (event.ctrlKey || event.metaKey) ? 'step' : 'random';
     lastStrumKey = null;
     lastStrumX = null;
     lastStrumY = null;
     document.body.classList.add('strumming');
+    setBanSuppressed(true);
     event.currentTarget.classList.add('strumming');
     event.currentTarget.setPointerCapture?.(event.pointerId);
     const row = laneRowAt(event.clientY);
@@ -5286,12 +5311,13 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     strumActive = true;
     strumPointerId = event.pointerId;
-    strumMode = event.shiftKey ? 'step' : 'random';
+    strumMode = (event.ctrlKey || event.metaKey) ? 'step' : 'random';
     lastStrumKey = null;
     lastStrumX = null;
     lastStrumY = null;
 
     document.body.classList.add('strumming');
+    setBanSuppressed(true);
     event.currentTarget.setPointerCapture?.(event.pointerId);
 
     strumRow(row, event);
@@ -5321,6 +5347,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     lastStrumKey = null;
     lastStrumX = null;
     lastStrumY = null;
+    setBanSuppressed(false);
     document.body.classList.remove('strumming');
   }
 
@@ -5939,7 +5966,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         '<span class="text-cyan-400">🎸 STRUM:</span> ' +
         'drag the lane beside the board, or the strip above it, to randomize rows as you move. ' +
         '<span class="strum-hint-more">Drag across the row labels for the same thing. ' +
-        'Hold <span class="text-yellow-400">Shift</span> to advance each pool by one instead. ' +
+        'Hold <span class="text-yellow-400">Shift</span> to set aside what you pass, or <span class="text-yellow-400">Ctrl</span> to advance each pool by one. ' +
         'Pinned and muted rows are never touched.</span>';
 
       // Above the lane-and-board row, not inside it. `categoriesPanel.before`
@@ -6062,7 +6089,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
           setTimeout(() => rows[next].classList.remove('cluster-preview'), 400);
           laneKey.preventDefault();
         } else if (laneKey.key === ' ' || laneKey.key === 'Enter') {
-          strumMode = laneKey.shiftKey ? 'step' : 'random';
+          strumMode = (laneKey.ctrlKey || laneKey.metaKey) ? 'step' : 'random';
           lastStrumKey = null;
           strumRow(rows[current], null);
           laneKey.preventDefault();

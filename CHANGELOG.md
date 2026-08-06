@@ -1,6 +1,9 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
+Changed
+Shift now means the same thing on every surface. It surveys — on a click, on a row's dice, and now on a strum, where each row the drag crosses draws from what it has not shown you yet. Step-strum moved to Ctrl, which is the modifier it should have had once Shift acquired a meaning everywhere else.
+Banking is unavailable to a strum, by design. A click refuses one signal; a drag down the board refuses seventeen in a second and a lane sweep refuses hundreds. Surveying at that speed is free because release undoes it — banishing at that speed is a permanent decision made by a gesture built to be careless. Holding the banking modifier while dragging surveys instead of banking, so the gesture is not refused, only its permanence.
 Added
 Added a bank: hold Ctrl+Shift (or Cmd+Shift) while rerolling and every signal rolled past is banished rather than merely set aside. Banked signals are filtered from every draw whether or not a key is held, and stay out until released. Shift records looking and clears when you let go; Ctrl+Shift records deciding and does not.
 Added the BANISHED SIGNALS panel, listing everything banked grouped by axis. Each entry is its own undo and one button empties the lot. A store the board keeps honouring must be readable and reversible, or it becomes a haunting — the pool quietly smaller every month with nothing to point at.
