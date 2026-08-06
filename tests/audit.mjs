@@ -294,6 +294,24 @@ if (!/window\.addEventListener\('blur',\s*\(\)\s*=>\s*setEliminationHeld\(false\
   fail('Nothing clears elimination on window blur, so losing focus mid-survey would leave the mode stuck on.');
 }
 
+/*
+ * The per-axis dice must be addressable, or the mode goes quiet where it is
+ * most used.
+ *
+ * Elimination has always applied to every reroll path, since they all run
+ * through pickRandomOption — but at first only the roll-all button said so, and
+ * a capability that is silent on the control that has it is indistinguishable
+ * from one wired to the wrong control. That is what it was reported as. The
+ * readout needs an id on each row's roll button to find.
+ */
+const rollButtonIds = (html.match(/id="roll-\$\{key\}"/g) || []).length;
+if (rollButtonIds < 2) {
+  fail(`Row reroll buttons carry no id in ${2 - rollButtonIds} of their two templates; the elimination readout cannot reach them.`);
+}
+if (!/getElementById\(`roll-\$\{key\}`\)/.test(html)) {
+  fail('syncEliminationUI no longer looks up the per-axis roll buttons, so elimination would only be visible on the roll-all control.');
+}
+
 // The Signal Rig reads three states out of the two persisted properties.
 const badStates = audit.rigStates.filter(({ observed }) =>
   observed.live !== 'live' ||

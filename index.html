@@ -3400,12 +3400,31 @@ rather than operate the instrument, replace `main` with a commit SHA.
     function syncEliminationUI() {
       const button = document.getElementById('randomizeButton');
       const label = document.getElementById('randomizeLabel');
-      if (!button || !label) return;
-      const count = eliminationCount();
-      button.classList.toggle('eliminating', eliminationHeld);
-      label.textContent = eliminationHeld
-        ? `⚗ ELIMINATING · ${count} SET ASIDE`
-        : '🎲 RANDOMIZE UNLOCKED';
+      if (button && label) {
+        button.classList.toggle('eliminating', eliminationHeld);
+        label.textContent = eliminationHeld
+          ? `⚗ ELIMINATING · ${eliminationCount()} SET ASIDE`
+          : '🎲 RANDOMIZE UNLOCKED';
+      }
+
+      /*
+       * The per-axis dice say it too. Elimination has always applied here —
+       * every reroll path runs through pickRandomOption — but only the roll-all
+       * button announced it, so on a single axis it looked like a feature that
+       * had been wired to the wrong control. A capability nobody can see on the
+       * button that has it is indistinguishable from one that is missing.
+       */
+      Object.keys(categories).forEach(key => {
+        const roll = document.getElementById(`roll-${key}`);
+        if (!roll) return;
+        const set = eliminatedSignals.get(key);
+        const aside = set ? set.size : 0;
+        roll.classList.toggle('eliminating', eliminationHeld);
+        roll.textContent = eliminationHeld && aside ? '⚗' : '🎲';
+        roll.title = eliminationHeld
+          ? `${aside} set aside on this axis · release Shift to restore the pool`
+          : 'Randomize this axis · hold Shift to set aside what you roll past';
+      });
     }
 
     function eliminationCount() {
@@ -3990,7 +4009,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
               ${LOCK_BUTTON_GLYPHS[state]}
             </button>
             <button class="btn btn-mute ${state === 'muted' ? 'active' : ''}" id="mute-${key}" onclick="muteCategory('${key}')" title="${escapeAttribute(MUTE_BUTTON_TITLES[state])}">🚫</button>
-            <button class="btn btn-random" onclick="randomizeCategory('${key}')" title="Randomize">🎲</button>
+            <button class="btn btn-random" id="roll-${key}" onclick="randomizeCategory('${key}')" title="Randomize this axis · hold Shift to set aside what you roll past">🎲</button>
             <button class="btn btn-clear" onclick="clearCategory('${key}')" title="Clear">✕</button>
           </div>
         `;
@@ -5526,8 +5545,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
           <button
             class="btn btn-random"
+            id="roll-${key}"
             onclick="randomizeCategory('${key}')"
-            title="Randomize"
+            title="Randomize this axis · hold Shift to set aside what you roll past"
           >🎲</button>
 
           <button
