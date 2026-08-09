@@ -1,6 +1,11 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
+Added
+Added BOORU output for Danbooru-tagged checkpoints — Illustrious, NoobAI, WAI, Pony. Camera position, pose, garment, place, light, weather and texture have genuine tag equivalents and are translated; everything else is passed through as prose, which those checkpoints still read, less precisely. The panel names which axes reached tag space and which are riding along as text, so you can see which half of the prompt the model is actually keyed to.
+The quality axis is deliberately unmapped in this mode. It says "8K Resolution, Tack Sharp"; a booru checkpoint wants "masterpiece, best quality, absurdres" — the same job in a different language with no correspondence, so the axis steps aside for editable scaffolding rather than being mistranslated.
+Added editable BOORU scaffolding: quality prefix, subject tags, trailing tags and negative, defaulted to what Illustrious-family checkpoints expect and saved with Blueprints. A subject count tag is close to mandatory on those models and the board has no axis for it.
+Added audit checks that every booru mapping still points at a signal in the live vocabulary, that tags are lowercase and space-separated rather than Danbooru's underscore form, and that the quality axis is never mapped. The check caught two invented weather keys on its first run.
 Changed
 Shift now means the same thing on every surface. It surveys — on a click, on a row's dice, and now on a strum, where each row the drag crosses draws from what it has not shown you yet. Step-strum moved to Ctrl, which is the modifier it should have had once Shift acquired a meaning everywhere else.
 Banking is unavailable to a strum, by design. A click refuses one signal; a drag down the board refuses seventeen in a second and a lane sweep refuses hundreds. Surveying at that speed is free because release undoes it — banishing at that speed is a permanent decision made by a gesture built to be careless. Holding the banking modifier while dragging surveys instead of banking, so the gesture is not refused, only its permanence.

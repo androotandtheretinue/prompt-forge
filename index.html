@@ -558,6 +558,26 @@
       letter-spacing: 0.06em;
     }
 
+    /* The booru report: which axes are tags and which are hoping. */
+    .booru-line { line-height: 1.7; color: #8a8a9a; }
+
+    .booru-key {
+      display: inline-block;
+      min-width: 62px;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      margin-right: 6px;
+    }
+
+    .booru-tagged { color: var(--neon-cyan); }
+    .booru-prose { color: var(--signal-muted); }
+
+    .booru-note {
+      margin: 2px 0 0 68px;
+      font-size: 10px;
+      color: #4a4a5a;
+    }
+
     /* Elimination: the button says what it will do while the key is down. */
     .btn.eliminating {
       border-color: var(--neon-gold);
@@ -1396,8 +1416,8 @@ Optional. 2,304 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html for the vocabulary. It is a 243 kB single-file
-application and the signal pools begin about 68 kB in, past the point where
+Do not scrape index.html for the vocabulary. It is a 274 kB single-file
+application and the signal pools begin about 73 kB in, past the point where
 many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
@@ -1552,10 +1572,45 @@ rather than operate the instrument, replace `main` with a commit SHA.
         <div class="status-dot pulse"></div>
         <span class="category-label">📡 OUTPUT FORMAT</span>
       </div>
-      <div class="flex gap-2 mb-4">
+      <div class="flex gap-2 mb-4 flex-wrap">
         <button class="btn mode-btn active" id="mode-universal" onclick="setMode('universal')">UNIVERSAL</button>
         <button class="btn mode-btn" id="mode-midjourney" onclick="setMode('midjourney')">MIDJOURNEY</button>
         <button class="btn mode-btn" id="mode-sdxl" onclick="setMode('sdxl')">SDXL</button>
+        <button class="btn mode-btn" id="mode-booru" onclick="setMode('booru')"
+                title="Danbooru tags for Illustrious, NoobAI, WAI and Pony checkpoints">BOORU</button>
+      </div>
+
+      <!--
+        Scaffolding a tagged checkpoint needs and the board has no axis for.
+        Editable because every checkpoint family wants a different incantation,
+        and the quality axis is deliberately unused in this mode — it speaks a
+        different language than "masterpiece, absurdres" and mapping the two
+        would be inventing a correspondence that does not exist.
+      -->
+      <div id="booruControls" class="hidden mb-4">
+        <div class="text-xs text-gray-600 mb-2">
+          Tags for Danbooru-trained checkpoints. The quality axis stands aside here — booru models use their own quality vocabulary.
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <label class="text-xs text-gray-500">QUALITY PREFIX
+            <input type="text" class="subject-input w-full mt-1" id="booruQuality"
+                   oninput="updateBooruSetting('quality', this.value)">
+          </label>
+          <label class="text-xs text-gray-500">SUBJECT TAGS
+            <input type="text" class="subject-input w-full mt-1" id="booruSubject"
+                   oninput="updateBooruSetting('subject', this.value)"
+                   title="1girl, 1boy, 2girls, solo — close to mandatory on Illustrious-family checkpoints">
+          </label>
+          <label class="text-xs text-gray-500">TRAILING
+            <input type="text" class="subject-input w-full mt-1" id="booruTrailing"
+                   oninput="updateBooruSetting('trailing', this.value)">
+          </label>
+          <label class="text-xs text-gray-500">NEGATIVE
+            <input type="text" class="subject-input w-full mt-1" id="booruNegative"
+                   oninput="updateBooruSetting('negative', this.value)">
+          </label>
+        </div>
+        <div id="booruReport" class="mt-3 text-xs"></div>
       </div>
       <div class="flex items-center gap-3">
         <span class="category-label">📐 ASPECT</span>
@@ -3428,6 +3483,236 @@ rather than operate the instrument, replace `main` with a commit SHA.
       return parts;
     }
 
+    /* ============================================
+     * BOORU TRANSLATION
+     * ============================================
+     * 🜏 the tag is not the word. the tag is what the model was told.
+     *
+     * Danbooru-tagged checkpoints — Illustrious, NoobAI, WAI, Pony — were
+     * trained on a closed vocabulary of about half a million tags in a fixed
+     * form. This board speaks natural language. Most of what it says has no tag
+     * at all, and pretending otherwise would be worse than saying so.
+     *
+     * Three honest tiers, and the mode is built around admitting which is which.
+     *
+     * Tier one is the physical vocabulary: camera position, pose, garment,
+     * place, light. Real tags exist, and this is exactly where a tagged model is
+     * most tag-dependent — `from below` lands where "worm's eye view" wanders.
+     * Those are mapped below.
+     *
+     * Tier two has no tag and is passed through as prose. These are SDXL
+     * finetunes and retain enough language understanding that a relational
+     * colour rule does something; less reliably than a tag, but not nothing.
+     * Guessing a tag here would be inventing a citation, which this project
+     * refuses elsewhere and refuses here.
+     *
+     * Tier three is replaced rather than mapped. The quality axis says
+     * "8K Resolution, Tack Sharp"; a booru checkpoint wants "masterpiece, best
+     * quality, absurdres". Same job, different language, no correspondence —
+     * so in this mode the quality axis steps aside for the scaffolding.
+     *
+     * The map is deliberately partial. Mapping all 2,304 signals would be a
+     * second vocabulary to maintain and would rot the moment the first one
+     * moved; the audit checks that every key here still exists upstream.
+     */
+    const BOORU_TAGS = {
+      framing: {
+        'Extreme Close-up': 'extreme close-up', 'Close-up': 'close-up',
+        'Medium Close-up': 'upper body', 'Medium Shot': 'upper body',
+        'Medium Full Shot': 'cowboy shot', 'Full Body Shot': 'full body',
+        'Wide Shot': 'wide shot', 'Extreme Wide Shot': 'very wide shot',
+        'Eye Level': 'eye-level shot', 'Low Angle': 'from below',
+        'High Angle': 'from above', "Bird's Eye View": 'from above',
+        "Worm's Eye View": 'from below', 'Dutch Angle': 'dutch angle',
+        'Canted Angle': 'dutch angle', 'Over-the-Shoulder': 'over-the-shoulder',
+        'POV First Person': 'pov', 'Fisheye': 'fisheye',
+        'Shallow Depth of Field': 'depth of field, blurry background',
+        'Underwater Shot': 'underwater', 'Selfie POV': 'selfie',
+        'Mirror Selfie': 'mirror selfie, reflection',
+        'Three-Quarter Rear View': 'from behind', 'Rear View Looking Out': 'from behind',
+        'Profile Two-Shot': 'profile', 'Boot-Level Low Angle': 'from below',
+        'Ant-Level Ground Shot': 'from below', 'Aerial Drone Shot': 'from above'
+      },
+      figure: {
+        'Weight on One Hip': 'contrapposto, hand on hip',
+        'Arched Back': 'arched back', 'Leaning Against Support': 'leaning',
+        'Leaning Into Frame': 'leaning forward',
+        'Shoulders Squared to Camera': 'facing viewer',
+        'Look Back Over the Shoulder': 'looking back',
+        'Chin Down, Eyes Up': 'looking at viewer, head down',
+        'Chin Lifted': 'head up', 'Head Tilted to the Shoulder': 'head tilt',
+        'Three-Quarter Head Turn': 'looking to the side',
+        'Hand at the Nape': 'hand in own hair',
+        'Hands Clasped Behind the Back': 'arms behind back',
+        'Arms Akimbo': 'hands on hips', 'One Arm Raised Overhead': 'arm up',
+        'Arms Folded': 'crossed arms', 'Hands in Pockets': 'hands in pockets',
+        'Hand Shielding the Eyes': 'hand over eyes',
+        'Reaching Out of Frame': 'reaching towards viewer',
+        'Legs Crossed Standing': 'crossed legs, standing',
+        'Ankles Crossed Seated': 'crossed legs, sitting',
+        'Knees Drawn Up': 'knees up', 'Cross-Legged Seated': 'indian style',
+        'Supine, Arms Overhead': 'lying, on back, arms up',
+        'Prone on the Forearms': 'lying, on stomach',
+        'Upright on Both Knees': 'kneeling',
+        'Crouched on the Balls of the Feet': 'squatting',
+        'Seated Forward Lean': 'sitting, leaning forward',
+        'Hands Loose at the Sides': 'arms at sides'
+      },
+      action: {
+        Standing: 'standing', Sitting: 'sitting', Kneeling: 'kneeling',
+        Reclining: 'lying', Walking: 'walking', Running: 'running',
+        Jumping: 'jumping', Swimming: 'swimming', Dancing: 'dancing',
+        Eating: 'eating', Drinking: 'drinking', Sleeping: 'sleeping',
+        Reading: 'reading', Embracing: 'hug', Laughing: 'laughing',
+        Stretching: 'stretching', Bowing: 'bowing', Saluting: 'salute',
+        'Riding Horseback': 'horseback riding', Surfing: 'surfing',
+        Skating: 'skating', Cycling: 'riding bicycle'
+      },
+      wardrobe: {
+        'One-Piece Maillot': 'one-piece swimsuit', 'Halter Bikini': 'bikini, halterneck',
+        'Bandeau Two-Piece': 'strapless bikini', 'Cutout Monokini': 'cutout swimsuit',
+        'Competition Racerback': 'competition swimsuit', 'Swim Briefs': 'male swimwear',
+        'Board Shorts': 'swim trunks', 'Rash Guard': 'wetsuit',
+        'Shortie Wetsuit': 'wetsuit', 'School Uniform': 'school uniform',
+        'Lab Coat': 'labcoat', 'Chef Whites': "chef uniform",
+        'Wedding Gown': 'wedding dress', 'Tutu': 'tutu',
+        'Leotard and Tights': 'leotard, pantyhose', 'Pointe Shoes': 'ballet slippers',
+        'Flannel Pajamas': 'pajamas', 'Silk Nightgown': 'nightgown',
+        'Terrycloth Robe': 'robe', 'Sarong Wrap': 'sarong',
+        'Hooded Cloak': 'hooded cloak', 'Ornate Mask': 'mask',
+        Veiled: 'veil', Crowned: 'crown', 'Kimono': 'kimono'
+      },
+      setting: {
+        Beach: 'beach', Forest: 'forest', Desert: 'desert', Library: 'library',
+        Rooftop: 'rooftop', Ballroom: 'ballroom', Graveyard: 'graveyard',
+        Barn: 'barn', 'Opera House': 'stage', 'Concert Stage': 'stage',
+        'Circus Tent': 'circus', 'Hospital Ward': 'hospital', Courtroom: 'courtroom',
+        'Night Train Car': 'train interior', Bathhouse: 'onsen',
+        'Harbor at Low Tide': 'harbor', 'Saloon at Noon': 'saloon',
+        'Fairground at Dusk': 'amusement park'
+      },
+      lighting: {
+        'Golden Hour': 'golden hour', 'Dappled Sunlight': 'dappled sunlight',
+        Backlit: 'backlighting', 'Rim Lighting': 'rim lighting',
+        Moonlight: 'moonlight', Candlelight: 'candlelight',
+        Firelight: 'firelight', Sunrise: 'sunrise', Sunset: 'sunset',
+        Twilight: 'twilight', 'Neon Glow': 'neon lights',
+        'Light Through Water': 'caustics, underwater',
+        'Stage Spotlight': 'spotlight', 'Follow Spot': 'spotlight',
+        Footlights: 'stage lights', 'Fireworks Overhead': 'fireworks',
+        'Light Shafts': 'light rays', Misty: 'fog'
+      },
+      weather: {
+        Rainbow: 'rainbow', Hail: 'hail', 'Clear Skies': 'clear sky',
+        'Steady Rain': 'rain', 'Warm Rain': 'rain', 'After the Rain': 'wet',
+        'Gentle Snowfall': 'snowing', 'Snow Flurries': 'snowing',
+        'Snow Beginning': 'snowing', 'Dense Fog': 'fog', 'Ground Fog': 'fog',
+        'Morning Mist': 'fog', 'Heat Shimmer': 'heat haze',
+        'First Frost': 'frost', Cloudless: 'clear sky'
+      },
+      texture: {
+        Dewy: 'wet', 'Condensation Beaded': 'wet', Sequined: 'sequins',
+        Tulle: 'tulle', Corduroy: 'corduroy', 'Worn Denim': 'denim',
+        'Tooled Leather': 'leather'
+      }
+    };
+
+    /*
+     * Scaffolding a tagged checkpoint expects and this board has no axis for:
+     * a quality preamble, a subject count, and a negative. Editable, because
+     * every checkpoint family wants a slightly different incantation and baking
+     * one in would be wrong for whichever you are not using today.
+     */
+    const booruSettings = {
+      quality: 'masterpiece, best quality, amazing quality, very aesthetic',
+      subject: '1girl, solo',
+      negative: 'bad quality, worst quality, worst detail, sketch, censor',
+      trailing: 'absurdres'
+    };
+
+    /*
+     * Translate the board into tag space, and be explicit about what did not
+     * make it. An axis passed through as prose is not a failure — the model
+     * still reads it — but you should be able to see which half of your prompt
+     * the checkpoint is actually keyed to.
+     */
+    function toBooruParts() {
+      const tagged = [];
+      const prose = [];
+      const taggedAxes = [];
+      const proseAxes = [];
+
+      getCorruptedParts().forEach(part => {
+        if (part.key === '__subject') { tagged.push(part.value); return; }
+        // Quality is replaced by the scaffolding in this mode, not translated.
+        if (part.key === 'quality') return;
+        const table = BOORU_TAGS[part.key];
+        // Look up the original, not the corrupted text: a damaged signal is
+        // deliberate but it is not a tag, and a near-miss tag is just a typo.
+        const tag = table && table[part.original];
+        if (tag) {
+          tagged.push(part.kind === 'clean' || part.kind === 'locked' ? tag : part.value.toLowerCase());
+          taggedAxes.push(part.label);
+        } else {
+          prose.push(part.value.toLowerCase());
+          proseAxes.push(part.label);
+        }
+      });
+
+      return { tagged, prose, taggedAxes, proseAxes };
+    }
+
+    function updateBooruSetting(field, value) {
+      if (!(field in booruSettings)) return;
+      booruSettings[field] = value;
+      updatePreview();
+    }
+
+    function syncBooruControls() {
+      [['booruQuality', 'quality'], ['booruSubject', 'subject'],
+       ['booruTrailing', 'trailing'], ['booruNegative', 'negative']].forEach(([id, field]) => {
+        const input = document.getElementById(id);
+        if (input && input.value !== booruSettings[field]) input.value = booruSettings[field];
+      });
+    }
+
+    /*
+     * Name which axes reached tag space and which are riding along as prose.
+     *
+     * This is the same honesty the blanks report and the corruption report
+     * apply: you should never have to guess which half of your prompt the
+     * checkpoint is actually keyed to. An untagged axis is not a failure — the
+     * model reads it — but it is weaker, and weaker in a way nothing else on
+     * screen would tell you.
+     */
+    function renderBooruReport() {
+      const panel = document.getElementById('booruReport');
+      if (!panel) return;
+      if (outputMode !== 'booru') { panel.innerHTML = ''; return; }
+      const { taggedAxes, proseAxes } = toBooruParts();
+      if (!taggedAxes.length && !proseAxes.length) { panel.innerHTML = ''; return; }
+      panel.innerHTML =
+        (taggedAxes.length
+          ? `<div class="booru-line"><span class="booru-key booru-tagged">TAGGED</span>${escapeHtml(taggedAxes.join(' · '))}</div>`
+          : '') +
+        (proseAxes.length
+          ? `<div class="booru-line"><span class="booru-key booru-prose">PROSE</span>${escapeHtml(proseAxes.join(' · '))}` +
+            `<div class="booru-note">No Danbooru equivalent — passed through as text. Booru checkpoints still read it, less precisely.</div></div>`
+          : '');
+    }
+
+    function buildBooruPrompt() {
+      const { tagged, prose } = toBooruParts();
+      const body = [...tagged, ...prose].filter(Boolean);
+      if (!body.length) return '';
+      const lead = [booruSettings.quality, booruSettings.subject].filter(Boolean).join(', ');
+      const tail = booruSettings.trailing ? `, ${booruSettings.trailing}` : '';
+      let prompt = `${lead ? lead + ', ' : ''}${body.join(', ')}${tail}`;
+      const negatives = [booruSettings.negative, ...negativePrompts].filter(Boolean).join(', ');
+      if (negatives) prompt += `\n\nNegative prompt: ${negatives}`;
+      return prompt;
+    }
+
     // ============================================
     // CHAOS & NEGATIVE FUNCTIONS
     // 🜂 IGNIS · do not feed the dial past the last tick. it has been fed.
@@ -4075,6 +4360,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         subjectLocked,
         categories: Object.fromEntries(Object.entries(categories).map(([key, cat]) => [key, { value: cat.value, locked: cat.locked }])),
         chaosLevel, pinnedChaosModifier, chaosSeed, outputMode, aspectRatio, payloadDensity,
+        booruSettings: { ...booruSettings },
         negativePrompts: [...negativePrompts],
         mjControls: { ...mjControls }
       };
@@ -4095,8 +4381,14 @@ rather than operate the instrument, replace `main` with a commit SHA.
       pinnedChaosModifier = typeof config.pinnedChaosModifier === 'string' ? config.pinnedChaosModifier : '';
       // A blueprint without a seed predates corruption; keep the default so an
       // old save reproduces exactly what it did before the dial had teeth.
+      if (config.booruSettings && typeof config.booruSettings === 'object') {
+        Object.keys(booruSettings).forEach(field => {
+          if (typeof config.booruSettings[field] === 'string') booruSettings[field] = config.booruSettings[field];
+        });
+        syncBooruControls();
+      }
       chaosSeed = Number.isFinite(Number(config.chaosSeed)) ? Math.max(0, Math.min(999999, Number(config.chaosSeed))) : 47;
-      outputMode = ['universal', 'midjourney', 'sdxl'].includes(config.outputMode) ? config.outputMode : 'universal';
+      outputMode = ['universal', 'midjourney', 'sdxl', 'booru'].includes(config.outputMode) ? config.outputMode : 'universal';
       aspectRatio = ['none', '1:1', '3:2', '4:5', '16:9', '9:16', '21:9', '2:3', '4:3'].includes(config.aspectRatio) ? config.aspectRatio : 'none';
       payloadDensity = ['recon', 'standard', 'full'].includes(config.payloadDensity) ? config.payloadDensity : 'full';
       if (Array.isArray(config.negativePrompts)) negativePrompts = [...new Set(config.negativePrompts.filter(Boolean).map(String))];
@@ -4182,7 +4474,11 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     function syncControlUI() {
       syncSubjectLockUI();
-      ['universal', 'midjourney', 'sdxl'].forEach(mode => document.getElementById(`mode-${mode}`).classList.toggle('active', outputMode === mode));
+      ['universal', 'midjourney', 'sdxl', 'booru'].forEach(mode => {
+        const button = document.getElementById(`mode-${mode}`);
+        if (button) button.classList.toggle('active', outputMode === mode);
+      });
+      document.getElementById('booruControls')?.classList.toggle('hidden', outputMode !== 'booru');
       document.getElementById('mjControls').classList.toggle('hidden', outputMode !== 'midjourney');
       ['none', '1:1', '3:2', '4:5', '16:9', '9:16', '21:9', '2:3', '4:3'].forEach(ratio => {
         document.getElementById(`aspect-${ratio}`).classList.toggle('active', aspectRatio === ratio);
@@ -4713,6 +5009,8 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
       let prompt = parts.join(', ');
 
+      if (outputMode === 'booru') return buildBooruPrompt();
+
       if (outputMode === 'midjourney') {
         const parameters = buildMidjourneyParameters();
         if (parameters) prompt += ' ' + parameters;
@@ -4797,7 +5095,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       if (!prompt) {
         preview.innerHTML = '<span class="text-gray-600 italic">Your prompt will appear here...</span>';
       } else {
-        const modeTag = { universal: 'UNIVERSAL', midjourney: 'MIDJOURNEY', sdxl: 'SDXL' }[outputMode];
+        const modeTag = { universal: 'UNIVERSAL', midjourney: 'MIDJOURNEY', sdxl: 'SDXL', booru: 'BOORU' }[outputMode];
         preview.innerHTML =
           `<span class="text-xs text-gray-600 block mb-2">[${modeTag}]</span>` +
           `<span class="text-cyan-400">"</span><span style="white-space:pre-wrap;">${escapeHtml(prompt)}</span><span class="text-cyan-400">"</span>`;
@@ -4805,6 +5103,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       updateTelemetry(prompt);
       renderDiagnostics(prompt);
       renderCorruptionReport();
+      renderBooruReport();
       // Once per roll rather than once per axis; randomizeAll touches seventeen.
       syncEliminationUI();
       // Every mutation path ends here, so the rig can never drift from state.
@@ -6113,6 +6412,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     // The bank outlives the session that made it; that is the point of it.
     loadBank();
     renderBankPanel();
+    syncBooruControls();
     installDarpaCard();
     injectV5Ui();
 

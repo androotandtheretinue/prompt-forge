@@ -37,7 +37,8 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - Each scope carries **⟳ reroll, 🔐 pin, and 🚫 mute** — the same three verbs a single row has. Mute Story to build an image that carries no narrative, action, figure or wardrobe at all. Both operators toggle back to live.
 - **Option Radar** searches built-in and custom signals.
 - **Chaos Dial** corrupts the signal text itself, on a meter that documents its own thresholds: **DRIFT** at 25 (semantic variants), **MISSPELL** at 50, **LEET** at 75, **ZALGO** at the last tick. Zones are cumulative, so high chaos gives a mix rather than a uniform filter. Locked signals are immune, the corruption is seeded and saved with Blueprints, and every damaged signal is shown beside its original.
-- **Universal, Midjourney, and SDXL** output formats.
+- **Universal, Midjourney, SDXL and BOORU** output formats.
+- **BOORU mode** translates the board into Danbooru tags for Illustrious, NoobAI, WAI and Pony checkpoints. Camera, pose, garment, place and light have real tag equivalents and are mapped; everything else passes through as prose, and the panel names which axes did which. The quality axis stands aside — booru checkpoints use their own quality vocabulary — and the prefix, subject tags and negative are editable, since every checkpoint family wants a different incantation.
 - **Midjourney flight controls** for version, stylize, weird, SD/HD, seed, style reference, style weight, profile, RAW, TILE, and DRAFT.
 - **Blueprint Vault** stores named configurations, including custom pools.
 - Persistent **24-prompt history**.
@@ -89,7 +90,7 @@ https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/vocabul
 
 Both paths track `main` and move as the vocabulary grows. Replace `main` with a commit SHA to pin the exact vocabulary a result was built from — `main` for operating the instrument, a pinned SHA for anything you intend to cite.
 
-This exists because `index.html` is ~243 kB and the signal pools begin about 68 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
+This exists because `index.html` is ~274 kB and the signal pools begin about 73 kB in — past the point where many fetchers truncate, and past where some strip `<script>` contents entirely. An agent that reads a truncated page tends to supply remembered signals instead of listed ones, which fails while looking like success. The protocol itself sits about 3 kB into the `<head>`, ahead of that wall, so a truncated read still lands on the instructions.
 
 Both vocabulary files are generated from the application by `npm run vocabulary`, and the audit fails if they drift from it.
 

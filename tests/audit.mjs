@@ -141,6 +141,21 @@ globalThis.__forgeAudit = {
 
     return { filtersUnheld, unbanRestores, refused, leftStanding, stillDrawable, clears, banksOnBanHeld, surveyDoesNotBank, outlivesRelease, strumNeverBanks, bankingReturnsAfterStrum };
   })(),
+  booru: (() => {
+    const orphanKeys = [];
+    const badAxes = [];
+    const badTags = [];
+    Object.entries(BOORU_TAGS).forEach(([axis, table]) => {
+      if (!categories[axis]) { badAxes.push(axis); return; }
+      const pool = new Set(categories[axis].options);
+      Object.entries(table).forEach(([signal, tag]) => {
+        if (!pool.has(signal)) orphanKeys.push(axis + ': ' + signal);
+        if (tag !== tag.toLowerCase() || /_/.test(tag)) badTags.push(axis + ': ' + tag);
+      });
+    });
+    const mapped = Object.values(BOORU_TAGS).reduce((sum, table) => sum + Object.keys(table).length, 0);
+    return { orphanKeys, badAxes, badTags, mapped, mapsQuality: 'quality' in BOORU_TAGS };
+  })(),
   rigStates: Object.keys(categories).map(key => {
     const cat = categories[key];
     const read = value => { cat.value = value.value; cat.locked = value.locked; return categoryStateOf(cat); };
@@ -422,6 +437,39 @@ if (rollButtonIds < 2) {
 if (!/getElementById\(`roll-\$\{key\}`\)/.test(html)) {
   fail('syncEliminationUI no longer looks up the per-axis roll buttons, so elimination would only be visible on the roll-all control.');
 }
+
+/*
+ * The booru map must stay attached to the vocabulary it translates.
+ *
+ * It is a second vocabulary keyed by the first, which is the shape of thing
+ * that rots quietly: rename a signal upstream and its tag becomes unreachable
+ * with nothing failing. Every key is therefore checked against the live pool,
+ * which is the same rule the Forge Cards live under.
+ *
+ * Tags are checked for form as well. Danbooru's canonical form uses
+ * underscores, but the SDXL finetunes this targets were trained on the
+ * space-separated rendering — emitting `hand_on_hip` to Illustrious is a
+ * near-miss token, which is worse than the prose it replaced.
+ *
+ * And quality is deliberately unmapped. That axis speaks a different language
+ * than "masterpiece, absurdres"; mapping it would invent a correspondence that
+ * does not exist, which is the thing this file exists to prevent.
+ */
+const booru = audit.booru;
+if (booru.badAxes.length) fail(`The booru map names axes that do not exist: ${booru.badAxes.join(', ')}.`);
+if (booru.orphanKeys.length) {
+  fail(`${booru.orphanKeys.length} booru mapping(s) point at signals no longer in the vocabulary: ${booru.orphanKeys.slice(0, 4).join('; ')}${booru.orphanKeys.length > 4 ? '…' : ''}`);
+}
+if (booru.badTags.length) {
+  fail(`Tags must be lowercase and space-separated for these checkpoints: ${booru.badTags.slice(0, 4).join('; ')}`);
+}
+if (booru.mapsQuality) fail('The booru map translates the quality axis. Booru checkpoints use their own quality vocabulary; that axis is replaced by the scaffolding, not mapped.');
+if (booru.mapped < 80) fail(`Only ${booru.mapped} signals map to tags; the mode would pass almost everything through as prose.`);
+
+// Every declared output mode needs a button, and every button a mode.
+const declaredModes = (html.match(/\['universal', 'midjourney', 'sdxl', 'booru'\]/g) || []).length;
+if (declaredModes < 2) fail('The output-mode list is inconsistent; booru must appear everywhere modes are validated or toggled.');
+if (!/id="mode-booru"/.test(html)) fail('BOORU is a valid output mode with no button to select it.');
 
 // The Signal Rig reads three states out of the two persisted properties.
 const badStates = audit.rigStates.filter(({ observed }) =>
