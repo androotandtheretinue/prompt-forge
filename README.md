@@ -155,6 +155,18 @@ Custom signals:
 - remain separate from the canonical built-in signal banks
 - can be deleted from their category's custom-signal panel
 
+### Bringing a vocabulary in
+
+The custom-signal panel takes lists as well as single entries.
+
+- **Import a list into this axis** accepts values separated by newlines or commas, or both. It reports what it added and what it refused as already present.
+- **Export or import every custom pool** moves the whole board at once as JSON keyed by axis, so a vocabulary is a portable object rather than browser state. Useful when a set is tuned to one checkpoint and you want another.
+- Import merges by default. Ticking **replace** empties every custom pool first, not only the axes named in the file, so the board ends up matching the file rather than running a mixture of two sets.
+- Duplicates are judged without regard to case and against the whole pool, built-ins included. A pool holding both `Golden Hour` and `golden hour` would look the same in every list the interface draws, and you could never tell which one a roll produced.
+- A malformed file changes nothing and says why. Axes the board does not have are named rather than silently dropped.
+
+Nothing here is curated or shipped. Prompt Forge holds a vocabulary of 2,304 signals chosen for the board; what you import is yours, stays in your browser, and is your responsibility.
+
 ## The PHOSPHOR card
 
 The PHOSPHOR Forge Card treats the aesthetic as a rendering doctrine rather than forcing an operator or control-room scene.

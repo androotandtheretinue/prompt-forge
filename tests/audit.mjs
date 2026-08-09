@@ -156,6 +156,45 @@ globalThis.__forgeAudit = {
     const mapped = Object.values(BOORU_TAGS).reduce((sum, table) => sum + Object.keys(table).length, 0);
     return { orphanKeys, badAxes, badTags, mapped, mapsQuality: 'quality' in BOORU_TAGS };
   })(),
+  bulkImport: (() => {
+    const keys = Object.keys(categories);
+    const bothSeparators = splitSignalList('alpha, beta\\ngamma').join('|');
+    const trimsAndDrops = splitSignalList('  a  ,, \\n , b \\n\\n ').join('|');
+    const nullSafe = splitSignalList(null).length === 0 && splitSignalList(undefined).length === 0;
+
+    // 'golden hour' differs from an existing entry only in case; 'Rim Light'
+    // repeats within the incoming list itself. Both must be refused.
+    const merged = mergeSignalValues(['Golden Hour', 'Noir'], ['golden hour', 'Rim Light', 'rim light', ' ', 'Noir']);
+    const mergeNullSafe = mergeSignalValues(null, null).added === 0;
+    const preservesCase = mergeSignalValues([], ['Rim Light']).accepted[0] === 'Rim Light';
+    const trimsOnMerge = mergeSignalValues([], ['  Rim Light  ']).accepted[0] === 'Rim Light';
+
+    const pools = parseSignalPools('{"wardrobe":["thighhighs","  "],"nonsense":["x"],"mood":"not a list"}', keys);
+    const badJson = parseSignalPools('{not json', keys);
+    const arrayJson = parseSignalPools('["a"]', keys);
+    const nullJson = parseSignalPools('null', keys);
+    const blankJson = parseSignalPools('   ', keys);
+
+    return {
+      bothSeparators,
+      trimsAndDrops,
+      nullSafe,
+      mergedAdded: merged.added,
+      mergedSkipped: merged.skipped,
+      mergedAccepted: merged.accepted.join('|'),
+      mergeNullSafe,
+      preservesCase,
+      trimsOnMerge,
+      poolsOk: pools.ok,
+      poolWardrobe: (pools.pools.wardrobe || []).join('|'),
+      poolUnknown: pools.unknown.join('|'),
+      poolMalformed: pools.malformed.join('|'),
+      badJsonRefused: badJson.ok === false && badJson.reason.length > 0,
+      arrayRefused: arrayJson.ok === false,
+      nullRefused: nullJson.ok === false,
+      blankAccepted: blankJson.ok === true && Object.keys(blankJson.pools).length === 0
+    };
+  })(),
   rigStates: Object.keys(categories).map(key => {
     const cat = categories[key];
     const read = value => { cat.value = value.value; cat.locked = value.locked; return categoryStateOf(cat); };
@@ -465,6 +504,75 @@ if (booru.badTags.length) {
 }
 if (booru.mapsQuality) fail('The booru map translates the quality axis. Booru checkpoints use their own quality vocabulary; that axis is replaced by the scaffolding, not mapped.');
 if (booru.mapped < 80) fail(`Only ${booru.mapped} signals map to tags; the mode would pass almost everything through as prose.`);
+
+/*
+ * Bulk import: the only path by which a stranger's vocabulary enters the board.
+ *
+ * Everything checked here is a way an import can appear to succeed while
+ * quietly doing something else. A pool that ends up holding "Golden Hour" and
+ * "golden hour" is the worst of them, because both render identically in every
+ * list the interface draws and nothing afterwards can tell you which one a roll
+ * produced. Case-insensitive deduplication is therefore not a nicety.
+ *
+ * The counts matter for the same reason. An import that reports what it added
+ * and stays silent about what it refused is a small lie that surfaces an hour
+ * later, when a signal the user believes they added never appears in a draw.
+ *
+ * And a malformed file must change nothing at all. A half-applied import that
+ * reports success leaves a board no one can reason about; a refusal leaves a
+ * board that is exactly where it was.
+ */
+const bulk = audit.bulkImport;
+if (bulk.bothSeparators !== 'alpha|beta|gamma') {
+  fail(`Bulk import split "alpha, beta\\ngamma" into ${bulk.bothSeparators}; commas and newlines must both separate, since that is how lists are written and how tag strings arrive.`);
+}
+if (bulk.trimsAndDrops !== 'a|b') {
+  fail(`Bulk import produced ${bulk.trimsAndDrops} from a list padded with blanks; empty entries and surrounding space must not become signals.`);
+}
+if (!bulk.nullSafe || !bulk.mergeNullSafe) fail('Bulk import throws on an empty field instead of importing nothing.');
+if (bulk.mergedAccepted !== 'Rim Light') {
+  fail(`Merging accepted ${bulk.mergedAccepted}. Only the one genuinely new signal may survive: a differently-cased copy of an existing signal is indistinguishable from it in every list the board draws.`);
+}
+if (bulk.mergedAdded !== 1 || bulk.mergedSkipped !== 3) {
+  fail(`Merging reported ${bulk.mergedAdded} added and ${bulk.mergedSkipped} skipped; expected 1 and 3. Unreported skips are what make a signal seem to vanish after import.`);
+}
+if (!bulk.preservesCase || !bulk.trimsOnMerge) {
+  fail('Merging rewrote an accepted signal. Deduplication ignores case; storage must not — the user typed what they typed.');
+}
+if (!bulk.poolsOk || bulk.poolWardrobe !== 'thighhighs') {
+  fail(`Whole-board import parsed wardrobe as ${bulk.poolWardrobe}; blank entries must be dropped there too.`);
+}
+if (bulk.poolUnknown !== 'nonsense') fail(`Unknown axes reported as ${bulk.poolUnknown}; a set written for a different board must say so rather than half-apply.`);
+if (bulk.poolMalformed !== 'mood') fail(`A known axis holding a non-list was reported as ${bulk.poolMalformed}; that is a different complaint from an unknown axis and is reported separately.`);
+if (!bulk.badJsonRefused) fail('Malformed JSON is accepted by the whole-board import. It must refuse with a reason and change nothing.');
+if (!bulk.arrayRefused) fail('A bare JSON array is accepted as a pool map; the format is an object keyed by axis.');
+if (!bulk.nullRefused) fail('JSON null is accepted as a pool map.');
+if (!bulk.blankAccepted) fail('An empty box is treated as an error rather than as nothing to import.');
+
+/*
+ * The wiring must reach the rules. These three functions live in the
+ * application block precisely so the checks above can execute them; if the
+ * interaction layer grew its own copy, everything above would be verifying code
+ * that no longer runs — which is the exact failure this harness was rebuilt to
+ * stop after it spent two releases auditing markup.
+ */
+['splitSignalList', 'mergeSignalValues', 'parseSignalPools'].forEach(name => {
+  if (!appBlocks[0].includes(`function ${name}(`)) {
+    fail(`${name} is not defined in the application block, so the harness cannot execute the rule it enforces.`);
+  }
+  if (!blocks.some(block => block !== appBlocks[0] && block.includes(`${name}(`))) {
+    fail(`${name} is defined but the interaction layer never calls it, so the import path is running some other rule.`);
+  }
+});
+
+// The controls have to exist for any of it to be reachable.
+['customPoolBulk', 'customPoolJson', 'customPoolReplace'].forEach(id => {
+  if (!html.includes(`id="${id}"`)) fail(`The custom pool modal has no #${id}; part of the import surface is unreachable.`);
+});
+['importCustomList', 'exportCustomPools', 'importCustomPools'].forEach(name => {
+  if (!html.includes(`window.${name} =`)) fail(`${name} is wired to a control but never defined on window, so the inline handler would throw.`);
+  if (!html.includes(`onclick="${name}()"`)) fail(`${name} is defined but no control calls it.`);
+});
 
 // Every declared output mode needs a button, and every button a mode.
 const declaredModes = (html.match(/\['universal', 'midjourney', 'sdxl', 'booru'\]/g) || []).length;

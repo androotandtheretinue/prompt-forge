@@ -3969,6 +3969,92 @@ rather than operate the instrument, replace `main` with a commit SHA.
       eliminatedSignals.get(key).add(value);
     }
 
+    /* ⟁ ⵣ 𐤀 ⟁ — the vessel accepts what is poured into it, and no more.
+     *
+     * Bulk import, kept here as pure functions rather than in the interaction
+     * layer, so the harness can execute the part that is actually easy to get
+     * wrong. The DOM wiring lives with the modal; the rules live here.
+     */
+
+    /*
+     * Newlines or commas, both. That is how a person writes a list and how a
+     * booru tag string arrives, and demanding one of the two is a papercut on
+     * every single paste.
+     */
+    function splitSignalList(text) {
+      return String(text == null ? '' : text)
+        .split(/[\n,]/)
+        .map(part => part.trim())
+        .filter(Boolean);
+    }
+
+    /*
+     * Deduplication is case-insensitive and checked against the whole combined
+     * pool, so an import cannot shadow a built-in signal with a differently
+     * cased copy of itself — two entries that read identically but are not
+     * equal is the worst state a pool can be in, because nothing about the
+     * interface reveals which one you drew.
+     *
+     * Incoming values are also deduped against each other; a pasted list very
+     * often repeats itself.
+     *
+     * What was skipped is counted and returned, never swallowed. Pasting two
+     * hundred tags and being told "added 200" when eleven were already present
+     * is a small lie that costs you the next hour, when a signal you believe
+     * you added never appears in a roll.
+     */
+    function mergeSignalValues(existing, incoming) {
+      const seen = new Set((existing || []).map(item => String(item).toLocaleLowerCase()));
+      const accepted = [];
+      let skipped = 0;
+
+      (incoming || []).forEach(raw => {
+        const value = String(raw == null ? '' : raw).trim();
+        if (!value) return;
+        const lower = value.toLocaleLowerCase();
+        if (seen.has(lower)) { skipped += 1; return; }
+        seen.add(lower);
+        accepted.push(value);
+      });
+
+      return { accepted, added: accepted.length, skipped };
+    }
+
+    /*
+     * A whole board's custom pools as one object keyed by axis.
+     *
+     * Unknown axis names are collected and reported rather than dropped in
+     * silence: a set written against a board with different axes should say so
+     * out loud, because a half-applied import that claims success is worse
+     * than one that fails.
+     */
+    function parseSignalPools(text, knownKeys) {
+      let parsed;
+      try {
+        parsed = JSON.parse(String(text == null ? '' : text).trim() || '{}');
+      } catch (error) {
+        return { ok: false, reason: 'not valid JSON', pools: {}, unknown: [], malformed: [] };
+      }
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return { ok: false, reason: 'expected an object keyed by axis', pools: {}, unknown: [], malformed: [] };
+      }
+
+      const known = new Set(knownKeys || Object.keys(categories));
+      const pools = {};
+      const unknown = [];
+      const malformed = [];
+
+      Object.entries(parsed).forEach(([key, values]) => {
+        if (!known.has(key)) { unknown.push(key); return; }
+        // A known axis holding something that is not a list is a different
+        // complaint from an axis nobody has heard of, and says so separately.
+        if (!Array.isArray(values)) { malformed.push(key); return; }
+        pools[key] = splitSignalList(values.join('\n'));
+      });
+
+      return { ok: true, reason: '', pools, unknown, malformed };
+    }
+
     function updateChaos(value) {
       chaosLevel = parseInt(value);
       document.getElementById('chaosValue').textContent = value + '%';
@@ -5797,6 +5883,135 @@ rather than operate the instrument, replace `main` with a commit SHA.
     updatePreview();
   };
 
+  /*
+   * Bulk import — the wiring only. The rules it enforces (how a list is split,
+   * how duplicates are judged, how a pool object is parsed) live in the
+   * application block above as splitSignalList, mergeSignalValues and
+   * parseSignalPools, where the harness can execute them.
+   *
+   * Everything here is the part a harness could not usefully check anyway:
+   * which element the text came out of, and which sentence goes back into the
+   * page afterwards.
+   */
+  function absorbInto(key, values) {
+    if (!categories[key]) return { added: 0, skipped: 0 };
+    if (!Array.isArray(customOptions[key])) customOptions[key] = [];
+
+    // Judged against the combined pool, not just the custom half: a custom
+    // "Golden Hour" sitting beside the built-in one is indistinguishable in
+    // every list the interface draws.
+    const { accepted, added, skipped } = mergeSignalValues(getCombinedOptions(key), values);
+    customOptions[key].push(...accepted);
+    return { added, skipped };
+  }
+
+  const importTally = (added, skipped) =>
+    `${added} added${skipped ? `, ${skipped} already present` : ''}`;
+
+  function afterImport() {
+    persistCustomOptions();
+    renderCategories();
+    renderCustomEditor();
+    updateOptionCount();
+    updatePreview();
+  }
+
+  window.importCustomList = function importCustomList() {
+    if (!customEditorKey) return;
+
+    const field = document.getElementById('customPoolBulk');
+    const report = document.getElementById('customPoolBulkReport');
+    const { added, skipped } = absorbInto(customEditorKey, splitSignalList(field.value));
+
+    if (added) {
+      afterImport();
+      field.value = '';
+    }
+
+    if (report) {
+      report.textContent = added || skipped ? importTally(added, skipped) : 'nothing to import';
+    }
+  };
+
+  /*
+   * Export writes into the same box import reads from, so the round trip is
+   * visible: what you are about to hand someone is the thing on screen, not a
+   * download you have to go and open to check.
+   */
+  window.exportCustomPools = function exportCustomPools() {
+    const flat = {};
+
+    Object.entries(customOptions).forEach(([key, values]) => {
+      if (Array.isArray(values) && values.length) flat[key] = [...values];
+    });
+
+    const field = document.getElementById('customPoolJson');
+    if (field) field.value = JSON.stringify(flat, null, 2);
+
+    const report = document.getElementById('customPoolJsonReport');
+    const total = Object.values(flat).reduce((sum, list) => sum + list.length, 0);
+
+    if (report) {
+      report.textContent = total
+        ? `${total} signals across ${Object.keys(flat).length} ${Object.keys(flat).length === 1 ? 'axis' : 'axes'}`
+        : 'no custom signals yet';
+    }
+  };
+
+  window.importCustomPools = function importCustomPools() {
+    const field = document.getElementById('customPoolJson');
+    const report = document.getElementById('customPoolJsonReport');
+    const replace = Boolean(document.getElementById('customPoolReplace')?.checked);
+    const parsed = parseSignalPools(field.value, Object.keys(categories));
+
+    if (!parsed.ok) {
+      // Nothing is touched on a parse failure. A half-applied import that
+      // reports success is worse than one that plainly refuses.
+      if (report) report.textContent = `${parsed.reason} — nothing changed`;
+      return;
+    }
+
+    /*
+     * Replace empties every custom pool, not only the ones the file mentions.
+     * Swapping vocabularies means the board ends up matching the file; an axis
+     * the file is silent about should end up silent too, or you are running a
+     * mixture of two sets and cannot tell which one gave you a word.
+     */
+    if (replace) Object.keys(customOptions).forEach(key => { customOptions[key] = []; });
+
+    let added = 0;
+    let skipped = 0;
+
+    Object.entries(parsed.pools).forEach(([key, values]) => {
+      const result = absorbInto(key, values);
+      added += result.added;
+      skipped += result.skipped;
+    });
+
+    /*
+     * A replace can pull the rug out from under a row that is currently showing
+     * a custom signal. Locked rows are left alone — a pin is a promise — but an
+     * unlocked row holding a word that no longer exists is cleared rather than
+     * left displaying something the pool cannot produce again.
+     */
+    if (replace) {
+      Object.keys(categories).forEach(key => {
+        const value = categories[key].value;
+        if (!value || categories[key].locked) return;
+        if (!getCombinedOptions(key).includes(value)) categories[key].value = '';
+      });
+    }
+
+    afterImport();
+
+    if (report) {
+      const notes = [];
+      if (parsed.unknown.length) notes.push(`unknown axes ignored: ${parsed.unknown.join(', ')}`);
+      if (parsed.malformed.length) notes.push(`not a list: ${parsed.malformed.join(', ')}`);
+      report.textContent = [importTally(added, skipped), ...notes].join(' · ');
+    }
+  };
+
   window.removeCustomOption = function removeCustomOption(index) {
     if (
       !customEditorKey ||
@@ -6220,6 +6435,31 @@ rather than operate the instrument, replace `main` with a commit SHA.
       #customPoolModal.hidden {
         display: none;
       }
+
+      /* Collapsed by default: bulk import is the rarer errand, and an open
+         textarea would push the list of what you already have off-screen. */
+      .pool-bulk > summary {
+        cursor: pointer;
+        color: #58f5ae;
+        font-size: 12px;
+        letter-spacing: .04em;
+        list-style: none;
+      }
+
+      .pool-bulk > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .pool-bulk > summary:hover {
+        color: #8dffc2;
+      }
+
+      .pool-bulk textarea {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        resize: vertical;
+      }
     `;
 
     document.head.appendChild(style);
@@ -6317,6 +6557,51 @@ rather than operate the instrument, replace `main` with a commit SHA.
           </div>
 
           <div id="customPoolList"></div>
+
+          <!--
+            Bulk import. Nobody types two hundred tags one at a time, and the
+            single-entry field was the only door in — which quietly capped how
+            much vocabulary anyone could actually bring.
+          -->
+          <details class="pool-bulk mt-4">
+            <summary>⇪ Import a list into this axis</summary>
+            <textarea
+              id="customPoolBulk"
+              class="subject-input w-full mt-2"
+              rows="4"
+              placeholder="One per line, or comma separated…"
+            ></textarea>
+            <div class="flex items-center gap-2 mt-2">
+              <button class="btn btn-custom text-xs" onclick="importCustomList()">⇪ IMPORT</button>
+              <span class="text-xs text-gray-600" id="customPoolBulkReport"></span>
+            </div>
+          </details>
+
+          <!--
+            And the whole board at once, so a vocabulary is a portable object
+            rather than browser state. Different checkpoints want different
+            words; swapping sets should not mean retyping them.
+          -->
+          <details class="pool-bulk mt-2">
+            <summary>⇄ Export or import every custom pool</summary>
+            <p class="text-xs text-gray-600 mt-2">
+              JSON keyed by axis. Import merges by default — tick replace to swap a whole vocabulary out.
+            </p>
+            <textarea
+              id="customPoolJson"
+              class="subject-input w-full mt-2"
+              rows="5"
+              placeholder='{ "wardrobe": ["thighhighs"], "action": ["looking back"] }'
+            ></textarea>
+            <div class="flex items-center gap-2 mt-2 flex-wrap">
+              <button class="btn btn-custom text-xs" onclick="exportCustomPools()">⇩ EXPORT ALL</button>
+              <button class="btn btn-custom text-xs" onclick="importCustomPools()">⇪ IMPORT ALL</button>
+              <label class="text-xs text-gray-600">
+                <input type="checkbox" id="customPoolReplace"> replace instead of merge
+              </label>
+              <span class="text-xs text-gray-600" id="customPoolJsonReport"></span>
+            </div>
+          </details>
         </div>
       `;
 
@@ -6337,10 +6622,10 @@ rather than operate the instrument, replace `main` with a commit SHA.
     /*
      * Elimination is a held mode, not a per-click flag.
      *
-     * Shift on a drag surface already means step-strum, which advances a pool
-     * by one and never calls the randomizer — so the two readings of the key
-     * cannot collide. Shift while rerolling means refuse; Shift while dragging
-     * means step; neither is ever asked to be both.
+     * Shift means the same thing everywhere now: survey — do not hand back
+     * what you already passed. Step-strum moved to Ctrl precisely so the key
+     * would keep one meaning across the reroll buttons and the drag lane,
+     * rather than meaning "refuse" on one surface and "advance" on another.
      *
      * The blur handler is the load-bearing one. A keyup that happens while the
      * window is unfocused never arrives, so alt-tabbing mid-survey would leave
