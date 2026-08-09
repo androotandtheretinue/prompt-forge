@@ -442,6 +442,51 @@ if (!/\.strum-strip\b[\s\S]{0,600}?touch-action:\s*pan-y/.test(html)) {
 }
 
 /*
+ * Button rows that wrap must become grids on a phone, not wrap.
+ *
+ * A wrapping flex row cannot express "these are equal options" once the count
+ * stops dividing into the width: the last item gets a line to itself and
+ * stretches to fill it. BOORU rendered 309px against 90-106px for the other
+ * three formats — three times the target for the option that is not three
+ * times more likely — and the global controls put their primary button's label
+ * on two lines while each secondary took a whole row.
+ *
+ * The !important is load-bearing rather than lazy. The Tailwind CDN generates
+ * its utilities at runtime and appends them after this stylesheet, so `.flex`
+ * and a later `display: grid` tie on specificity and source order hands it to
+ * Tailwind. Both rules are checked for it, because without it they parse fine,
+ * look right in the file, and do nothing in the browser.
+ */
+const mobileBlock = (html.match(/@media \(max-width: 640px\) \{[\s\S]*?\n    \}/) || [''])[0];
+if (!mobileBlock) {
+  fail('The 640px mobile block could not be located, so none of the phone layout can be checked.');
+} else {
+  [
+    ['.mode-row', 'the four output-format buttons'],
+    ['\\[data-mobile-order="actions"\\]', 'the global control row']
+  ].forEach(([selector, what]) => {
+    /*
+     * All rules for the selector, not the first. These sections carry a
+     * separate `order:` rule for the mobile reordering, and matching only the
+     * first one checked the wrong declaration block entirely — it passed for
+     * the wrong reason until the layout rule was written, then failed for the
+     * wrong reason once it was.
+     */
+    const rules = [...mobileBlock.matchAll(new RegExp(selector + '\\s*\\{[^}]*\\}', 'g'))].map(match => match[0]);
+    if (!rules.length) {
+      fail(`${what} has no mobile rule, so it wraps and the last button stretches to fill its own line.`);
+      return;
+    }
+    if (!rules.some(rule => /display:\s*grid\s*!important/.test(rule))) {
+      fail(`${what} does not set display: grid !important on mobile. Without the !important the Tailwind CDN's runtime .flex wins on source order and the rule does nothing.`);
+    }
+    if (!rules.some(rule => /grid-template-columns:\s*repeat\(2,/.test(rule))) {
+      fail(`${what} does not lay out in two equal columns on mobile.`);
+    }
+  });
+}
+
+/*
  * Elimination: a survey, and a survey that ends.
  *
  * Holding the modifier sets aside every value rolled past, so each draw shows

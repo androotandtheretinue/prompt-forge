@@ -365,6 +365,67 @@
       .category-row select { padding: 6px 8px; font-size: 12px; }
       #strumInstructions { padding: 8px 10px !important; }
       .strum-hint-more { display: none; }
+      /* The strip already says which format it edits; the summary need not
+         repeat it at the cost of a second line. */
+      .pool-bulk-more { display: none; }
+
+      /*
+       * Four formats, one grid, four equal buttons.
+       *
+       * As a wrapping flex row the fourth button had a line to itself and
+       * stretched to fill it, so BOORU rendered 309px against 90-106px for the
+       * other three — three times the target for the option that is not three
+       * times more likely. A wrapping row cannot express "equal" once the count
+       * stops dividing into the width; a grid can, and does not care whether a
+       * fifth format ever arrives.
+       *
+       * !important throughout this block is load-bearing rather than lazy. The
+       * Tailwind CDN generates its utilities at runtime and appends them after
+       * this stylesheet, so `.flex` and a later `display: grid` tie on
+       * specificity and source order hands it to Tailwind. The category row
+       * above has needed the same for the same reason.
+       */
+      .mode-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .mode-row .btn { width: 100%; }
+
+      /*
+       * Same problem in the global controls: the primary button wrapped its own
+       * label onto two lines while the three secondaries each took a row. The
+       * primary keeps a full row, the rest pair up.
+       */
+      [data-mobile-order="actions"] {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      [data-mobile-order="actions"] > .btn { width: 100%; margin: 0; }
+      [data-mobile-order="actions"] > #randomizeButton { grid-column: 1 / -1; }
+
+      /* px-5 left the secondaries about 126px of usable width, which is not
+         enough for "CLEAR UNLOCKED" — it wrapped and pulled its whole row 21px
+         taller than the one above it. The padding is the part that can go. */
+      [data-mobile-order="actions"] > .btn:not(#randomizeButton) {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      /*
+       * The subject override takes two lines, like the category rows: the
+       * format tag and its two buttons above, the field itself full width
+       * below. On one line the field was down to about 145px, which is not
+       * enough to read a subject you are editing.
+       */
+      .subject-override { flex-wrap: wrap; }
+      .subject-override .subject-override-tag { order: 0; }
+      .subject-override .btn { order: 1; }
+      .subject-override .subject-input { order: 2; flex: 1 0 100%; }
     }
 
     /*
@@ -1496,8 +1557,8 @@ Optional. 2,304 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html for the vocabulary. It is a 274 kB single-file
-application and the signal pools begin about 73 kB in, past the point where
+Do not scrape index.html for the vocabulary. It is a 310 kB single-file
+application and the signal pools begin about 81 kB in, past the point where
 many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
@@ -1567,7 +1628,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       <div id="subjectPoolChips" class="subject-pool-chips"></div>
 
       <details class="pool-bulk mt-2">
-        <summary>⇪ Import a list of subjects for this format</summary>
+        <summary>⇪ Import a list of subjects<span class="pool-bulk-more"> for this format</span></summary>
         <textarea
           id="subjectPoolBulk"
           class="subject-input w-full mt-2"
@@ -1688,7 +1749,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         <div class="status-dot pulse"></div>
         <span class="category-label">📡 OUTPUT FORMAT</span>
       </div>
-      <div class="flex gap-2 mb-4 flex-wrap">
+      <div class="flex gap-2 mb-4 flex-wrap mode-row">
         <button class="btn mode-btn active" id="mode-universal" onclick="setMode('universal')">UNIVERSAL</button>
         <button class="btn mode-btn" id="mode-midjourney" onclick="setMode('midjourney')">MIDJOURNEY</button>
         <button class="btn mode-btn" id="mode-sdxl" onclick="setMode('sdxl')">SDXL</button>
