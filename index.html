@@ -895,6 +895,86 @@
       color: #555;
     }
 
+    /* The per-format subject override, and the pool it draws from. */
+    .subject-override {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .subject-override-tag {
+      flex: none;
+      min-width: 92px;
+      padding: 6px 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-align: center;
+      color: #6b6b80;
+      background: #12121a;
+      border: 1px solid #2a2a3a;
+      border-radius: 5px;
+    }
+
+    /* Lit only while this format is actually overriding. The strip is present
+       in every mode, so its resting state has to read as "not doing anything". */
+    .subject-override.overridden .subject-override-tag {
+      color: #58f5ae;
+      border-color: #58f5ae;
+      box-shadow: 0 0 10px rgba(88, 245, 174, .25);
+    }
+
+    .subject-override.overridden .subject-input {
+      border-color: #58f5ae;
+    }
+
+    .status-dot.overridden {
+      background: #58f5ae;
+      box-shadow: 0 0 10px rgba(88, 245, 174, .5);
+    }
+
+    .subject-pool-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .subject-chip {
+      display: inline-flex;
+      align-items: stretch;
+      overflow: hidden;
+      background: #12121a;
+      border: 1px solid #284438;
+      border-radius: 5px;
+    }
+
+    .subject-chip button {
+      padding: 4px 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: #58f5ae;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .subject-chip button:hover {
+      color: #8dffc2;
+      background: rgba(88, 245, 174, .1);
+    }
+
+    .subject-chip-drop {
+      color: #6b6b80 !important;
+      border-left: 1px solid #284438 !important;
+    }
+
+    .subject-chip-drop:hover {
+      color: #ff6b6b !important;
+      background: rgba(255, 107, 107, .12) !important;
+    }
+
     .category-label {
       font-family: 'Orbitron', sans-serif;
       font-size: 11px;
@@ -1456,13 +1536,49 @@ rather than operate the instrument, replace `main` with a commit SHA.
         <button class="btn btn-lock" id="subjectLock" onclick="toggleSubjectLock()" title="Lock Subject">🔒</button>
         <button class="btn btn-clear" onclick="clearSubject()" title="Clear Subject">✕</button>
       </div>
-      <input 
-        type="text" 
-        id="subjectInput" 
-        class="subject-input" 
+      <input
+        type="text"
+        id="subjectInput"
+        class="subject-input"
         placeholder="Enter your subject... (e.g., 'cyberpunk street vendor', 'ethereal forest spirit')"
         oninput="updatePreview()"
       >
+
+      <!--
+        The per-format override. Blank means this format uses the subject
+        above, which is the case for three of the four most of the time — the
+        prose modes want the same sentence and comparing them is the point.
+        BOORU is the one that wants different content: a count declaration,
+        not a translated sentence.
+      -->
+      <div class="subject-override" id="subjectOverrideRow">
+        <span class="subject-override-tag" id="subjectOverrideMode">UNIVERSAL</span>
+        <input
+          type="text"
+          id="subjectOverrideInput"
+          class="subject-input flex-1"
+          placeholder="Override for this format — blank uses the subject above"
+          oninput="updateSubjectOverride(this.value)"
+        >
+        <button class="btn btn-custom" onclick="saveSubjectToPool()" title="Save this subject to the current format's pool">＋</button>
+        <button class="btn btn-clear" onclick="clearSubjectOverride()" title="Clear the override; this format falls back to the subject above">✕</button>
+      </div>
+
+      <div id="subjectPoolChips" class="subject-pool-chips"></div>
+
+      <details class="pool-bulk mt-2">
+        <summary>⇪ Import a list of subjects for this format</summary>
+        <textarea
+          id="subjectPoolBulk"
+          class="subject-input w-full mt-2"
+          rows="3"
+          placeholder="One per line, or comma separated…"
+        ></textarea>
+        <div class="flex items-center gap-2 mt-2">
+          <button class="btn btn-custom text-xs" onclick="importSubjectList()">⇪ IMPORT</button>
+          <span class="text-xs text-gray-600" id="subjectPoolBulkReport"></span>
+        </div>
+      </details>
     </div>
 
     <!-- Global Controls -->
@@ -1590,16 +1706,12 @@ rather than operate the instrument, replace `main` with a commit SHA.
       <div id="booruControls" class="hidden mb-4">
         <div class="text-xs text-gray-600 mb-2">
           Tags for Danbooru-trained checkpoints. The quality axis stands aside here — booru models use their own quality vocabulary.
+          The count tag (<span class="text-cyan-400">1girl, solo</span>) goes in the BOORU subject override beside the subject field, not here.
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <label class="text-xs text-gray-500">QUALITY PREFIX
             <input type="text" class="subject-input w-full mt-1" id="booruQuality"
                    oninput="updateBooruSetting('quality', this.value)">
-          </label>
-          <label class="text-xs text-gray-500">SUBJECT TAGS
-            <input type="text" class="subject-input w-full mt-1" id="booruSubject"
-                   oninput="updateBooruSetting('subject', this.value)"
-                   title="1girl, 1boy, 2girls, solo — close to mandatory on Illustrious-family checkpoints">
           </label>
           <label class="text-xs text-gray-500">TRAILING
             <input type="text" class="subject-input w-full mt-1" id="booruTrailing"
@@ -2848,6 +2960,214 @@ rather than operate the instrument, replace `main` with a commit SHA.
     let payloadDensity = 'full';
     let blueprints = [];
     const STORAGE_KEY = 'promptForgeDarpaV4';
+    const SUBJECT_POOL_KEY = 'promptForgeSubjectPoolsV1';
+
+    /*
+     * ☿ MERCURIUS · one name, four tongues. the thing does not change.
+     *
+     * The four output formats are one prompt in four dialects, and flipping
+     * between them to compare is a reason to use this at all. So the subject
+     * stays shared and each mode may *optionally* override it.
+     *
+     * That asymmetry is not tidiness, it is the difference between the modes.
+     * Universal, Midjourney and SDXL want the same sentence — "a lighthouse
+     * keeper" is a lighthouse keeper in all three. A booru checkpoint wants a
+     * count declaration, `1girl, solo`, which is not that sentence translated
+     * but different content entirely. Only the mode that needs different
+     * content carries an override; the rest fall through to the shared value
+     * and keep the comparison honest.
+     *
+     * This replaces booruSettings.subject, which prepended `1girl, solo` to
+     * every prompt unconditionally — including prompts whose subject was a
+     * cracked helmet — while the board's real subject went in immediately
+     * after it. Two subjects, adjacent, contradicting each other, on every
+     * booru prompt ever built. An override cannot do that: it substitutes for
+     * the subject rather than sitting in front of it.
+     */
+    const OUTPUT_MODES = ['universal', 'midjourney', 'sdxl', 'booru'];
+    const subjectOverrides = { universal: '', midjourney: '', sdxl: '', booru: '' };
+    const customSubjects = { universal: [], midjourney: [], sdxl: [], booru: [] };
+
+    /*
+     * Which subject a given mode actually uses. Pure, and the only place the
+     * fallback is decided — every consumer goes through here or the rule would
+     * have to be right in several places at once.
+     *
+     * Whitespace-only is not an override. A field someone cleared by selecting
+     * and deleting leaves an empty string in some browsers and a stray space in
+     * others, and " " suppressing the shared subject would read as the board
+     * losing it.
+     */
+    function resolveSubject(mode, shared) {
+      const override = String(subjectOverrides[mode] == null ? '' : subjectOverrides[mode]).trim();
+      return override || String(shared == null ? '' : shared).trim();
+    }
+
+    function subjectOverrideActive(mode) {
+      return Boolean(String(subjectOverrides[mode] == null ? '' : subjectOverrides[mode]).trim());
+    }
+
+    function setSubjectOverride(mode, value) {
+      if (!(mode in subjectOverrides)) return false;
+      subjectOverrides[mode] = String(value == null ? '' : value);
+      return true;
+    }
+
+    /*
+     * Each format keeps its own list of subjects, because a subject worth
+     * saving is nearly always worth saving *for one dialect*. `1girl, solo` is
+     * a good booru subject and noise in a Midjourney prompt; "a lighthouse
+     * keeper" is the reverse. One shared list would put both in front of you
+     * every time and leave the sorting to memory.
+     */
+    function addSubjectToPool(mode, value) {
+      if (!(mode in customSubjects)) return { added: 0, skipped: 0 };
+      const { accepted, added, skipped } = mergeSignalValues(customSubjects[mode], [value]);
+      customSubjects[mode].push(...accepted);
+      return { added, skipped };
+    }
+
+    function importSubjectsInto(mode, text) {
+      if (!(mode in customSubjects)) return { added: 0, skipped: 0 };
+      const { accepted, added, skipped } = mergeSignalValues(customSubjects[mode], splitSignalList(text));
+      customSubjects[mode].push(...accepted);
+      return { added, skipped };
+    }
+
+    function removeSubjectFromPool(mode, index) {
+      if (!(mode in customSubjects)) return false;
+      if (index < 0 || index >= customSubjects[mode].length) return false;
+      customSubjects[mode].splice(index, 1);
+      return true;
+    }
+
+    function persistSubjectPools() {
+      try {
+        localStorage.setItem(SUBJECT_POOL_KEY, JSON.stringify(customSubjects));
+      } catch (error) {
+        console.warn('Prompt Forge subject pools unavailable:', error);
+      }
+    }
+
+    function restoreSubjectPools() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SUBJECT_POOL_KEY) || '{}');
+        if (!saved || typeof saved !== 'object') return;
+        OUTPUT_MODES.forEach(mode => {
+          if (Array.isArray(saved[mode])) {
+            customSubjects[mode] = saved[mode].filter(item => typeof item === 'string' && item.trim());
+          }
+        });
+      } catch (error) {
+        console.warn('Prompt Forge subject pools could not be restored:', error);
+      }
+    }
+
+    // --- the controls -------------------------------------------------------
+
+    function updateSubjectOverride(value) {
+      setSubjectOverride(outputMode, value);
+      syncSubjectOverrideUI();
+      updatePreview();
+    }
+
+    function clearSubjectOverride() {
+      setSubjectOverride(outputMode, '');
+      const field = document.getElementById('subjectOverrideInput');
+      if (field) field.value = '';
+      syncSubjectOverrideUI();
+      updatePreview();
+    }
+
+    /*
+     * Saves whatever this format is actually using — the override if it has
+     * one, the shared subject otherwise. Saving a blank because the override
+     * field happened to be empty would be the least useful reading of the
+     * button, since what you want to keep is what you are looking at.
+     */
+    function saveSubjectToPool() {
+      const value = resolveSubject(outputMode, document.getElementById('subjectInput')?.value);
+      if (!value) return;
+      const { added } = addSubjectToPool(outputMode, value);
+      if (added) {
+        persistSubjectPools();
+        renderSubjectPool();
+      }
+    }
+
+    /*
+     * By index, not by value. Passing the text through an inline onclick means
+     * escaping it for HTML and for JavaScript at once, and a subject is
+     * user-authored text that can contain quotes, backslashes and apostrophes —
+     * exactly the characters that make that two-layer escaping go wrong. An
+     * index has no such problem.
+     */
+    function applySubjectFromPool(index) {
+      const pool = customSubjects[outputMode] || [];
+      const value = pool[index];
+      if (typeof value !== 'string') return;
+      setSubjectOverride(outputMode, value);
+      const field = document.getElementById('subjectOverrideInput');
+      if (field) field.value = value;
+      syncSubjectOverrideUI();
+      updatePreview();
+    }
+
+    function dropSubjectFromPool(index) {
+      if (!removeSubjectFromPool(outputMode, index)) return;
+      persistSubjectPools();
+      renderSubjectPool();
+    }
+
+    function importSubjectList() {
+      const field = document.getElementById('subjectPoolBulk');
+      const report = document.getElementById('subjectPoolBulkReport');
+      if (!field) return;
+      const { added, skipped } = importSubjectsInto(outputMode, field.value);
+      if (added) {
+        persistSubjectPools();
+        renderSubjectPool();
+        field.value = '';
+      }
+      if (report) {
+        report.textContent = added || skipped
+          ? `${added} added${skipped ? `, ${skipped} already present` : ''}`
+          : 'nothing to import';
+      }
+    }
+
+    function renderSubjectPool() {
+      const panel = document.getElementById('subjectPoolChips');
+      if (!panel) return;
+      const pool = customSubjects[outputMode] || [];
+      if (!pool.length) { panel.innerHTML = ''; return; }
+      panel.innerHTML = pool.map((value, index) =>
+        `<span class="subject-chip">` +
+        `<button type="button" onclick="applySubjectFromPool(${index})">${escapeHtml(value)}</button>` +
+        `<button type="button" class="subject-chip-drop" onclick="dropSubjectFromPool(${index})" title="Remove from this format's pool">✕</button>` +
+        `</span>`
+      ).join('');
+    }
+
+    /*
+     * The strip says which format it is editing and whether that format is
+     * currently using its own subject or the shared one. A field whose effect
+     * depends on invisible state elsewhere is how you end up with `1girl` on a
+     * cracked helmet and no idea where it came from.
+     */
+    function syncSubjectOverrideUI() {
+      const label = document.getElementById('subjectOverrideMode');
+      if (label) label.textContent = outputMode.toUpperCase();
+      const field = document.getElementById('subjectOverrideInput');
+      if (field && field.value !== subjectOverrides[outputMode]) {
+        field.value = subjectOverrides[outputMode];
+      }
+      const row = document.getElementById('subjectOverrideRow');
+      if (row) row.classList.toggle('overridden', subjectOverrideActive(outputMode));
+      const dot = document.getElementById('subjectDot');
+      if (dot) dot.classList.toggle('overridden', subjectOverrideActive(outputMode));
+      renderSubjectPool();
+    }
     const mjControls = {
       version: '', stylize: '', weird: '', resolution: '', seed: '',
       sref: '', styleWeight: '', profile: '', raw: false, tile: false, draft: false
@@ -3472,7 +3792,10 @@ rather than operate the instrument, replace `main` with a commit SHA.
     // Every corruptible part of the prompt, in order, with its origin recorded.
     function getCorruptedParts() {
       const parts = [];
-      const subject = document.getElementById('subjectInput')?.value.trim() || '';
+      // The mode's override if it has one, the shared subject otherwise. Every
+      // consumer of the prompt reads this, so an override is a real subject
+      // rather than a booru-only decoration bolted on at assembly time.
+      const subject = resolveSubject(outputMode, document.getElementById('subjectInput')?.value);
       if (subject) parts.push({ key: '__subject', label: 'SUBJECT', ...corruptSignal('__subject', subject, chaosLevel, chaosSeed) });
       promptOrder.forEach(key => {
         const cat = categories[key];
@@ -3618,14 +3941,18 @@ rather than operate the instrument, replace `main` with a commit SHA.
     };
 
     /*
-     * Scaffolding a tagged checkpoint expects and this board has no axis for:
-     * a quality preamble, a subject count, and a negative. Editable, because
-     * every checkpoint family wants a slightly different incantation and baking
-     * one in would be wrong for whichever you are not using today.
+     * Scaffolding a tagged checkpoint expects and this board genuinely has no
+     * axis for: a quality preamble, a trailing tag, and a negative. Editable,
+     * because every checkpoint family wants a slightly different incantation
+     * and baking one in would be wrong for whichever you are not using today.
+     *
+     * The subject count tag used to live here and does not any more. It was the
+     * one field in this object the board *did* have somewhere for, and having
+     * it in both places meant every booru prompt carried two subjects. It is
+     * now the booru subject override; see subjectOverrides.
      */
     const booruSettings = {
       quality: 'masterpiece, best quality, amazing quality, very aesthetic',
-      subject: '1girl, solo',
       negative: 'bad quality, worst quality, worst detail, sketch, censor',
       trailing: 'absurdres'
     };
@@ -3643,7 +3970,11 @@ rather than operate the instrument, replace `main` with a commit SHA.
       const proseAxes = [];
 
       getCorruptedParts().forEach(part => {
-        if (part.key === '__subject') { tagged.push(part.value); return; }
+        // Lowercased like every other tag. It went in raw until 5.5, so a
+        // subject sat in Titlecase among lowercase tags — harmless to a model,
+        // but it made the subject look like a different kind of thing than the
+        // tags around it, which in this mode it is not.
+        if (part.key === '__subject') { tagged.push(part.value.toLowerCase()); return; }
         // Quality is replaced by the scaffolding in this mode, not translated.
         if (part.key === 'quality') return;
         const table = BOORU_TAGS[part.key];
@@ -3669,7 +4000,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     }
 
     function syncBooruControls() {
-      [['booruQuality', 'quality'], ['booruSubject', 'subject'],
+      [['booruQuality', 'quality'],
        ['booruTrailing', 'trailing'], ['booruNegative', 'negative']].forEach(([id, field]) => {
         const input = document.getElementById(id);
         if (input && input.value !== booruSettings[field]) input.value = booruSettings[field];
@@ -3705,7 +4036,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
       const { tagged, prose } = toBooruParts();
       const body = [...tagged, ...prose].filter(Boolean);
       if (!body.length) return '';
-      const lead = [booruSettings.quality, booruSettings.subject].filter(Boolean).join(', ');
+      // Quality only. The subject is already in `body`, having come through
+      // getCorruptedParts like every other part of the prompt.
+      const lead = booruSettings.quality;
       const tail = booruSettings.trailing ? `, ${booruSettings.trailing}` : '';
       let prompt = `${lead ? lead + ', ' : ''}${body.join(', ')}${tail}`;
       const negatives = [booruSettings.negative, ...negativePrompts].filter(Boolean).join(', ');
@@ -4160,12 +4493,21 @@ rather than operate the instrument, replace `main` with a commit SHA.
     // ☍ three tongues, one utterance. none of them is the image.
     // ============================================
 
+    /*
+     * Everything mode-dependent is synced in one place rather than listed here.
+     *
+     * This function used to toggle three buttons by name and knew nothing about
+     * BOORU, which arrived later — the fourth button lit only because
+     * syncControlUI happened to run from elsewhere. The per-format subject
+     * override made that gap visible: switch away from BOORU and the strip went
+     * on displaying the booru override, because nothing told it the mode had
+     * changed. Delegating means the next format added is handled by editing one
+     * list instead of finding every place that enumerates the modes.
+     */
     function setMode(mode) {
+      if (!OUTPUT_MODES.includes(mode)) return;
       outputMode = mode;
-      ['universal', 'midjourney', 'sdxl'].forEach(m => {
-        document.getElementById('mode-' + m).classList.toggle('active', m === mode);
-      });
-      document.getElementById('mjControls').classList.toggle('hidden', mode !== 'midjourney');
+      syncControlUI();
       updatePreview();
     }
 
@@ -4444,6 +4786,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       return {
         subject: document.getElementById('subjectInput')?.value || '',
         subjectLocked,
+        subjectOverrides: { ...subjectOverrides },
         categories: Object.fromEntries(Object.entries(categories).map(([key, cat]) => [key, { value: cat.value, locked: cat.locked }])),
         chaosLevel, pinnedChaosModifier, chaosSeed, outputMode, aspectRatio, payloadDensity,
         booruSettings: { ...booruSettings },
@@ -4467,10 +4810,29 @@ rather than operate the instrument, replace `main` with a commit SHA.
       pinnedChaosModifier = typeof config.pinnedChaosModifier === 'string' ? config.pinnedChaosModifier : '';
       // A blueprint without a seed predates corruption; keep the default so an
       // old save reproduces exactly what it did before the dial had teeth.
+      OUTPUT_MODES.forEach(mode => { subjectOverrides[mode] = ''; });
+      if (config.subjectOverrides && typeof config.subjectOverrides === 'object') {
+        OUTPUT_MODES.forEach(mode => {
+          if (typeof config.subjectOverrides[mode] === 'string') subjectOverrides[mode] = config.subjectOverrides[mode];
+        });
+      }
       if (config.booruSettings && typeof config.booruSettings === 'object') {
         Object.keys(booruSettings).forEach(field => {
           if (typeof config.booruSettings[field] === 'string') booruSettings[field] = config.booruSettings[field];
         });
+        /*
+         * Every blueprint saved before 5.5 carries its count tag as
+         * booruSettings.subject, a field that no longer exists. Read it into
+         * the booru override rather than dropping it: those saves were built
+         * around `1girl, solo` being present, and silently losing it would
+         * change what an old blueprint produces without saying so.
+         *
+         * Only when the blueprint has no override of its own, so a save made
+         * after the migration is never overwritten by its own legacy field.
+         */
+        if (typeof config.booruSettings.subject === 'string' && !subjectOverrides.booru.trim()) {
+          subjectOverrides.booru = config.booruSettings.subject;
+        }
         syncBooruControls();
       }
       chaosSeed = Number.isFinite(Number(config.chaosSeed)) ? Math.max(0, Math.min(999999, Number(config.chaosSeed))) : 47;
@@ -4564,6 +4926,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
         const button = document.getElementById(`mode-${mode}`);
         if (button) button.classList.toggle('active', outputMode === mode);
       });
+      // The override strip follows the mode, since which format it edits is
+      // the only thing about it that changes.
+      syncSubjectOverrideUI();
       document.getElementById('booruControls')?.classList.toggle('hidden', outputMode !== 'booru');
       document.getElementById('mjControls').classList.toggle('hidden', outputMode !== 'midjourney');
       ['none', '1:1', '3:2', '4:5', '16:9', '9:16', '21:9', '2:3', '4:3'].forEach(ratio => {
@@ -4610,6 +4975,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     function init() {
       restorePersistedState();
+      restoreSubjectPools();
       renderCategories();
       renderPresets();
       renderNegativeChips();

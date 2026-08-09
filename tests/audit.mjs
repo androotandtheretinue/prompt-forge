@@ -208,7 +208,67 @@ globalThis.__forgeAudit = {
     cat.value = before.value;
     cat.locked = before.locked;
     return { key, observed };
-  })
+  }),
+  subjectScope: (() => {
+    const modeBefore = outputMode;
+    const overridesBefore = { ...subjectOverrides };
+    OUTPUT_MODES.forEach(mode => setSubjectOverride(mode, ''));
+
+    const sharedWins = resolveSubject('universal', 'a lighthouse keeper');
+    setSubjectOverride('booru', '1girl, solo');
+    const overrideWins = resolveSubject('booru', 'a lighthouse keeper');
+    const othersUnaffected = resolveSubject('midjourney', 'a lighthouse keeper');
+    setSubjectOverride('sdxl', '   ');
+    const blankIsNotAnOverride = resolveSubject('sdxl', 'a lighthouse keeper');
+    const trimsShared = resolveSubject('universal', '  a lighthouse keeper  ');
+    const rejectsUnknownMode = setSubjectOverride('nonsense', 'x') === false;
+    const activeReadsBlank = subjectOverrideActive('sdxl') === false && subjectOverrideActive('booru') === true;
+
+    // The whole point: the assembled booru prompt must carry one subject.
+    OUTPUT_MODES.forEach(mode => setSubjectOverride(mode, ''));
+    setSubjectOverride('booru', 'ZZMARKERZZ');
+    outputMode = 'booru';
+    categories.lighting.value = categories.lighting.options.find(option => !option.startsWith('—'));
+    const built = buildBooruPrompt();
+    const markerCount = (built.match(/zzmarkerzz/gi) || []).length;
+    const lowercasedSubject = built.includes('zzmarkerzz') && !built.includes('ZZMARKERZZ');
+    categories.lighting.value = '';
+
+    // A pre-5.5 blueprint carries its count tag in booruSettings.subject.
+    OUTPUT_MODES.forEach(mode => setSubjectOverride(mode, ''));
+    applyConfiguration({ booruSettings: { subject: '2girls' } }, false);
+    const legacyMigrates = subjectOverrides.booru === '2girls';
+    // A blueprint holding both must keep its own, not the legacy field.
+    OUTPUT_MODES.forEach(mode => setSubjectOverride(mode, ''));
+    applyConfiguration({ subjectOverrides: { booru: '1boy' }, booruSettings: { subject: '2girls' } }, false);
+    const newerWins = subjectOverrides.booru === '1boy';
+
+    // The pools.
+    customSubjects.booru.length = 0;
+    addSubjectToPool('booru', '1girl, solo');
+    const poolDedupes = addSubjectToPool('booru', '1GIRL, SOLO').skipped === 1;
+    importSubjectsInto('booru', '2girls, 1boy\\nno humans');
+    const poolImports = customSubjects.booru.length === 4;
+    removeSubjectFromPool('booru', 0);
+    const poolRemoves = customSubjects.booru.length === 3 && !customSubjects.booru.includes('1girl, solo');
+    const poolsAreSeparate = customSubjects.universal.length === 0;
+    const rejectsUnknownPool = addSubjectToPool('nonsense', 'x').added === 0;
+    customSubjects.booru.length = 0;
+
+    outputMode = modeBefore;
+    Object.keys(overridesBefore).forEach(mode => setSubjectOverride(mode, overridesBefore[mode]));
+
+    return {
+      sharedWins, overrideWins, othersUnaffected, blankIsNotAnOverride, trimsShared,
+      rejectsUnknownMode, activeReadsBlank, markerCount, lowercasedSubject,
+      legacyMigrates, newerWins, poolDedupes, poolImports, poolRemoves,
+      poolsAreSeparate, rejectsUnknownPool,
+      overrideKeys: Object.keys(subjectOverrides).join(','),
+      poolKeys: Object.keys(customSubjects).join(','),
+      modeList: OUTPUT_MODES.join(','),
+      booruFields: Object.keys(booruSettings).join(',')
+    };
+  })()
 };`;
 
 /*
@@ -573,6 +633,58 @@ if (!bulk.blankAccepted) fail('An empty box is treated as an error rather than a
   if (!html.includes(`window.${name} =`)) fail(`${name} is wired to a control but never defined on window, so the inline handler would throw.`);
   if (!html.includes(`onclick="${name}()"`)) fail(`${name} is defined but no control calls it.`);
 });
+
+/*
+ * One subject, four dialects, and at most one override each.
+ *
+ * The bug this replaced: booruSettings.subject prepended "1girl, solo" to
+ * every booru prompt unconditionally, while the board's real subject went in
+ * immediately after it. Two subjects, adjacent, contradicting each other, on
+ * every prompt — including ones whose subject was a cracked helmet. The
+ * marker check below is the direct guard against it coming back: an assembled
+ * booru prompt must contain its subject exactly once.
+ *
+ * The fallback is the other half. Three of the four modes want the same
+ * sentence, and flipping between them to compare dialects is a reason to use
+ * this at all — so a mode with no override of its own must resolve to the
+ * shared subject rather than to nothing.
+ */
+const subj = audit.subjectScope;
+if (subj.modeList !== 'universal,midjourney,sdxl,booru') fail(`OUTPUT_MODES reads ${subj.modeList}; the four formats are declared in one place and everything else derives from it.`);
+if (subj.overrideKeys !== subj.modeList) fail(`Subject overrides cover ${subj.overrideKeys} but the modes are ${subj.modeList}; a mode with no override slot silently cannot have one.`);
+if (subj.poolKeys !== subj.modeList) fail(`Subject pools cover ${subj.poolKeys} but the modes are ${subj.modeList}.`);
+if (subj.booruFields.includes('subject')) {
+  fail('booruSettings still carries a subject field. That is the duplicate-subject bug: the board already has a subject, and a second one prepended here appears in every booru prompt alongside it.');
+}
+if (subj.sharedWins !== 'a lighthouse keeper') fail(`A mode with no override resolved to ${JSON.stringify(subj.sharedWins)} instead of the shared subject; comparing the same idea across formats depends on that fallback.`);
+if (subj.overrideWins !== '1girl, solo') fail(`An override did not win for its own mode; got ${JSON.stringify(subj.overrideWins)}.`);
+if (subj.othersUnaffected !== 'a lighthouse keeper') fail('Setting one mode\'s override changed another mode\'s subject; the overrides must be per-format or the feature is a global rename.');
+if (subj.blankIsNotAnOverride !== 'a lighthouse keeper') fail('A whitespace-only override suppressed the shared subject. Clearing a field leaves a stray space in some browsers, and the board would read as having lost the subject.');
+if (subj.trimsShared !== 'a lighthouse keeper') fail('The shared subject is not trimmed before use.');
+if (!subj.rejectsUnknownMode) fail('setSubjectOverride accepted a mode that does not exist, which would create a fifth override nothing ever reads.');
+if (!subj.activeReadsBlank) fail('subjectOverrideActive disagrees with resolveSubject about whether an override is set, so the UI would light up for an override that is not applied, or stay dark for one that is.');
+if (subj.markerCount !== 1) {
+  fail(`The assembled booru prompt contains its subject ${subj.markerCount} times; it must appear exactly once. Two is the duplicate-subject bug returning.`);
+}
+if (!subj.lowercasedSubject) fail('The subject enters booru tag space without being lowercased, so it reads as a different kind of thing than the tags around it.');
+if (!subj.legacyMigrates) fail('A pre-5.5 blueprint\'s booruSettings.subject is dropped rather than read into the booru override. Those saves were built around that tag being present.');
+if (!subj.newerWins) fail('A blueprint carrying both an override and the legacy field lets the legacy field win, so migrating a save would undo it.');
+if (!subj.poolDedupes) fail('The subject pool accepted a differently-cased duplicate.');
+if (!subj.poolImports) fail('Bulk import into a subject pool did not take a comma-and-newline list.');
+if (!subj.poolRemoves) fail('Removing a subject from a pool did not remove it.');
+if (!subj.poolsAreSeparate) fail('Adding a subject to one format\'s pool put it in another\'s; the pools are per-format because a good booru subject is noise in a Midjourney prompt.');
+if (!subj.rejectsUnknownPool) fail('A subject was added to a pool for a mode that does not exist.');
+
+// The override has to be reachable, and the field it replaced must be gone.
+['subjectOverrideInput', 'subjectOverrideMode', 'subjectPoolChips', 'subjectPoolBulk'].forEach(id => {
+  if (!html.includes(`id="${id}"`)) fail(`The subject panel has no #${id}; part of the per-format subject surface is unreachable.`);
+});
+if (html.includes('id="booruSubject"')) {
+  fail('The BOORU panel still has its own subject field. It was replaced by the per-format override; leaving both is how the prompt got two subjects in the first place.');
+}
+if (!/applySubjectFromPool\(\$\{index\}\)/.test(html)) {
+  fail('Subject chips do not dispatch by index. A subject is user-authored text that can contain quotes and backslashes, and passing it through an inline onclick needs HTML and JavaScript escaping at once.');
+}
 
 // Every declared output mode needs a button, and every button a mode.
 const declaredModes = (html.match(/\['universal', 'midjourney', 'sdxl', 'booru'\]/g) || []).length;

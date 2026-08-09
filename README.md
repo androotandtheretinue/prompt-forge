@@ -167,6 +167,19 @@ The custom-signal panel takes lists as well as single entries.
 
 Nothing here is curated or shipped. Prompt Forge holds a vocabulary of 2,304 signals chosen for the board; what you import is yours, stays in your browser, and is your responsibility.
 
+## Subject, per output format
+
+The subject is shared across all four output formats, and each format may optionally override it.
+
+A format with no override uses the shared subject. That is the normal case for UNIVERSAL, MIDJOURNEY and SDXL — they want the same sentence, and flipping between them to compare dialects is a reason to use the tool at all.
+
+BOORU is the exception. Danbooru-trained checkpoints want a count declaration — `1girl, solo`, `2girls`, `1boy`, `no humans` — which is not the prose subject translated but different content. Put it in the BOORU override and the other three formats keep the sentence you typed.
+
+- The strip under the subject field names the format it is editing, and lights up only while that format is actually overriding.
+- Each format keeps its own pool of saved subjects, shown as chips. Clicking one sets the override.
+- The pools take bulk imports on the same terms as the axis pools.
+- Overrides travel with Blueprints. Blueprints saved before 5.5 have their old BOORU subject tag read into the booru override rather than dropped.
+
 ## The PHOSPHOR card
 
 The PHOSPHOR Forge Card treats the aesthetic as a rendering doctrine rather than forcing an operator or control-room scene.
