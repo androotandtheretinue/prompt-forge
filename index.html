@@ -287,54 +287,70 @@
     }
 
     /* ============================================
+     * PAGE ORDER
+     * ============================================
+     *
+     * Reach the instrument first; tune afterwards. On both platforms.
+     *
+     * This began as a phone-only rescue: the board sat 2,231 pixels down a
+     * 5,583-pixel page, three screenfuls of things that tune the instrument
+     * before one row of the instrument itself. The desktop had the same fault
+     * and hid it better, because a wide screen makes a long page read as a
+     * choice rather than a wall — you still scrolled past the chaos dial, the
+     * output format, the cards and the radar to reach a row you wanted to
+     * change. So the order left the media query.
+     *
+     * Subject, then the rig that says which axes are in play, then the strum
+     * hint and the board. Everything optional below. One order, both
+     * platforms, and no second arrangement to keep in step with the first.
+     *
+     * Order lives here rather than in the markup so a section can be moved
+     * without cutting several hundred lines of HTML out of one place and
+     * pasting them into another, which is the edit most likely to go wrong.
+     *
+     * The default is on the child rather than on the attribute, so a section
+     * added later without one lands below the board instead of above it. Unset
+     * order is 0, which would otherwise put anything new ahead of everything —
+     * the wrong failure for a forgotten attribute.
+     */
+    .max-w-4xl {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .max-w-4xl > * { order: 50; }
+    [data-section-order="header"]    { order: 0; }
+    [data-section-order="protocol"]  { order: 1; }
+    [data-section-order="subject"]   { order: 2; }
+    [data-section-order="actions"]   { order: 3; }
+    [data-section-order="hint"]      { order: 4; }
+    [data-section-order="board"]     { order: 5; }
+    [data-section-order="output"]    { order: 6; }
+    [data-section-order="format"]    { order: 7; }
+    [data-section-order="doctrine"]  { order: 8; }
+    [data-section-order="chaos"]     { order: 9; }
+    [data-section-order="cards"]     { order: 11; }
+    [data-section-order="radar"]     { order: 12; }
+    [data-section-order="negative"]  { order: 13; }
+    [data-section-order="banished"]  { order: 14; }
+    [data-section-order="vault"]     { order: 15; }
+    [data-section-order="history"]   { order: 16; }
+    [data-section-order="footer"]    { order: 99; }
+
+    /* ============================================
      * MOBILE
      * ============================================
      *
-     * The board sat 2,231 pixels down a 5,583-pixel page — three screenfuls of
-     * things that tune the instrument before one row of the instrument itself.
-     * And each row was 148px tall, because the label block, the select and five
-     * buttons each took a line, so five and a half axes of seventeen were on
-     * screen at once.
+     * What remains here is density, not arrangement. Each row was 148px tall,
+     * because the label block, the select and five buttons each took a line,
+     * so five and a half axes of seventeen were on screen at once.
      *
-     * Both are fixed by arrangement rather than by removal. Nothing is dropped
-     * on a phone: the tuning panels move below the board, and the row is packed
-     * into two lines instead of three. Locks stay inline on every row, because
-     * roll-then-pin-what-lived is the loop, and randomising without pinning is
-     * a slot machine rather than a lighter version of this.
+     * Fixed by packing rather than by removal. Nothing is dropped on a phone:
+     * the row goes to two lines instead of three, and locks stay inline on
+     * every row, because roll-then-pin-what-lived is the loop and randomising
+     * without pinning is a slot machine rather than a lighter version of this.
      */
     @media (max-width: 640px) {
-      .max-w-4xl {
-        display: flex;
-        flex-direction: column;
-      }
-
-      /*
-       * Reach the rows first; tune afterwards.
-       *
-       * The default is on the child rather than on the attribute, so a section
-       * added later without one lands below the board instead of above it.
-       * Unset order is 0, which would otherwise put anything new ahead of
-       * everything — the wrong failure for a forgotten attribute.
-       */
-      .max-w-4xl > * { order: 50; }
-      [data-mobile-order="header"]    { order: 0; }
-      [data-mobile-order="protocol"]  { order: 1; }
-      [data-mobile-order="subject"]   { order: 2; }
-      [data-mobile-order="actions"]   { order: 3; }
-      [data-mobile-order="hint"]      { order: 4; }
-      [data-mobile-order="board"]     { order: 5; }
-      [data-mobile-order="output"]    { order: 6; }
-      [data-mobile-order="format"]    { order: 7; }
-      [data-mobile-order="doctrine"]  { order: 8; }
-      [data-mobile-order="chaos"]     { order: 9; }
-      [data-mobile-order="rig"]       { order: 10; }
-      [data-mobile-order="cards"]     { order: 11; }
-      [data-mobile-order="radar"]     { order: 12; }
-      [data-mobile-order="negative"]  { order: 13; }
-      [data-mobile-order="banished"]  { order: 14; }
-      [data-mobile-order="vault"]     { order: 15; }
-      [data-mobile-order="history"]   { order: 16; }
-      [data-mobile-order="footer"]    { order: 99; }
 
       /*
        * Two lines, not three: identity and controls on the first, the value on
@@ -400,19 +416,19 @@
        * label onto two lines while the three secondaries each took a row. The
        * primary keeps a full row, the rest pair up.
        */
-      [data-mobile-order="actions"] {
+      #globalControls {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
       }
 
-      [data-mobile-order="actions"] > .btn { width: 100%; margin: 0; }
-      [data-mobile-order="actions"] > #randomizeButton { grid-column: 1 / -1; }
+      #globalControls > .btn { width: 100%; margin: 0; }
+      #globalControls > #randomizeButton { grid-column: 1 / -1; }
 
       /* px-5 left the secondaries about 126px of usable width, which is not
          enough for "CLEAR UNLOCKED" — it wrapped and pulled its whole row 21px
          taller than the one above it. The padding is the part that can go. */
-      [data-mobile-order="actions"] > .btn:not(#randomizeButton) {
+      #globalControls > .btn:not(#randomizeButton) {
         padding-left: 8px !important;
         padding-right: 8px !important;
         font-size: 13px;
@@ -1343,7 +1359,7 @@
   
   <div class="max-w-4xl mx-auto">
     <!-- Header -->
-    <header class="text-center mb-8" data-mobile-order="header">
+    <header class="text-center mb-8" data-section-order="header">
       <h1 class="font-display text-3xl md:text-4xl font-black tracking-wider neon-text text-cyan-400 mb-2">
         PROMPT FORGE
       </h1>
@@ -1382,7 +1398,7 @@
 
       Generated by `npm run vocabulary`. Edit llms.txt, never this copy.
     -->
-    <details class="agent-protocol mb-4" data-mobile-order="protocol">
+    <details class="agent-protocol mb-4" data-section-order="protocol">
       <summary>For AI agents — Prompt Forge protocol (llms.txt)</summary>
       <pre><!-- BEGIN llms.txt -->
 # Prompt Forge
@@ -1623,7 +1639,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </details>
 
     <!-- Subject Input -->
-    <div class="panel p-4 mb-4" data-mobile-order="subject">
+    <div class="panel p-4 mb-4" data-section-order="subject">
       <div class="flex items-center gap-3 mb-2">
         <div class="status-dot pulse" id="subjectDot"></div>
         <label class="category-label" id="subjectLabel">SUBJECT</label>
@@ -1689,22 +1705,56 @@ rather than operate the instrument, replace `main` with a commit SHA.
       </details>
     </div>
 
-    <!-- Global Controls -->
-    <div class="flex flex-wrap gap-3 mb-4" data-mobile-order="actions">
-      <button class="btn btn-primary flex-1 py-3" id="randomizeButton" onclick="randomizeAll()"
-              title="Roll every live axis. Hold Shift to set aside what you roll past, so each roll shows you something new.">
-        <span id="randomizeLabel">🎲 RANDOMIZE UNLOCKED</span>
-      </button>
-      <button class="btn btn-random py-3 px-5" onclick="mutateRandom(3)" title="Reroll three unlocked dimensions">
-        🧬 MUTATE 3
-      </button>
-      <button class="btn btn-lock py-3 px-6" onclick="unlockAll()">
-        🔓 UNLOCK ALL
-      </button>
+    <!--
+      SIGNAL RIG — which axes are in play, and the controls that act on them.
+
+      These were two panels with a page between them: the rig chose the scope
+      and the buttons pulled the trigger, and you set one at the top and the
+      other two screens down. They also overlapped. `allCategoriesLive` and
+      `unlockAll` were the same function written twice, so ALL LIVE and UNLOCK
+      ALL were the same button in two places under two names — the rig's copy
+      simply forgot the subject.
+
+      One panel, at the top: state the scope, then act on it. ALL LIVE is the
+      surviving name and it releases the subject too, which is what people
+      pressing the other one wanted.
+    -->
+    <div class="panel p-4 mb-4" data-section-order="actions">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="status-dot" style="background:var(--signal-muted); box-shadow:0 0 10px var(--signal-muted);"></div>
+        <span class="category-label">🎚️ SIGNAL RIG</span>
+        <span class="text-xs text-gray-500 ml-auto" id="rigReadout">17 live · 0 pinned · 0 muted</span>
+      </div>
+
+      <div class="flex flex-wrap gap-3 mb-3" id="globalControls">
+        <button class="btn btn-primary flex-1 py-3" id="randomizeButton" onclick="randomizeAll()"
+                title="Roll every live axis. Hold Shift to set aside what you roll past, so each roll shows you something new.">
+          <span id="randomizeLabel">🎲 RANDOMIZE UNLOCKED</span>
+        </button>
+        <button class="btn btn-random py-3 px-5" onclick="mutateRandom(3)" title="Reroll three unlocked dimensions">
+          🧬 MUTATE 3
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-600 mb-3">
+        Choose which axes are in play before you forge. Tap a chip to cycle it:
+        <span class="text-cyan-400">live</span> → <span class="text-yellow-400">pinned</span> → <span style="color:var(--signal-muted);">muted</span>.
+        Pinned holds its value; muted stays blank. Both survive every reroll, card, strum, and randomize.
+      </p>
+
+      <div class="flex flex-wrap gap-2 mb-3" id="rigStrip">
+        <!-- Rig chips injected here -->
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-mute text-xs" onclick="muteEmptyCategories()" title="Mute every axis that is currently blank — lock in your blanks before you start">🚫 MUTE BLANKS</button>
+        <button class="btn btn-lock text-xs" onclick="pinFilledCategories()" title="Pin every axis that currently has a value">🔐 PIN FILLED</button>
+        <button class="btn btn-random text-xs" onclick="unlockAll()" title="Return every axis to live and release the subject; values are kept">🔓 ALL LIVE</button>
+      </div>
     </div>
 
     <!-- Mission Doctrine -->
-    <div class="panel p-4 mb-4" data-mobile-order="doctrine">
+    <div class="panel p-4 mb-4" data-section-order="doctrine">
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot" style="background:var(--neon-gold); box-shadow:0 0 10px var(--neon-gold);"></div>
         <span class="category-label">🛰️ MISSION DOCTRINE</span>
@@ -1742,7 +1792,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Chaos Dial & Output Mode -->
-    <div class="panel p-4 mb-4" data-mobile-order="chaos">
+    <div class="panel p-4 mb-4" data-section-order="chaos">
       <!-- Chaos Dial -->
       <div>
         <div class="flex items-center gap-3 mb-3">
@@ -1791,7 +1841,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Output Mode & Aspect Ratio -->
-    <div class="panel p-4 mb-4" data-mobile-order="format">
+    <div class="panel p-4 mb-4" data-section-order="format">
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot pulse"></div>
         <span class="category-label">📡 OUTPUT FORMAT</span>
@@ -1895,7 +1945,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Forge Presets -->
-    <div class="panel p-4 mb-4" data-mobile-order="cards">
+    <div class="panel p-4 mb-4" data-section-order="cards">
       <div class="flex items-center gap-3 cursor-pointer" onclick="togglePresetPanel()">
         <div class="status-dot" style="background: var(--neon-magenta); box-shadow: 0 0 10px var(--neon-magenta);"></div>
         <span class="category-label">🃏 FORGE CARDS</span>
@@ -1910,7 +1960,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Option Radar -->
-    <div class="panel p-4 mb-4" data-mobile-order="radar">
+    <div class="panel p-4 mb-4" data-section-order="radar">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleRadarPanel()">
         <div class="status-dot" style="background:#58f5ae; box-shadow:0 0 10px #58f5ae;"></div>
         <span class="category-label">📡 OPTION RADAR</span>
@@ -1931,7 +1981,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       A store like that must be readable and reversible or it becomes a haunting
       — the pool quietly smaller every month and nothing to point at.
     -->
-    <div class="panel p-4 mb-4" data-mobile-order="banished">
+    <div class="panel p-4 mb-4" data-section-order="banished">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleBankPanel()">
         <div class="status-dot" style="background: #7c8aa8; box-shadow: 0 0 10px #7c8aa8;"></div>
         <span class="category-label">⚱ BANISHED SIGNALS</span>
@@ -1949,7 +1999,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Negative Prompt (collapsible) -->
-    <div class="panel p-4 mb-4" data-mobile-order="negative">
+    <div class="panel p-4 mb-4" data-section-order="negative">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleNegativePanel()">
         <div class="status-dot" style="background: #ff4444; box-shadow: 0 0 10px #ff4444;"></div>
         <span class="category-label">🚫 NEGATIVE PROMPT</span>
@@ -1972,28 +2022,6 @@ rather than operate the instrument, replace `main` with a commit SHA.
       </div>
     </div>
 
-    <!-- Signal Rig -->
-    <div class="panel p-4 mb-4" data-mobile-order="rig">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="status-dot" style="background:var(--signal-muted); box-shadow:0 0 10px var(--signal-muted);"></div>
-        <span class="category-label">🎚️ SIGNAL RIG</span>
-        <span class="text-xs text-gray-500 ml-auto" id="rigReadout">17 live · 0 pinned · 0 muted</span>
-      </div>
-      <p class="text-xs text-gray-600 mb-3">
-        Choose which axes are in play before you forge. Tap a chip to cycle it:
-        <span class="text-cyan-400">live</span> → <span class="text-yellow-400">pinned</span> → <span style="color:var(--signal-muted);">muted</span>.
-        Pinned holds its value; muted stays blank. Both survive every reroll, card, strum, and randomize.
-      </p>
-      <div class="flex flex-wrap gap-2 mb-3" id="rigStrip">
-        <!-- Rig chips injected here -->
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button class="btn btn-mute text-xs" onclick="muteEmptyCategories()" title="Mute every axis that is currently blank — lock in your blanks before you start">🚫 MUTE BLANKS</button>
-        <button class="btn btn-lock text-xs" onclick="pinFilledCategories()" title="Pin every axis that currently has a value">🔐 PIN FILLED</button>
-        <button class="btn btn-random text-xs" onclick="allCategoriesLive()" title="Return every axis to live (values are kept)">🔓 ALL LIVE</button>
-      </div>
-    </div>
-
     <!--
       Categories, with a strum lane down the left.
 
@@ -2007,7 +2035,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       shuffle button. Locked rows are skipped, because strumRow already refuses
       them.
     -->
-    <div class="board-with-lane mb-4" data-mobile-order="board">
+    <div class="board-with-lane mb-4" data-section-order="board">
       <!--
         The horizontal counterpart, shown only where the lane is not. A vertical
         drag on a phone is the scroll gesture, so the mobile strum has to run
@@ -2035,7 +2063,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Preview Panel -->
-    <div class="panel p-4" data-mobile-order="output">
+    <div class="panel p-4" data-section-order="output">
       <div class="flex items-center gap-3 mb-3">
         <div class="status-dot pulse"></div>
         <span class="category-label">LIVE PROMPT OUTPUT</span>
@@ -2053,7 +2081,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Blueprint Vault -->
-    <div class="panel p-4 mt-4" data-mobile-order="vault">
+    <div class="panel p-4 mt-4" data-section-order="vault">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleBlueprintPanel()">
         <div class="status-dot" style="background:#ffd166; box-shadow:0 0 10px #ffd166;"></div>
         <span class="category-label">🧬 BLUEPRINT VAULT</span>
@@ -2070,7 +2098,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Forge History -->
-    <div class="panel p-4 mt-4" data-mobile-order="history">
+    <div class="panel p-4 mt-4" data-section-order="history">
       <div class="flex items-center gap-3 cursor-pointer" onclick="toggleHistoryPanel()">
         <div class="status-dot" style="background: #8888ff; box-shadow: 0 0 10px #8888ff;"></div>
         <span class="category-label">📜 FORGE HISTORY</span>
@@ -2085,7 +2113,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
     </div>
 
     <!-- Footer -->
-    <footer data-mobile-order="footer" class="text-center mt-6 text-gray-600 text-xs tracking-wider">
+    <footer data-section-order="footer" class="text-center mt-6 text-gray-600 text-xs tracking-wider">
       <p>FORGED WITH hop.e 💫 | v5.4 · Distributed Axis Randomization &amp; Prompt Assembly</p>
     </footer>
   </div>
@@ -5407,10 +5435,12 @@ rather than operate the instrument, replace `main` with a commit SHA.
       updatePreview();
     }
 
-    function allCategoriesLive() {
-      Object.keys(categories).forEach(key => setCategoryState(key, 'live'));
-      updatePreview();
-    }
+    /*
+     * allCategoriesLive lived here and was unlockAll with the subject left out.
+     * Two names, two buttons, two panels, one behaviour — and the difference
+     * between them was not a design decision, it was the copy forgetting a
+     * line. unlockAll is the survivor.
+     */
 
     // ============================================
     // CLUSTER SCOPES
@@ -6923,9 +6953,14 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     document.head.appendChild(style);
 
-    const globalControls = document.querySelector(
-      '.flex.flex-wrap.gap-3.mb-4'
-    );
+    /*
+     * By id. This read `.flex.flex-wrap.gap-3.mb-4` — a selector made of
+     * layout utilities, which named the row only as long as nobody restyled it.
+     * Folding the controls into the Signal Rig changed those classes and the
+     * button would have silently stopped being injected: no error, just a
+     * control that quietly no longer exists.
+     */
+    const globalControls = document.getElementById('globalControls');
 
     if (
       globalControls &&
@@ -6956,7 +6991,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       hint.className =
         'panel p-3 mb-4 text-xs text-gray-500';
       // Carries its own place in the mobile order, like every other section.
-      hint.dataset.mobileOrder = 'hint';
+      hint.dataset.sectionOrder = 'hint';
 
       // The second half is desktop detail. On a phone it costs a third of a
       // screen above the board, which is the thing you came to use.

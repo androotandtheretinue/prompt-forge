@@ -429,27 +429,47 @@ if (!/<div class="board-with-lane/.test(html)) {
 }
 
 /*
- * Mobile ordering: every section named in the markup must have a rule, and
- * every rule must name a section that exists.
+ * Page order: every section named in the markup must have a rule, and every
+ * rule must name a section that exists.
  *
- * The phone layout reorders the page with flexbox so the board comes before
- * the panels that tune it — 2,231px of scrolling before the first axis, until
- * it did not. That mapping lives in two places, an attribute and a stylesheet,
- * and a section whose name matches nothing silently keeps the fallback order
- * while looking deliberate. Neither half is visible from the other.
+ * The page is arranged with flex order so the board comes before the panels
+ * that tune it — 2,231px of scrolling before the first axis, until it did not.
+ * That mapping lives in two places, an attribute and a stylesheet, and a
+ * section whose name matches nothing silently keeps the fallback position while
+ * looking deliberate. Neither half is visible from the other.
+ *
+ * It applies to both platforms as of 5.5. It was phone-only, which meant two
+ * arrangements to keep in step and a desktop that still scrolled past four
+ * tuning panels to reach a row.
  */
-const orderedSections = [...html.matchAll(/data-mobile-order="([a-z]+)"/g)].map(match => match[1]);
-const styledSections = [...html.matchAll(/\[data-mobile-order="([a-z]+)"\]\s*\{\s*order:/g)].map(match => match[1]);
+const orderedSections = [...html.matchAll(/data-section-order="([a-z]+)"/g)].map(match => match[1]);
+const styledSections = [...html.matchAll(/\[data-section-order="([a-z]+)"\]\s*\{\s*order:/g)].map(match => match[1]);
 const markupSections = orderedSections.filter(name => !styledSections.includes(name));
 const orphanRules = styledSections.filter(name => !orderedSections.includes(name));
 if (markupSections.length) {
-  fail(`These sections carry data-mobile-order with no rule to place them: ${[...new Set(markupSections)].join(', ')}.`);
+  fail(`These sections carry data-section-order with no rule to place them: ${[...new Set(markupSections)].join(', ')}.`);
 }
 if (orphanRules.length) {
-  fail(`These mobile order rules name sections that no longer exist: ${[...new Set(orphanRules)].join(', ')}.`);
+  fail(`These page order rules name sections that no longer exist: ${[...new Set(orphanRules)].join(', ')}.`);
 }
 if (!/\.max-w-4xl > \*\s*\{\s*order:/.test(html)) {
-  fail('The mobile order has no default for unlabelled sections, so a new panel would sort above the board rather than below it.');
+  fail('The page order has no default for unlabelled sections, so a new panel would sort above the board rather than below it.');
+}
+if (/data-mobile-order/.test(html)) {
+  fail('data-mobile-order survives somewhere. The order applies to both platforms now, and an attribute that says otherwise will send someone looking for a second arrangement that does not exist.');
+}
+
+/*
+ * The order must not be inside the media query. It was, and the desktop kept
+ * the DOM order — which is the arrangement nobody chose, with the board below
+ * four panels that tune it.
+ */
+const orderRuleAt = html.search(/\[data-section-order="board"\]/);
+const mobileQueryAt = html.search(/@media \(max-width: 640px\)/);
+if (orderRuleAt === -1) {
+  fail('No page order rule for the board.');
+} else if (mobileQueryAt !== -1 && orderRuleAt > mobileQueryAt) {
+  fail('The page order sits inside the mobile media query, so the desktop falls back to DOM order and only the phone gets the arrangement.');
 }
 
 /*
@@ -484,7 +504,7 @@ if (!mobileBlock) {
 } else {
   [
     ['.mode-row', 'the four output-format buttons'],
-    ['\\[data-mobile-order="actions"\\]', 'the global control row']
+    ['#globalControls', 'the global control row']
   ].forEach(([selector, what]) => {
     /*
      * All rules for the selector, not the first. These sections carry a
@@ -630,6 +650,44 @@ if (booru.badTags.length) {
 }
 if (booru.mapsQuality) fail('The booru map translates the quality axis. Booru checkpoints use their own quality vocabulary; that axis is replaced by the scaffolding, not mapped.');
 if (booru.mapped < 80) fail(`Only ${booru.mapped} signals map to tags; the mode would pass almost everything through as prose.`);
+
+/*
+ * Injected controls must be anchored by id, not by layout classes.
+ *
+ * CLEAR UNLOCKED is created by the interaction layer and appended to the
+ * global control row, which used to be found with `.flex.flex-wrap.gap-3.mb-4`
+ * — a selector made entirely of layout utilities, naming the row only for as
+ * long as nobody restyled it. Folding the controls into the Signal Rig changed
+ * exactly those classes. The button would have stopped being injected with no
+ * error and no missing element to find: a control that quietly ceases to exist.
+ *
+ * The strum hint has hit the same class of bug from the other direction, where
+ * an insertion point kept working and started meaning somewhere else.
+ */
+if (!/getElementById\('globalControls'\)/.test(html)) {
+  fail('The global control row is not located by id, so restyling it would silently stop CLEAR UNLOCKED being injected.');
+}
+if (!/id="globalControls"/.test(html)) {
+  fail('There is no #globalControls for the injected clear button to attach to.');
+}
+if (/querySelector\(\s*['"]\.flex\.flex-wrap/.test(html)) {
+  fail('Something is still finding an element by its layout utility classes. Those name a box only until it is restyled.');
+}
+
+/*
+ * One button, one behaviour, one name.
+ *
+ * allCategoriesLive and unlockAll were the same function written twice — the
+ * rig's copy simply forgot to release the subject — surfaced as ALL LIVE and
+ * UNLOCK ALL in two panels a page apart. The difference between them was not a
+ * decision, it was a dropped line.
+ */
+if (/function allCategoriesLive/.test(html)) {
+  fail('allCategoriesLive is back. It is unlockAll without the subject, and having both is how the same button ended up in two panels under two names.');
+}
+if (/onclick="allCategoriesLive\(\)"/.test(html)) {
+  fail('A control still calls allCategoriesLive, which no longer exists.');
+}
 
 /*
  * Bulk import: the only path by which a stranger's vocabulary enters the board.
