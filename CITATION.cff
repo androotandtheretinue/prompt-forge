@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "Attribution is not required under CC0, but if you wish to cite Prompt Forge, use this metadata."
 title: "Prompt Forge"
 type: software
-version: 5.4.0
-date-released: 2026-07-30
+version: 5.5.0
+date-released: 2026-08-09
 authors:
   - name: "Root and The Retinue"
     alias: "@OAndroot"

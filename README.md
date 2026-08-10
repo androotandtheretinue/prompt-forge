@@ -44,7 +44,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **Blueprint Vault** stores named configurations, including custom pools.
 - Persistent **24-prompt history**.
 - **Live telemetry and diagnostics** for density, range, and compatibility problems.
-- Real locks: pinned values and muted blanks survive cards, radar selection, clearing, mutation, strumming, and randomization.
+- Real locks: pinned values and muted blanks survive cards, search selection, clearing, mutation, strumming, and randomization.
 
 ## Use it
 
@@ -217,4 +217,4 @@ Wild additions are welcome. Please read [CONTRIBUTING.md], run `npm test`, and k
 
 ## Version
 
-Current release: **5.4.0 — Field Reports**. See [CHANGELOG.md](CHANGELOG.md).
+Current release: **5.5.0 — The Bench Rebuilt**. See [CHANGELOG.md](CHANGELOG.md).

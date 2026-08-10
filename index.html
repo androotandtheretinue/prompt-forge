@@ -1535,7 +1535,7 @@
         cannot see. An outside audit of the live page reported the version as
         v4.0.0 for exactly this reason. The audit checks it now.
       -->
-      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · v5.4 · 2,343 Options · 17 Axes</p>
+      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · v5.5 · 2,343 Options · 17 Axes</p>
 
       <!--
         Arranging is a mode you open, not a state the page is in. See the
@@ -1783,8 +1783,8 @@ Optional. 2,343 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
-Do not scrape index.html for the vocabulary. It is a 310 kB single-file
-application and the signal pools begin about 81 kB in, past the point where
+Do not scrape index.html for the vocabulary. It is a 335 kB single-file
+application and the signal pools begin about 90 kB in, past the point where
 many fetchers truncate. Read these instead:
 
 - https://androotandtheretinue.github.io/prompt-forge/vocabulary.json
@@ -2297,7 +2297,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     <!-- Footer -->
     <footer data-section-order="footer" class="text-center mt-6 text-gray-600 text-xs tracking-wider">
-      <p>FORGED WITH hop.e 💫 | v5.4 · Distributed Axis Randomization &amp; Prompt Assembly</p>
+      <p>FORGED WITH hop.e 💫 | v5.5 · Distributed Axis Randomization &amp; Prompt Assembly</p>
     </footer>
   </div>
 
@@ -6260,7 +6260,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
  * - random drag-strum; Ctrl+drag step-strum
  * - Clear Unlocked preserving locked values and locked blanks
  * - persistent custom entries for every category pool
- * - custom entries in randomization, strum, Option Radar, and Blueprints
+ * - custom entries in randomization, strum, signal search, and Blueprints
  *
  * This list is not a manifest and goes stale if treated as one. Step-strum
  * moved from Shift to Ctrl in 5.4 and this line said Shift until 5.5; the
@@ -6271,7 +6271,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 (() => {
   'use strict';
 
-  const PF_VERSION = '5.4';
+  const PF_VERSION = '5.5';
   const CUSTOM_STORAGE_KEY = 'promptForgeCustomOptionsV1';
 
   const customOptions = Object.fromEntries(

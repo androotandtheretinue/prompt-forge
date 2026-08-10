@@ -1,5 +1,5 @@
 PROMPT FORGE — SIGNAL VOCABULARY
-version 5.4.0 · 17 axes · 2343 signals · CC0-1.0
+version 5.5.0 · 17 axes · 2343 signals · CC0-1.0
 
 Build a prompt by choosing at most one signal per axis, in service of one
 stated idea. Use only the values listed here, and only in the axis that

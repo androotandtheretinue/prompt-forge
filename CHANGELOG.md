@@ -1,6 +1,6 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
-[Unreleased]
+[5.5.0] — 2026-08-09 — The Bench Rebuilt
 Changed
 Moved every Signal Rig control to one band at the foot of the panel, reading in the order the work happens: set the scope with the chips, then act on it. RANDOMIZE is still first and still the primary. The band sits directly above the search field and the board, so the three things pressed most — randomize, then search, then a row — are adjacent instead of separated by the chips and a paragraph of explanation.
 The band keeps two groups rather than becoming one list of six. The first three change values, the last three change which axes are in play at all, and an undivided row invites ALL LIVE to be read as another kind of reroll.
