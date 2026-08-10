@@ -2647,7 +2647,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       }
     };
 
-    // DARPA v4 vocabulary expansion. Existing banks remain intact; every legacy
+    // The v4 vocabulary expansion. Existing banks remain intact; every legacy
     // category is brought to a deliberate round target, then three control
     // dimensions are added for composition, color behavior, and story pressure.
     const categoryExpansions = {
@@ -5809,15 +5809,20 @@ rather than operate the instrument, replace `main` with a commit SHA.
  * you are reading is once again the whole program.
  * ========================================================================= */
 
-/* Prompt Forge DARPA v5
- * Drop-in extension for the existing single-page v4 index.html.
+/* Prompt Forge v5
+ * Began as a drop-in extension for the single-page v4 board.
  * Adds:
  * - crypto-backed centralized randomness with no immediate repeats
- * - random drag-strum; Shift+drag step-strum
+ * - random drag-strum; Ctrl+drag step-strum
  * - Clear Unlocked preserving locked values and locked blanks
  * - persistent custom entries for every category pool
  * - custom entries in randomization, strum, Option Radar, and Blueprints
- * - DARPA Forge Card and supporting vocabulary
+ *
+ * This list is not a manifest and goes stale if treated as one. Step-strum
+ * moved from Shift to Ctrl in 5.4 and this line said Shift until 5.5; the
+ * PHOSPHOR card and its vocabulary were listed here after they had moved to
+ * the application block. What a layer does is worth stating; what it happens
+ * to contain today is worth reading off the layer.
  */
 (() => {
   'use strict';
