@@ -1440,6 +1440,34 @@
       gap: 8px;
     }
 
+    /*
+     * Two tiers, not three.
+     *
+     * RANDOMIZE had flex-1 against two content-width buttons, so it took the
+     * whole remainder — 505px against 137 and 187, most of it empty. It should
+     * be the largest thing here and it should not be three and a half times
+     * the button beside it; a primary reads as primary at twice the width, and
+     * past that it is just a wide box with a word in the middle.
+     *
+     * The state row was 30px against the value row's 47px, which is far enough
+     * apart to read as two unrelated bands rather than one. It comes up to
+     * meet them without matching them, because it is genuinely secondary:
+     * these three change which axes are in play, not what is in them.
+     *
+     * Both rows share out the width evenly rather than sizing to their labels,
+     * so the band is a grid of blocks instead of a ragged line — and the
+     * 120px basis means the state row wraps rather than crushing its labels
+     * when the panel is narrow.
+     */
+    #globalControls > .btn { flex: 1 1 0; min-width: 0; }
+    #globalControls > #randomizeButton { flex: 2 1 0; }
+
+    #rigStateControls > .btn {
+      flex: 1 1 120px;
+      padding: 9px 10px;
+      font-size: 13px;
+    }
+
     /* ============================================
      * ARRANGE MODE
      * ============================================ */

@@ -1,5 +1,9 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
+[Unreleased]
+Changed
+Sized the Signal Rig band to two tiers instead of three. RANDOMIZE had `flex-1` against two content-width buttons, so it took the whole remainder — 505px against 137 and 187, most of it empty. It is still the largest thing in the panel and no longer three and a half times the button beside it; a primary reads as primary at twice the width, and past that it is a wide box with a word in the middle. The axis-state row came up from 30px to 36px against the value row's 47px, close enough to read as one band rather than two unrelated ones, and still visibly secondary. Both rows share the width evenly rather than sizing to their labels, so the band is a block of controls instead of a ragged line.
+
 [5.5.0] — 2026-08-09 — The Bench Rebuilt
 Changed
 Moved every Signal Rig control to one band at the foot of the panel, reading in the order the work happens: set the scope with the chips, then act on it. RANDOMIZE is still first and still the primary. The band sits directly above the search field and the board, so the three things pressed most — randomize, then search, then a row — are adjacent instead of separated by the chips and a paragraph of explanation.
