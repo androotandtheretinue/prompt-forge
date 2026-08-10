@@ -26,7 +26,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **Drag Strum**: hold and sweep across category labels to repeatedly randomize unlocked axes.
 - **Ctrl + Drag Step Strum**: advance each crossed category through its pool one at a time. Step moved to Ctrl so that Shift means the same thing everywhere.
 - **Custom Signals**: add persistent entries to any category pool.
-- Custom signals participate in randomization, strumming, Option Radar, and Blueprint saves.
+- Custom signals participate in randomization, strumming, signal search, and Blueprint saves.
 - **Clear Unlocked** clears the subject and every unlocked axis while preserving locked values and intentionally locked blanks.
 - Centralized browser randomness avoids immediate repeat selections where possible.
 - **RECON / STANDARD / FULL** missions randomize 6, 10, or all 17 unlocked axes.
@@ -35,7 +35,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **MUTE BLANKS / PIN FILLED / ALL LIVE** configure the whole rig in one move.
 - **Cluster scopes** target Structure, Atmosphere, Surface, or Story. The four scopes partition the seventeen axes, and hovering one outlines exactly the rows it will change.
 - Each scope carries **⟳ reroll, 🔐 pin, and 🚫 mute** — the same three verbs a single row has. Mute Story to build an image that carries no narrative, action, figure or wardrobe at all. Both operators toggle back to live.
-- **Option Radar** searches built-in and custom signals.
+- **Signal search** sits in the strip above the board and answers as you type, five ranked suggestions at a time, across built-in and custom signals. Click one to load it into its axis, or press Enter for the top hit.
 - **Chaos Dial** corrupts the signal text itself, on a meter that documents its own thresholds: **DRIFT** at 25 (semantic variants), **MISSPELL** at 50, **LEET** at 75, **ZALGO** at the last tick. Zones are cumulative, so high chaos gives a mix rather than a uniform filter. Locked signals are immune, the corruption is seeded and saved with Blueprints, and every damaged signal is shown beside its original.
 - **Universal, Midjourney, SDXL and BOORU** output formats.
 - **BOORU mode** translates the board into Danbooru tags for Illustrious, NoobAI, WAI and Pony checkpoints. Camera, pose, garment, place and light have real tag equivalents and are mapped; everything else passes through as prose, and the panel names which axes did which. The quality axis stands aside — booru checkpoints use their own quality vocabulary — and the prefix, subject tags and negative are editable, since every checkpoint family wants a different incantation.
@@ -150,7 +150,7 @@ Custom signals:
 - are stored locally in the browser
 - appear in the category dropdown
 - join randomization and strumming
-- appear in Option Radar
+- appear in signal search
 - travel with newly saved Blueprints
 - remain separate from the canonical built-in signal banks
 - can be deleted from their category's custom-signal panel

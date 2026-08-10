@@ -330,11 +330,10 @@
     [data-section-order="doctrine"]  { order: 8; }
     [data-section-order="chaos"]     { order: 9; }
     [data-section-order="cards"]     { order: 11; }
-    [data-section-order="radar"]     { order: 12; }
-    [data-section-order="negative"]  { order: 13; }
-    [data-section-order="banished"]  { order: 14; }
-    [data-section-order="vault"]     { order: 15; }
-    [data-section-order="history"]   { order: 16; }
+    [data-section-order="negative"]  { order: 12; }
+    [data-section-order="banished"]  { order: 13; }
+    [data-section-order="vault"]     { order: 14; }
+    [data-section-order="history"]   { order: 15; }
     [data-section-order="footer"]    { order: 99; }
 
     /* ============================================
@@ -354,16 +353,26 @@
 
       /*
        * Two lines, not three: identity and controls on the first, the value on
-       * the second at full width so it stays readable. Roughly 72px a row,
-       * which puts eleven axes on a phone screen instead of five.
+       * the second at full width so it stays readable.
+       *
+       * The gap needs !important for the same reason the button grids do — the
+       * row carries Tailwind's `gap-3`, generated at runtime and appended after
+       * this stylesheet, so a plain `gap: 6px` ties on specificity and loses on
+       * source order. It did lose, silently: the row was declaring 6px and
+       * rendering 12px, and half the density this rule was written for was
+       * never delivered.
+       *
+       * 78px a row with the signal count gone. Buttons stay at 28px — below
+       * that the density is bought from the thumb, which is not a trade this
+       * board should make on the surface you tap most.
        */
       .category-row {
         display: grid !important;
         grid-template-columns: 1fr auto;
         grid-template-areas: 'label actions' 'value value';
         align-items: center;
-        gap: 6px 8px;
-        padding: 8px 10px !important;
+        gap: 6px 8px !important;
+        padding: 6px 10px !important;
       }
 
       .category-row > .strum-zone { grid-area: label; width: auto; min-width: 0; }
@@ -376,9 +385,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-
-      /* The signal count and the strum hint are desktop affordances. */
-      .category-row .category-label > span { display: none; }
 
       .category-row .btn { padding: 4px 7px; font-size: 12px; }
       .category-row select { padding: 6px 8px; font-size: 12px; }
@@ -1292,7 +1298,38 @@
       box-shadow: 0 0 12px rgba(255,215,0,.18);
     }
 
-    .radar-result {
+    /* ============================================
+     * SIGNAL SEARCH
+     * ============================================
+     *
+     * The results hang over the board rather than pushing it down. A list that
+     * moves the rows while you are reading them costs more than five
+     * suggestions return, and this strip sits directly above them.
+     */
+    .board-search {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .board-search .subject-input {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
+    .signal-search-results {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .signal-search-results:empty { display: none; }
+
+    .signal-hit {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -1303,12 +1340,60 @@
       background: #0d0d15;
       text-align: left;
       color: #cfcfe0;
-      font-size: 11px;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
+      /* Staggered per result by an inline delay, so the list arrives as a list
+         rather than as five things appearing at once. */
+      animation: signal-hit-in .16s ease-out both;
     }
 
-    .radar-result:hover {
+    @keyframes signal-hit-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* Anyone who has asked not to be surprised by movement is not shown any. */
+    @media (prefers-reduced-motion: reduce) {
+      .signal-hit { animation: none; }
+    }
+
+    .signal-hit:hover {
       border-color: var(--neon-cyan);
-      background: rgba(0,240,255,.05);
+      background: rgba(0, 240, 255, .06);
+    }
+
+    .signal-hit mark {
+      background: none;
+      color: var(--neon-cyan);
+      font-weight: 700;
+    }
+
+    .signal-hit-value { flex: 1; }
+
+    .signal-hit-axis {
+      color: #6b6b80;
+      font-size: 10px;
+      letter-spacing: .05em;
+    }
+
+    /* A pinned row is still shown — hiding it would read as the signal not
+       existing. It says why it will not take, and shakes the row when pressed. */
+    .signal-hit.is-locked { opacity: .55; }
+    .signal-hit.is-locked .signal-hit-axis::after {
+      content: ' · pinned';
+      color: var(--neon-gold);
+    }
+
+    .signal-search-empty {
+      padding: 8px 10px;
+      border: 1px solid #232334;
+      border-radius: 4px;
+      background: #0d0d15;
+      color: #6b6b80;
+      font-size: 12px;
+      font-style: italic;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
     }
 
     .telemetry-pill {
@@ -1959,19 +2044,12 @@ rather than operate the instrument, replace `main` with a commit SHA.
       </div>
     </div>
 
-    <!-- Option Radar -->
-    <div class="panel p-4 mb-4" data-section-order="radar">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="toggleRadarPanel()">
-        <div class="status-dot" style="background:#58f5ae; box-shadow:0 0 10px #58f5ae;"></div>
-        <span class="category-label">📡 OPTION RADAR</span>
-        <span class="text-xs text-gray-500 ml-auto" id="radarToggle">▶ Show</span>
-      </div>
-      <div id="radarPanel" class="hidden mt-4">
-        <input id="radarInput" class="subject-input" placeholder="Search all 2,000 options… e.g. rust, moon, tenderness" oninput="renderRadarResults()">
-        <p class="text-xs text-gray-600 my-2">Click a return to load it directly into its category.</p>
-        <div id="radarResults" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
-      </div>
-    </div>
+    <!--
+      The Option Radar was here: its own collapsed panel, a page below the
+      board, returning up to 48 hits. It searched well and nobody opened it,
+      because looking a signal up meant leaving the rows you wanted it for. It
+      is now the search field in the strip directly above the board.
+    -->
 
     <!--
       The bank, made inspectable.
@@ -4966,57 +5044,106 @@ rather than operate the instrument, replace `main` with a commit SHA.
     }
 
     // ============================================
-    // OPTION RADAR
+    // SIGNAL SEARCH
     // ⍟ sweep · listen · the pool answers in its own time
     // ============================================
+    /*
+     * This was the Option Radar: its own collapsed panel, a page below the
+     * board, returning up to 48 hits in a two-column grid. It searched well and
+     * nobody opened it, because looking something up meant leaving the thing
+     * you were looking it up for.
+     *
+     * It now sits in the strip above the rows and answers as you type. The
+     * result cap went from 48 to five, which is the whole difference: 48 hits
+     * is a page you have to read, five is a suggestion you can glance at. The
+     * board is already dense and a list that pushes it down the screen costs
+     * more than it returns.
+     *
+     * Five only works if they are the right five, which is what the ranking is
+     * for — a substring match anywhere would put "Overcast" above "Cast Iron"
+     * for the query "cast" and make the feature feel broken at exactly the
+     * length people type.
+     */
+    const SEARCH_MINIMUM = 2;
+    const SEARCH_LIMIT = 5;
 
-    function toggleRadarPanel() {
-      const panel = document.getElementById('radarPanel');
-      const toggle = document.getElementById('radarToggle');
-      panel.classList.toggle('hidden');
-      toggle.textContent = panel.classList.contains('hidden') ? '▶ Show' : '▼ Hide';
-      if (!panel.classList.contains('hidden')) document.getElementById('radarInput').focus();
-    }
+    /*
+     * Pure, and takes its own option resolver.
+     *
+     * The interaction layer passes getCombinedOptions so custom signals are
+     * searchable; the harness passes nothing and searches the built-in banks.
+     * Reaching for a function that only exists in the other block would make
+     * this untestable, and ranking is exactly the thing worth testing.
+     */
+    function searchSignals(query, limit, resolveOptions) {
+      const needle = String(query == null ? '' : query).trim().toLocaleLowerCase();
+      if (needle.length < SEARCH_MINIMUM) return [];
 
-    function renderRadarResults() {
-      const query = document.getElementById('radarInput').value.trim().toLowerCase();
-      const box = document.getElementById('radarResults');
-      if (query.length < 2) {
-        box.innerHTML = '';
-        return;
-      }
-      const matches = [];
-      Object.entries(categories).forEach(([key, cat]) => {
-        cat.options.forEach((option, optionIndex) => {
-          if (!option.startsWith('—') && option.toLowerCase().includes(query)) {
-            matches.push({ key, cat, option, optionIndex });
-          }
+      const cap = Number.isFinite(limit) && limit > 0 ? limit : SEARCH_LIMIT;
+      const hits = [];
+
+      Object.entries(categories).forEach(([key, category]) => {
+        const options = resolveOptions ? resolveOptions(key) : category.options;
+        options.forEach(option => {
+          if (option.startsWith('—')) return;
+          const lower = option.toLocaleLowerCase();
+          const at = lower.indexOf(needle);
+          if (at === -1) return;
+          /*
+           * Where the match lands decides the rank. Starts-with first, then the
+           * start of any word, then buried in the middle. Without this a plain
+           * substring search answers "cast" with "Overcast" before "Cast Iron",
+           * and five results is far too few to survive that.
+           */
+          const before = at === 0 ? '' : lower[at - 1];
+          const rank = at === 0 ? 0 : (before === ' ' || before === '-' || before === ',' ? 1 : 2);
+          hits.push({ key, option, rank, at, label: category.label, icon: category.icon });
         });
       });
-      box.innerHTML = matches.slice(0, 48).map(m => `
-        <button class="radar-result" onclick="setCategoryFromRadar('${m.key}', ${m.optionIndex})">
-          <span>${m.cat.icon}</span>
-          <span class="flex-1">${escapeHtml(m.option)}</span>
-          <span class="text-gray-600">${escapeHtml(m.cat.label)}</span>
-        </button>
-      `).join('');
-      if (!matches.length) box.innerHTML = '<span class="text-gray-600 italic text-sm">No signal acquired.</span>';
-      if (matches.length > 48) box.insertAdjacentHTML('beforeend', `<span class="text-xs text-gray-600">+ ${matches.length - 48} more matches; narrow the signal.</span>`);
+
+      hits.sort((a, b) =>
+        a.rank - b.rank ||
+        a.at - b.at ||
+        a.option.length - b.option.length ||
+        a.option.localeCompare(b.option));
+
+      return hits.slice(0, cap);
     }
 
-    function setCategoryFromRadar(key, optionIndex) {
-      const cat = categories[key];
-      if (!cat || cat.locked || !cat.options[optionIndex]) return;
-      cat.value = cat.options[optionIndex];
+    /*
+     * A pin survives cards, radar, clearing, mutation, strumming and randomize,
+     * and it survives this. Refusing silently would read as a broken result, so
+     * a locked row is shaken rather than ignored.
+     */
+    function applySearchHit(key, option) {
+      const category = categories[key];
+      if (!category) return false;
+      // Custom signals are not in category.options, so membership is decided by
+      // whoever resolved the pool for the search rather than re-checked here.
+      if (category.locked) { shakeRow(key); return false; }
+
+      category.value = option;
       const select = document.getElementById(`select-${key}`);
-      if (select) select.value = cat.value;
-      const row = document.getElementById(`row-${key}`);
-      if (row) {
-        row.classList.add('shake');
-        setTimeout(() => row.classList.remove('shake'), 300);
-      }
+      if (select) select.value = option;
+      shakeRow(key);
       updatePreview();
+      return true;
     }
+
+    function shakeRow(key) {
+      const row = document.getElementById(`row-${key}`);
+      if (!row) return;
+      row.classList.add('shake');
+      setTimeout(() => row.classList.remove('shake'), 300);
+    }
+
+    /*
+     * Declared here so the interaction layer has something to reassign. That
+     * layer runs under 'use strict', where assigning an undeclared name throws
+     * rather than quietly minting a global — so a renderer that only exists
+     * down there has to be announced up here first.
+     */
+    function renderSignalSearch() {}
 
     // ============================================
     // BLUEPRINTS & PERSISTENCE
@@ -6641,74 +6768,70 @@ rather than operate the instrument, replace `main` with a commit SHA.
   };
 
   // ------------------------------------------------------------
-  // OPTION RADAR WITH CUSTOM ENTRIES
+  // SIGNAL SEARCH WITH CUSTOM ENTRIES
   // ⍜ the sweep widens to admit your inventions. it does not judge them.
   // ------------------------------------------------------------
 
-  renderRadarResults = function renderRadarResultsV5() {
-    const query = document
-      .getElementById('radarInput')
-      .value.trim()
-      .toLocaleLowerCase();
+  function closeSignalSearch() {
+    const box = document.getElementById('signalSearchResults');
+    if (box) box.innerHTML = '';
+  }
 
-    const box = document.getElementById('radarResults');
+  /*
+   * The matched run is marked in each result rather than the whole word, so at
+   * two or three characters you can see why a hit is a hit. Without it a short
+   * query returns five plausible-looking strings and no account of itself.
+   */
+  function markMatch(option, at, length) {
+    return escapeHtml(option.slice(0, at)) +
+      '<mark>' + escapeHtml(option.slice(at, at + length)) + '</mark>' +
+      escapeHtml(option.slice(at + length));
+  }
 
-    if (query.length < 2) {
+  renderSignalSearch = function renderSignalSearchV5() {
+    const field = document.getElementById('signalSearch');
+    const box = document.getElementById('signalSearchResults');
+    if (!field || !box) return;
+
+    const query = field.value.trim();
+    // getCombinedOptions as the resolver, so your own signals are searchable.
+    const hits = searchSignals(query, SEARCH_LIMIT, getCombinedOptions);
+
+    if (query.length < SEARCH_MINIMUM) {
       box.innerHTML = '';
       return;
     }
 
-    const matches = [];
+    if (!hits.length) {
+      box.innerHTML = '<div class="signal-search-empty">No signal acquired.</div>';
+      return;
+    }
 
-    Object.entries(categories).forEach(([key, category]) => {
-      getCombinedOptions(key).forEach((option) => {
-        if (option.toLocaleLowerCase().includes(query)) {
-          matches.push({ key, category, option });
+    box.innerHTML = hits
+      .map((hit, index) => `
+        <button
+          type="button"
+          class="signal-hit${categories[hit.key].locked ? ' is-locked' : ''}"
+          data-hit="${index}"
+          style="animation-delay: ${index * 40}ms"
+        >
+          <span class="signal-hit-icon">${hit.icon}</span>
+          <span class="signal-hit-value">${markMatch(hit.option, hit.at, query.trim().length)}</span>
+          <span class="signal-hit-axis">${escapeHtml(hit.label)}</span>
+        </button>
+      `)
+      .join('');
+
+    box.querySelectorAll('[data-hit]').forEach(button => {
+      button.addEventListener('click', () => {
+        const hit = hits[Number(button.dataset.hit)];
+        if (!hit) return;
+        if (applySearchHit(hit.key, hit.option)) {
+          field.value = '';
+          closeSignalSearch();
         }
       });
     });
-
-    box.innerHTML = matches
-      .slice(0, 48)
-      .map(
-        ({ key, category, option }, index) => `
-          <button
-            class="radar-result"
-            data-radar-index="${index}"
-          >
-            <span>${category.icon}</span>
-            <span class="flex-1">${escapeHtml(option)}</span>
-            <span class="text-gray-600">${escapeHtml(category.label)}</span>
-          </button>
-        `
-      )
-      .join('');
-
-    box.querySelectorAll('[data-radar-index]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const match = matches[Number(button.dataset.radarIndex)];
-        const category = categories[match.key];
-
-        if (!category || category.locked) return;
-
-        category.value = match.option;
-        setSelectValue(match.key);
-        animateRow(match.key);
-        updatePreview();
-      });
-    });
-
-    if (!matches.length) {
-      box.innerHTML =
-        '<span class="text-gray-600 italic text-sm">No signal acquired.</span>';
-    }
-
-    if (matches.length > 48) {
-      box.insertAdjacentHTML(
-        'beforeend',
-        `<span class="text-xs text-gray-600">+ ${matches.length - 48} more matches; narrow the signal.</span>`
-      );
-    }
   };
 
   // ------------------------------------------------------------
@@ -6735,7 +6858,6 @@ rather than operate the instrument, replace `main` with a commit SHA.
     Object.entries(categories).forEach(([key, category]) => {
       const builtIns = getBuiltInOptions(key);
       const customs = customOptions[key] || [];
-      const signalCount = getCombinedOptions(key).length;
       const state = categoryStateOf(category);
 
       const row = document.createElement('div');
@@ -6758,11 +6880,15 @@ rather than operate the instrument, replace `main` with a commit SHA.
             class="status-dot ${category.locked ? '' : 'pulse'}"
             id="dot-${key}"
           ></div>
+          <!--
+            The per-row signal count is gone. It was the same three numbers on
+            every row of every session, it cost a second line on seventeen rows,
+            and knowing that lighting holds 146 signals has never once changed
+            which one you picked. The board-wide total is still in the header
+            and the pool sizes are in vocabulary.json.
+          -->
           <span class="category-label" id="label-${key}">
             ${category.icon} ${category.label}
-            <span class="block text-gray-600" style="font-size:9px;">
-              ${signalCount} SIGNALS · STRUM ⇅
-            </span>
           </span>
         </div>
 
@@ -6990,22 +7116,66 @@ rather than operate the instrument, replace `main` with a commit SHA.
       hint.id = 'strumInstructions';
       hint.className =
         'panel p-3 mb-4 text-xs text-gray-500';
-      // Carries its own place in the mobile order, like every other section.
+      // Carries its own place in the page order, like every other section.
       hint.dataset.sectionOrder = 'hint';
 
-      // The second half is desktop detail. On a phone it costs a third of a
-      // screen above the board, which is the thing you came to use.
+      /*
+       * The strip above the board carries both things you do to the board from
+       * outside a row: search it, and strum it.
+       *
+       * The results list is absolutely positioned so it hangs over the rows
+       * rather than pushing them down. A search that moves the board while you
+       * are reading it costs more than the five suggestions return.
+       */
       hint.innerHTML =
-        '<span class="text-cyan-400">🎸 STRUM:</span> ' +
-        'drag the lane beside the board, or the strip above it, to randomize rows as you move. ' +
-        '<span class="strum-hint-more">Drag across the row labels for the same thing. ' +
-        'Hold <span class="text-yellow-400">Shift</span> to set aside what you pass, or <span class="text-yellow-400">Ctrl</span> to advance each pool by one. ' +
-        'Pinned and muted rows are never touched.</span>';
+        '<div class="board-search">' +
+          '<input id="signalSearch" class="subject-input" autocomplete="off" spellcheck="false" ' +
+            'placeholder="⌕ Search every signal — rust, moon, tenderness">' +
+          '<div id="signalSearchResults" class="signal-search-results"></div>' +
+        '</div>' +
+        '<div class="strum-hint-line">' +
+          '<span class="text-cyan-400">🎸 STRUM:</span> ' +
+          'drag the lane beside the board, or the strip above it, to randomize rows as you move. ' +
+          '<span class="strum-hint-more">Drag across the row labels for the same thing. ' +
+          'Hold <span class="text-yellow-400">Shift</span> to set aside what you pass, or <span class="text-yellow-400">Ctrl</span> to advance each pool by one. ' +
+          'Pinned and muted rows are never touched.</span>' +
+        '</div>';
 
       // Above the lane-and-board row, not inside it. `categoriesPanel.before`
       // used to mean "above the board" and now means "beside the lane", since
       // the panel gained a flex parent — the same call, a different place.
       (categoriesPanel.closest('.board-with-lane') || categoriesPanel).before(hint);
+
+      const searchField = document.getElementById('signalSearch');
+
+      searchField.addEventListener('input', renderSignalSearch);
+      searchField.addEventListener('focus', renderSignalSearch);
+      searchField.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          searchField.value = '';
+          renderSignalSearch();
+          searchField.blur();
+        }
+        // Enter takes the top hit, which is the point of ranking them.
+        if (event.key === 'Enter') {
+          const top = searchSignals(searchField.value, SEARCH_LIMIT, getCombinedOptions)[0];
+          if (top) {
+            applySearchHit(top.key, top.option);
+            searchField.value = '';
+            renderSignalSearch();
+          }
+        }
+      });
+
+      /*
+       * Dismiss on click-away rather than on blur. Blur fires before the click
+       * that caused it, so a blur handler would tear the list down before the
+       * result you were pressing could receive the event.
+       */
+      document.addEventListener('pointerdown', event => {
+        const search = document.querySelector('.board-search');
+        if (search && !search.contains(event.target)) closeSignalSearch();
+      });
     }
 
     if (!document.getElementById('customPoolModal')) {

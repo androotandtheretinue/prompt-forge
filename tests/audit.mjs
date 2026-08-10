@@ -213,6 +213,46 @@ globalThis.__forgeAudit = {
     cat.locked = before.locked;
     return { key, observed };
   }),
+  search: (() => {
+    const names = hits => hits.map(hit => hit.option).join('|');
+    const cast = searchSignals('cast', 5);
+    /*
+     * Match kind is recomputed here from the option text and the reported
+     * offset, deliberately not read off the rank the code produced — a check
+     * that trusts the field it is testing passes whatever that field says.
+     * (No backticks in this block: it is inside a template literal.)
+     *
+     * An earlier version of this looked for a signal called "Overcast", which
+     * does not exist; the vocabulary has "Overcast Soft Light". The check could
+     * never fire and said so to nobody for as long as it was there.
+     */
+    const wide = searchSignals('cast', 40);
+    const kindOf = hit => {
+      if (hit.at === 0) return 0;
+      const before = hit.option.toLocaleLowerCase()[hit.at - 1];
+      return before === ' ' || before === '-' || before === ',' ? 1 : 2;
+    };
+    const kinds = wide.map(kindOf);
+    const custom = searchSignals('zzcustomzz', 5, key => key === 'mood' ? ['ZZcustomZZ signal'] : []);
+    return {
+      belowMinimum: searchSignals('c', 5).length,
+      empty: searchSignals('', 5).length + searchSignals(null, 5).length,
+      capped: searchSignals('a', 5).length <= 5 && searchSignals('e', 3).length <= 3,
+      castTop: names(cast),
+      wideSample: wide.slice(0, 6).map(hit => hit.option).join('|'),
+      prefixFirst: cast.length > 0 && cast[0].option.toLocaleLowerCase().startsWith('cast'),
+      // Word-start matches must all precede buried ones.
+      wellOrdered: kinds.every((kind, index) => index === 0 || kinds[index - 1] <= kind),
+      // Both kinds must appear, or the ordering assertion is vacuous.
+      sawWordStart: kinds.some(kind => kind < 2),
+      sawBuried: kinds.some(kind => kind === 2),
+      carriesAxis: cast.length > 0 && Boolean(cast[0].key && cast[0].label),
+      marksPosition: cast.length > 0 && cast[0].at === 0,
+      noSeparators: searchSignals('—', 5).length === 0,
+      usesResolver: names(custom),
+      caseInsensitive: names(searchSignals('CAST', 5)) === names(cast)
+    };
+  })(),
   subjectScope: (() => {
     const modeBefore = outputMode;
     const overridesBefore = { ...subjectOverrides };
@@ -650,6 +690,46 @@ if (booru.badTags.length) {
 }
 if (booru.mapsQuality) fail('The booru map translates the quality axis. Booru checkpoints use their own quality vocabulary; that axis is replaced by the scaffolding, not mapped.');
 if (booru.mapped < 80) fail(`Only ${booru.mapped} signals map to tags; the mode would pass almost everything through as prose.`);
+
+/*
+ * Signal search: five results, and therefore the right five.
+ *
+ * This replaced the Option Radar, which returned 48 hits in a panel a page
+ * below the board. Five is the whole difference — 48 is a page you read, five
+ * is a suggestion you glance at — but five only works if the ranking is right.
+ * A plain substring match answers "cast" with "Overcast" ahead of "Cast Iron"
+ * and the feature feels broken at exactly the query length people type.
+ *
+ * Starts-with first, then the start of any word, then buried in the middle.
+ */
+const search = audit.search;
+if (search.belowMinimum !== 0) fail('Search returns hits for a single character; it must wait for two or every keystroke rebuilds the list from thousands of matches.');
+if (search.empty !== 0) fail('Search returns hits for an empty or null query.');
+if (!search.capped) fail('Search ignores its result limit. The list hangs over the board, and an uncapped one would cover it.');
+if (!search.prefixFirst) fail(`Search did not rank a starts-with match first for "cast"; got ${search.castTop}.`);
+if (!search.sawWordStart || !search.sawBuried) {
+  fail(`The "cast" probe no longer returns both word-start and mid-word matches (${search.wideSample}), so the ordering check below proves nothing. Pick a query that does.`);
+}
+if (!search.wellOrdered) {
+  fail(`A mid-word match outranks a word-start one for "cast" (${search.wideSample}). "Overcast Soft Light" must not sit above "Sand Casting", or five results is far too few to be useful.`);
+}
+if (!search.carriesAxis) fail('Search hits do not carry their axis, so a result cannot say where it would land or be applied to it.');
+if (!search.marksPosition) fail('Search hits do not report where the match begins, so the matched run cannot be highlighted.');
+// The em-dash group separators in each pool are furniture, not signals. They
+// are skipped everywhere else that counts or draws, and search is no exception.
+if (!search.noSeparators) fail('Search returns the em-dash group separators as though they were signals.');
+if (search.usesResolver !== 'ZZcustomZZ signal') {
+  fail(`Search ignored its option resolver (got ${search.usesResolver}). The interaction layer passes getCombinedOptions through it, and without that custom signals are unsearchable.`);
+}
+if (!search.caseInsensitive) fail('Search is case-sensitive.');
+
+if (/id="radarInput"|id="radarResults"|function toggleRadarPanel/.test(html)) {
+  fail('The Option Radar panel survives alongside the board search. Two searches over the same vocabulary is the state this replaced.');
+}
+if (!/id="signalSearch"/.test(html)) fail('There is no search field in the strip above the board.');
+if (!/\.signal-search-results\s*\{[^}]*position:\s*absolute/.test(html)) {
+  fail('The search results are in flow rather than hanging over the board, so typing pushes the rows down the screen while you are reading them.');
+}
 
 /*
  * Injected controls must be anchored by id, not by layout classes.
