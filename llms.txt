@@ -200,7 +200,7 @@ it with the image.
 
 ## LEXICON
 
-Optional. 2,304 curated signals across the same 17 axes, built so a human
+Optional. 2,343 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 

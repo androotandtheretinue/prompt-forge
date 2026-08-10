@@ -13,7 +13,7 @@
     "instructions": "https://raw.githubusercontent.com/androotandtheretinue/prompt-forge/main/llms.txt"
   },
   "axis_count": 17,
-  "signal_count": 2304,
+  "signal_count": 2343,
   "axis_order": [
     "narrative",
     "action",
@@ -36,7 +36,7 @@
   "axes": {
     "narrative": {
       "label": "STORY SIGNAL",
-      "count": 80,
+      "count": 82,
       "options": [
         "A Promise Has Just Been Made",
         "A Promise Has Just Been Broken",
@@ -117,12 +117,14 @@
         "The Scene Is Being Projected Elsewhere",
         "The Floor Plan Is Changing",
         "Something Crossed the Threshold Unseen",
-        "The Next Frame Will Contradict This One"
+        "The Next Frame Will Contradict This One",
+        "The Interface Knows Before You Do",
+        "The Signal Was Classified for a Reason"
       ]
     },
     "action": {
       "label": "ACTION",
-      "count": 176,
+      "count": 178,
       "options": [
         "Standing",
         "Sitting",
@@ -299,7 +301,9 @@
         "Surrendering with Raised Hands",
         "Dealing Cards",
         "Tipping a Hat",
-        "Taking a Curtain Call"
+        "Taking a Curtain Call",
+        "Monitoring Telemetry",
+        "Scanning for Anomalies"
       ]
     },
     "figure": {
@@ -390,7 +394,7 @@
     },
     "mood": {
       "label": "MOOD",
-      "count": 144,
+      "count": 147,
       "options": [
         "Joyful",
         "Euphoric",
@@ -535,12 +539,15 @@
         "Awe Without Worship",
         "Optimism with Teeth",
         "Quietly Radioactive",
-        "Love at the End of Infrastructure"
+        "Love at the End of Infrastructure",
+        "Cold War Paranoia",
+        "Command-Line Authority",
+        "Clinical Surveillance"
       ]
     },
     "composition": {
       "label": "COMPOSITION",
-      "count": 96,
+      "count": 99,
       "options": [
         "Single Dominant Subject",
         "Equal-Weight Duo",
@@ -637,12 +644,15 @@
         "Centered Group Portrait",
         "Asymmetric Quartet",
         "Figures at Four Corners",
-        "Group Turned Toward Offscreen Event"
+        "Group Turned Toward Offscreen Event",
+        "HUD-Dominant Overlay",
+        "Command Screen Layout",
+        "Tactical Grid Composition"
       ]
     },
     "setting": {
       "label": "SETTING",
-      "count": 176,
+      "count": 179,
       "options": [
         "Prehistoric",
         "Ancient Egypt",
@@ -819,12 +829,15 @@
         "Graveyard",
         "Bridge at Night",
         "Hospital Ward",
-        "Courtroom"
+        "Courtroom",
+        "Defense Research Operations Center",
+        "Retro Command Terminal",
+        "Military Computing Lab"
       ]
     },
     "framing": {
       "label": "CAMERA",
-      "count": 144,
+      "count": 146,
       "options": [
         "Extreme Close-up",
         "Close-up",
@@ -969,12 +982,14 @@
         "Boot-Level Low Angle",
         "Across a Card Table",
         "Saddle-Height Tracking",
-        "Balcony Looking Down"
+        "Balcony Looking Down",
+        "Command Console View",
+        "Tactical Display Close-Up"
       ]
     },
     "wardrobe": {
       "label": "WARDROBE",
-      "count": 176,
+      "count": 177,
       "options": [
         "Casual Streetwear",
         "Business Attire",
@@ -1151,12 +1166,13 @@
         "Chef Whites",
         "Lab Coat",
         "Stagehand Blacks",
-        "Ringmaster Tailcoat"
+        "Ringmaster Tailcoat",
+        "Systems Operator Utility Wear"
       ]
     },
     "medium": {
       "label": "MEDIUM",
-      "count": 176,
+      "count": 178,
       "options": [
         "Photography",
         "Film Photography",
@@ -1333,12 +1349,14 @@
         "Gold Tooling on Leather",
         "Sand Casting",
         "Airbrushed Van Art",
-        "Charcoal and White Chalk on Toned Paper"
+        "Charcoal and White Chalk on Toned Paper",
+        "Vector Graphics",
+        "Oscilloscope Display Capture"
       ]
     },
     "style": {
       "label": "STYLE",
-      "count": 192,
+      "count": 195,
       "options": [
         "Renaissance",
         "Baroque",
@@ -1531,12 +1549,15 @@
         "Social Realism",
         "Ashcan School",
         "Nihonga",
-        "Pictorialism"
+        "Pictorialism",
+        "DARPA Interface",
+        "Retro Tactical Futurism",
+        "Defense Terminal Aesthetic"
       ]
     },
     "lighting": {
       "label": "LIGHTING",
-      "count": 144,
+      "count": 146,
       "options": [
         "Golden Hour",
         "Blue Hour",
@@ -1681,12 +1702,14 @@
         "Oil Lamp",
         "Match Strike",
         "Signal Fire",
-        "Projector Beam in Smoke"
+        "Projector Beam in Smoke",
+        "Phosphor Monitor Glow",
+        "Amber CRT Glow"
       ]
     },
     "palette": {
       "label": "PALETTE",
-      "count": 128,
+      "count": 131,
       "options": [
         "Black and White",
         "High Contrast B&W",
@@ -1815,12 +1838,15 @@
         "Infrared False Color",
         "Thermal Spectrum",
         "Multispectral Vegetation Index",
-        "Deep Space False Color"
+        "Deep Space False Color",
+        "Phosphor Green",
+        "Terminal Amber",
+        "Blue-White Terminal"
       ]
     },
     "colorlogic": {
       "label": "COLOR LOGIC",
-      "count": 80,
+      "count": 82,
       "options": [
         "Monochrome Except Subject Accent",
         "Monochrome Except Each Character Accent",
@@ -1901,12 +1927,14 @@
         "False Color Maps Loyalty",
         "Color Encodes Timeline",
         "Color Encodes Point of View",
-        "Palette Changes at the Threshold"
+        "Palette Changes at the Threshold",
+        "Monochrome Authority Signal",
+        "Phosphor Signal Hierarchy"
       ]
     },
     "texture": {
       "label": "TEXTURE",
-      "count": 144,
+      "count": 147,
       "options": [
         "Thick Impasto",
         "Visible Brushstrokes",
@@ -2051,12 +2079,15 @@
         "Velvet Curtain Nap",
         "Powder Coat",
         "Chalk Dust",
-        "Burlap"
+        "Burlap",
+        "DARPA Scan Lines",
+        "CRT Raster",
+        "Phosphor Bloom"
       ]
     },
     "weather": {
       "label": "WEATHER",
-      "count": 128,
+      "count": 129,
       "options": [
         "Clear Skies",
         "Cloudless",
@@ -2185,12 +2216,13 @@
         "Snow Beginning",
         "Warm Rain",
         "Blue Norther",
-        "Harvest Dust in Late Light"
+        "Harvest Dust in Late Light",
+        "Static-Charged Interior Air"
       ]
     },
     "fx": {
       "label": "FX",
-      "count": 144,
+      "count": 149,
       "options": [
         "Floating Embers",
         "Drifting Sparks",
@@ -2335,12 +2367,17 @@
         "Sawdust in the Ring",
         "Spray Off a Wave Lip",
         "Ice Chips from a Skate",
-        "Sparks from an Anvil"
+        "Sparks from an Anvil",
+        "Telemetry Overlay",
+        "Vector Wireframe Grid",
+        "Targeting Reticle",
+        "Data Box HUD",
+        "Oscilloscope Trace"
       ]
     },
     "quality": {
       "label": "QUALITY",
-      "count": 96,
+      "count": 98,
       "options": [
         "4K Resolution",
         "8K Resolution",
@@ -2437,7 +2474,9 @@
         "Key Art Finish",
         "Production Design Bible",
         "Hero Asset Quality",
-        "Conservation Documentation"
+        "Conservation Documentation",
+        "Archive Display Fidelity",
+        "Declassified Technical Capture"
       ]
     }
   }

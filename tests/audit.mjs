@@ -46,6 +46,10 @@ script += `
 globalThis.__forgeAudit = {
   counts: Object.fromEntries(Object.entries(categories).map(([key, category]) => [key, category.options.filter(option => !option.startsWith('—')).length])),
   duplicates: Object.fromEntries(Object.entries(categories).map(([key, category]) => [key, category.options.filter(option => !option.startsWith('—')).filter((option, index, all) => all.indexOf(option) !== index)])),
+  supplement: Object.fromEntries(Object.entries(PHOSPHOR_SUPPLEMENT).map(([key, values]) => [key, values.length])),
+  supplementTotal: Object.values(PHOSPHOR_SUPPLEMENT).reduce((sum, values) => sum + values.length, 0),
+  supplementOrphans: Object.entries(PHOSPHOR_SUPPLEMENT).flatMap(([key, values]) =>
+    !categories[key] ? [key] : values.filter(value => !categories[key].options.includes(value)).map(value => key + ': ' + value)),
   presetErrors: Object.entries(presets).flatMap(([name, preset]) => Object.entries(preset).filter(([key, value]) => !categories[key] || !categories[key].options.includes(value)).map(([key, value]) => ({ name, key, value }))),
   missingMeta: Object.keys(presets).filter(name => !presetMeta[name]),
   missingFromOrder: Object.keys(categories).filter(key => !promptOrder.includes(key)),
@@ -323,9 +327,24 @@ const total = Object.values(audit.counts).reduce((sum, count) => sum + count, 0)
 const duplicateCount = Object.values(audit.duplicates).reduce((sum, values) => sum + values.length, 0);
 
 if (Object.keys(audit.counts).length !== 17) fail(`Expected 17 axes; found ${Object.keys(audit.counts).length}.`);
-if (total !== 2304) fail(`Expected 2,304 signals; found ${total}.`);
+if (total !== 2343) fail(`Expected 2,343 signals; found ${total}.`);
 if (duplicateCount) fail(`Found ${duplicateCount} duplicate signals.`);
-if (audit.cardCount !== 28) fail(`Expected 28 Forge Cards; found ${audit.cardCount}.`);
+if (audit.cardCount !== 29) fail(`Expected 29 Forge Cards; found ${audit.cardCount}.`);
+
+/*
+ * The PHOSPHOR supplement must reach the pools it claims to extend.
+ *
+ * It spent four releases being merged in from the v5 interaction layer, where
+ * neither this harness nor the vocabulary generator could see it: the app
+ * offered 2,343 signals while vocabulary.json, vocabulary.txt and llms.txt all
+ * said 2,304. You could roll Phosphor Green off the palette axis and then be
+ * told by the published LEXICON that it was not a canonical value. It now
+ * lives with the rest of the vocabulary, and this checks it arrived.
+ */
+if (audit.supplementTotal !== 39) fail(`The PHOSPHOR supplement holds ${audit.supplementTotal} signals; expected 39.`);
+if (audit.supplementOrphans.length) {
+  fail(`PHOSPHOR supplement entries never reached their axis: ${audit.supplementOrphans.slice(0, 4).join('; ')}`);
+}
 if (audit.presetErrors.length) fail(`Broken Forge Card values: ${JSON.stringify(audit.presetErrors)}`);
 if (audit.missingMeta.length) fail(`Forge Cards missing metadata: ${audit.missingMeta.join(', ')}`);
 if (audit.missingFromOrder.length || audit.extraInOrder.length) fail('Prompt order does not match the category registry.');
@@ -337,8 +356,10 @@ if (audit.clusterErrors.length) fail(`Broken cluster references: ${JSON.stringif
  * held by hand and nothing caught a drift. v5.2 took medium from 128 to 160 and
  * the rule is now checked.
  */
-const offGrid = Object.entries(audit.counts).filter(([, count]) => count % 16 !== 0);
-if (offGrid.length) fail(`Axes not sized to a multiple of 16: ${offGrid.map(([key, count]) => `${key} (${count})`).join(', ')}`);
+const offGrid = Object.entries(audit.counts)
+  .map(([key, count]) => [key, count - (audit.supplement[key] || 0)])
+  .filter(([, base]) => base % 16 !== 0);
+if (offGrid.length) fail(`Axis banks not sized to a multiple of 16: ${offGrid.map(([key, base]) => `${key} (${base})`).join(', ')}`);
 
 /*
  * Reroll scopes must partition the axes. Overlapping scopes are what made the
@@ -727,6 +748,28 @@ if (!subj.rejectsUnknownPool) fail('A subject was added to a pool for a mode tha
 if (html.includes('id="booruSubject"')) {
   fail('The BOORU panel still has its own subject field. It was replaced by the per-format override; leaving both is how the prompt got two subjects in the first place.');
 }
+/*
+ * Collapsed by default, never collapsed while it is changing the prompt.
+ *
+ * The panel is folded shut because most sessions never need it. A subject
+ * quietly substituted by a control that is out of sight is the same class of
+ * problem as the duplicate subject this feature replaced — output disagreeing
+ * with the visible board and nothing on screen saying why — so an override in
+ * force must force the panel open and state itself in the summary.
+ */
+if (!/<details id="subjectOverridePanel"/.test(html)) {
+  fail('The per-format subject override is not collapsible; it is a control most sessions never touch and it sits above the board.');
+}
+if (/<details id="subjectOverridePanel"[^>]*\bopen\b/.test(html)) {
+  fail('The subject override panel ships open. It should default collapsed and open itself only when an override is set.');
+}
+if (!/if \(active\) panel\.open = true;/.test(html)) {
+  fail('Nothing forces the subject override panel open when an override is active, so a format could substitute its subject from behind a folded-shut control.');
+}
+if (!/subjectOverrideState/.test(html)) {
+  fail('The collapsed override panel has no summary readout, so the one state worth knowing while it is shut is invisible.');
+}
+
 if (!/applySubjectFromPool\(\$\{index\}\)/.test(html)) {
   fail('Subject chips do not dispatch by index. A subject is user-authored text that can contain quotes and backslashes, and passing it through an inline onclick needs HTML and JavaScript escaping at once.');
 }
@@ -1232,7 +1275,9 @@ if (!process.exitCode) {
   console.log(`  ${total.toLocaleString()} unique signals`);
   console.log(`  ${audit.cardCount} valid Forge Cards`);
   console.log(`  ${audit.clusterNames.length} reroll scopes partitioning all ${audit.categoryKeys.length} axes`);
-  console.log(`  every axis sized to a multiple of 16 (medium ${audit.counts.medium})`);
+  // The bank, not the total. Reporting 178 under a line about multiples of 16
+  // reads as an arithmetic error in the checker rather than a supplement.
+  console.log(`  every axis bank sized to a multiple of 16 (medium ${audit.counts.medium - audit.supplement.medium}) + ${audit.supplementTotal} PHOSPHOR`);
   console.log(`  ${blocks.length} inline script blocks, all parsing, no local script or stylesheet dependencies`);
   console.log(`  vocabulary.json and vocabulary.txt match the application`);
   console.log(`  llms.txt carries the protocol, all ${audit.categoryKeys.length} axes, and the mirrors`);

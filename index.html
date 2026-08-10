@@ -12,9 +12,12 @@
 
       STATION LOG — day 1,204
       ──────────────────────
-      17 axes. 2,304 signals. The count is correct. I have checked the
+      17 axes. 2,343 signals. The count is correct. I have checked the
       count. The count has been correct every morning and I check it every
       morning and this is not the same as trust.
+
+      It was 2,304 for four releases and I checked it every morning then
+      too. Thirty-nine of them were standing in a room I was not counting.
 
       Ⅰ.  The board does not generate. It arranges. Every image it has ever
           been blamed for was made somewhere else, by something else, from
@@ -47,11 +50,11 @@
   -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A free, public-domain visual prompt instrument with 2,304 signals across 17 creative axes.">
+  <meta name="description" content="A free, public-domain visual prompt instrument with 2,343 signals across 17 creative axes.">
   <meta name="theme-color" content="#0a0a0f">
   <meta name="color-scheme" content="dark">
   <meta property="og:title" content="Prompt Forge">
-  <meta property="og:description" content="Forge image prompts from 2,304 signals, 28 curated cards, and model-aware controls.">
+  <meta property="og:description" content="Forge image prompts from 2,343 signals, 29 curated cards, and model-aware controls.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://androotandtheretinue.github.io/prompt-forge/">
   <!--
@@ -65,7 +68,7 @@
   <meta property="og:image:alt" content="The Prompt Forge control board: subject field, randomize and mutate controls, mission doctrine payload sizes, cluster reroll scopes, and the chaos dial.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Prompt Forge">
-  <meta name="twitter:description" content="Forge image prompts from 2,304 signals across 17 creative axes. Public domain, no account required.">
+  <meta name="twitter:description" content="Forge image prompts from 2,343 signals across 17 creative axes. Public domain, no account required.">
   <meta name="twitter:image" content="https://androotandtheretinue.github.io/prompt-forge/social-card.png">
   <title>Prompt Forge — Distributed Axis Randomization &amp; Prompt Assembly</title>
 
@@ -957,6 +960,37 @@
     }
 
     /* The per-format subject override, and the pool it draws from. */
+    .subject-override-panel > summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 2px;
+      cursor: pointer;
+      list-style: none;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+    }
+
+    .subject-override-panel > summary::-webkit-details-marker { display: none; }
+
+    .subject-override-caption { color: #6b6b80; }
+    .subject-override-panel > summary:hover .subject-override-caption { color: #9a9ab0; }
+
+    .subject-override-state {
+      margin-left: auto;
+      color: #4a4a5c;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Lit while an override is in force. The panel opens itself in that state,
+       so this is the marker you scroll past, not the only warning. */
+    .subject-override-panel.overridden > summary .subject-override-caption,
+    .subject-override-panel.overridden > summary .subject-override-state {
+      color: #58f5ae;
+    }
+
     .subject-override {
       display: flex;
       align-items: center;
@@ -1321,7 +1355,7 @@
         cannot see. An outside audit of the live page reported the version as
         v4.0.0 for exactly this reason. The audit checks it now.
       -->
-      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · v5.4 · 2,304 Options · 17 Axes</p>
+      <p class="text-sm text-gray-500 tracking-widest uppercase" id="optionCountHeader">AI Image Generation Control Board · v5.4 · 2,343 Options · 17 Axes</p>
     </header>
 
     <!--
@@ -1553,7 +1587,7 @@ it with the image.
 
 ## LEXICON
 
-Optional. 2,304 curated signals across the same 17 axes, built so a human
+Optional. 2,343 curated signals across the same 17 axes, built so a human
 browsing the board meets visual language they would not have thought of. Read
 it when you want that curation instead of your own priors.
 
@@ -1606,39 +1640,52 @@ rather than operate the instrument, replace `main` with a commit SHA.
       >
 
       <!--
-        The per-format override. Blank means this format uses the subject
-        above, which is the case for three of the four most of the time — the
-        prose modes want the same sentence and comparing them is the point.
-        BOORU is the one that wants different content: a count declaration,
-        not a translated sentence.
+        The per-format override, collapsed by default. Blank means this format
+        uses the subject above, which is the case for three of the four most of
+        the time — the prose modes want the same sentence and comparing them is
+        the point. BOORU is the one that wants different content: a count
+        declaration, not a translated sentence. Most sessions never open this.
+
+        The summary reports the override when one is set, and syncSubjectPanel
+        forces the panel open in that case. Collapsing is a way to stop looking
+        at a control, never a way to stop knowing what the prompt will say —
+        a subject substituted by a panel folded shut is precisely the invisible
+        state this whole feature was built to remove.
       -->
-      <div class="subject-override" id="subjectOverrideRow">
-        <span class="subject-override-tag" id="subjectOverrideMode">UNIVERSAL</span>
-        <input
-          type="text"
-          id="subjectOverrideInput"
-          class="subject-input flex-1"
-          placeholder="Override for this format — blank uses the subject above"
-          oninput="updateSubjectOverride(this.value)"
-        >
-        <button class="btn btn-custom" onclick="saveSubjectToPool()" title="Save this subject to the current format's pool">＋</button>
-        <button class="btn btn-clear" onclick="clearSubjectOverride()" title="Clear the override; this format falls back to the subject above">✕</button>
-      </div>
+      <details id="subjectOverridePanel" class="subject-override-panel mt-2">
+        <summary id="subjectOverrideSummary">
+          <span class="subject-override-caption">⌖ Per-format subject</span>
+          <span class="subject-override-state" id="subjectOverrideState">all four use the subject above</span>
+        </summary>
 
-      <div id="subjectPoolChips" class="subject-pool-chips"></div>
-
-      <details class="pool-bulk mt-2">
-        <summary>⇪ Import a list of subjects<span class="pool-bulk-more"> for this format</span></summary>
-        <textarea
-          id="subjectPoolBulk"
-          class="subject-input w-full mt-2"
-          rows="3"
-          placeholder="One per line, or comma separated…"
-        ></textarea>
-        <div class="flex items-center gap-2 mt-2">
-          <button class="btn btn-custom text-xs" onclick="importSubjectList()">⇪ IMPORT</button>
-          <span class="text-xs text-gray-600" id="subjectPoolBulkReport"></span>
+        <div class="subject-override" id="subjectOverrideRow">
+          <span class="subject-override-tag" id="subjectOverrideMode">UNIVERSAL</span>
+          <input
+            type="text"
+            id="subjectOverrideInput"
+            class="subject-input flex-1"
+            placeholder="Override for this format — blank uses the subject above"
+            oninput="updateSubjectOverride(this.value)"
+          >
+          <button class="btn btn-custom" onclick="saveSubjectToPool()" title="Save this subject to the current format's pool">＋</button>
+          <button class="btn btn-clear" onclick="clearSubjectOverride()" title="Clear the override; this format falls back to the subject above">✕</button>
         </div>
+
+        <div id="subjectPoolChips" class="subject-pool-chips"></div>
+
+        <details class="pool-bulk mt-2">
+          <summary>⇪ Import a list of subjects<span class="pool-bulk-more"> for this format</span></summary>
+          <textarea
+            id="subjectPoolBulk"
+            class="subject-input w-full mt-2"
+            rows="3"
+            placeholder="One per line, or comma separated…"
+          ></textarea>
+          <div class="flex items-center gap-2 mt-2">
+            <button class="btn btn-custom text-xs" onclick="importSubjectList()">⇪ IMPORT</button>
+            <span class="text-xs text-gray-600" id="subjectPoolBulkReport"></span>
+          </div>
+        </details>
       </details>
     </div>
 
@@ -3217,6 +3264,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
      * cracked helmet and no idea where it came from.
      */
     function syncSubjectOverrideUI() {
+      const active = subjectOverrideActive(outputMode);
       const label = document.getElementById('subjectOverrideMode');
       if (label) label.textContent = outputMode.toUpperCase();
       const field = document.getElementById('subjectOverrideInput');
@@ -3224,9 +3272,33 @@ rather than operate the instrument, replace `main` with a commit SHA.
         field.value = subjectOverrides[outputMode];
       }
       const row = document.getElementById('subjectOverrideRow');
-      if (row) row.classList.toggle('overridden', subjectOverrideActive(outputMode));
+      if (row) row.classList.toggle('overridden', active);
       const dot = document.getElementById('subjectDot');
-      if (dot) dot.classList.toggle('overridden', subjectOverrideActive(outputMode));
+      if (dot) dot.classList.toggle('overridden', active);
+
+      /*
+       * The panel is collapsed by default because most sessions never need it.
+       * It is not allowed to be collapsed while it is changing the prompt.
+       *
+       * A subject quietly substituted by a control folded out of sight is the
+       * same class of problem as the duplicate subject this feature replaced —
+       * output that disagrees with the visible board, and nothing on screen
+       * saying why. So when an override is set the summary states it and the
+       * panel opens itself; the rest of the time it stays shut and says the
+       * one thing worth knowing, which is that nothing is being overridden.
+       */
+      const panel = document.getElementById('subjectOverridePanel');
+      const state = document.getElementById('subjectOverrideState');
+      if (state) {
+        state.textContent = active
+          ? `${outputMode.toUpperCase()} uses “${subjectOverrides[outputMode].trim()}”`
+          : 'all four use the subject above';
+      }
+      if (panel) {
+        panel.classList.toggle('overridden', active);
+        if (active) panel.open = true;
+      }
+
       renderSubjectPool();
     }
     const mjControls = {
@@ -3650,6 +3722,86 @@ rather than operate the instrument, replace `main` with a commit SHA.
       'Light Through Water': ['🌊', 'Caustics moving over a floating figure, seen from below.', '#5fd0e8'],
       'Lido 1972': ['📻', 'Wool swimsuits, backlight, and the warmth of expired film.', '#e0a878']
     };
+
+    /* ============================================
+     * PHOSPHOR — the card, and the vocabulary it needs
+     * ============================================
+     * 📟 ⌁ ⏦ · the terminal remembers being watched
+     *
+     * The card was called DARPA until the name left the masthead. Two of its
+     * signal values still carry the word — DARPA Scan Lines, DARPA Interface —
+     * and stay that way on purpose: a value inside the vocabulary reads as a
+     * citation the way a film emulation names a stock, and renaming them would
+     * silently blank those axes in every blueprint that used the card, since
+     * applyConfiguration drops any saved value no longer in its pool.
+     *
+     * This lived in the v5 interaction layer until 5.5, which is why the
+     * published vocabulary was wrong for four releases. The generator and the
+     * audit both read the application block; these 39 signals were merged into
+     * the pools at runtime from the layer below, so the app offered 2,343
+     * signals while vocabulary.json, vocabulary.txt and llms.txt all said
+     * 2,304. Anyone could roll Phosphor Green off the palette axis and then be
+     * told by the published LEXICON that it was not a real value.
+     *
+     * Vocabulary belongs with the vocabulary. The interaction layer is for
+     * interaction.
+     */
+    const PHOSPHOR_SUPPLEMENT = {
+      medium: ['Vector Graphics', 'Oscilloscope Display Capture'],
+      action: ['Monitoring Telemetry', 'Scanning for Anomalies'],
+      texture: ['DARPA Scan Lines', 'CRT Raster', 'Phosphor Bloom'],
+      style: ['DARPA Interface', 'Retro Tactical Futurism', 'Defense Terminal Aesthetic'],
+      lighting: ['Phosphor Monitor Glow', 'Amber CRT Glow'],
+      framing: ['Command Console View', 'Tactical Display Close-Up'],
+      mood: ['Cold War Paranoia', 'Command-Line Authority', 'Clinical Surveillance'],
+      palette: ['Phosphor Green', 'Terminal Amber', 'Blue-White Terminal'],
+      quality: ['Archive Display Fidelity', 'Declassified Technical Capture'],
+      setting: ['Defense Research Operations Center', 'Retro Command Terminal', 'Military Computing Lab'],
+      weather: ['Static-Charged Interior Air'],
+      wardrobe: ['Systems Operator Utility Wear'],
+      fx: ['Telemetry Overlay', 'Vector Wireframe Grid', 'Targeting Reticle', 'Data Box HUD', 'Oscilloscope Trace'],
+      composition: ['HUD-Dominant Overlay', 'Command Screen Layout', 'Tactical Grid Composition'],
+      colorlogic: ['Monochrome Authority Signal', 'Phosphor Signal Hierarchy'],
+      narrative: ['The Interface Knows Before You Do', 'The Signal Was Classified for a Reason']
+    };
+
+    /*
+     * Merged case-insensitively, because this table was written separately from
+     * the banks it joins and a near-duplicate differing only in case is the one
+     * kind of duplicate the interface cannot show you.
+     */
+    Object.entries(PHOSPHOR_SUPPLEMENT).forEach(([key, additions]) => {
+      const category = categories[key];
+      if (!category) return;
+      const seen = new Set(category.options.map(option => option.toLocaleLowerCase()));
+      additions.forEach(option => {
+        if (seen.has(option.toLocaleLowerCase())) return;
+        category.options.push(option);
+        seen.add(option.toLocaleLowerCase());
+      });
+    });
+
+    presets.PHOSPHOR = {
+      medium: 'Vector Graphics',
+      texture: 'DARPA Scan Lines',
+      style: 'DARPA Interface',
+      lighting: 'Phosphor Monitor Glow',
+      framing: 'Command Console View',
+      mood: 'Cold War Paranoia',
+      palette: 'Phosphor Green',
+      quality: 'Archive Display Fidelity',
+      fx: 'Telemetry Overlay',
+      composition: 'HUD-Dominant Overlay',
+      colorlogic: 'Monochrome Authority Signal',
+      narrative: 'The Interface Knows Before You Do'
+    };
+
+    presetMeta.PHOSPHOR = [
+      '📟',
+      'Cold-war terminal authority, phosphor raster, and classified telemetry.',
+      '#73ff75'
+    ];
+
     let negativePrompts = [
       'watermark', 'text', 'logo', 'signature', 'deformed', 'blurry', 
       'bad anatomy', 'extra limbs', 'cropped'
@@ -3895,7 +4047,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
      * quality, absurdres". Same job, different language, no correspondence —
      * so in this mode the quality axis steps aside for the scaffolding.
      *
-     * The map is deliberately partial. Mapping all 2,304 signals would be a
+     * The map is deliberately partial. Mapping all 2,343 signals would be a
      * second vocabulary to maintain and would rot the moment the first one
      * moved; the audit checks that every key here still exists upstream.
      */
@@ -5686,79 +5838,10 @@ rather than operate the instrument, replace `main` with a commit SHA.
   let lastStrumY = null;
   const SAME_ROW_STRUM_DISTANCE = 24;
 
-  const darpaVocabulary = {
-    medium: [
-      'Vector Graphics',
-      'Oscilloscope Display Capture'
-    ],
-    action: [
-      'Monitoring Telemetry',
-      'Scanning for Anomalies'
-    ],
-    texture: [
-      'DARPA Scan Lines',
-      'CRT Raster',
-      'Phosphor Bloom'
-    ],
-    style: [
-      'DARPA Interface',
-      'Retro Tactical Futurism',
-      'Defense Terminal Aesthetic'
-    ],
-    lighting: [
-      'Phosphor Monitor Glow',
-      'Amber CRT Glow'
-    ],
-    framing: [
-      'Command Console View',
-      'Tactical Display Close-Up'
-    ],
-    mood: [
-      'Cold War Paranoia',
-      'Command-Line Authority',
-      'Clinical Surveillance'
-    ],
-    palette: [
-      'Phosphor Green',
-      'Terminal Amber',
-      'Blue-White Terminal'
-    ],
-    quality: [
-      'Archive Display Fidelity',
-      'Declassified Technical Capture'
-    ],
-    setting: [
-      'Defense Research Operations Center',
-      'Retro Command Terminal',
-      'Military Computing Lab'
-    ],
-    weather: [
-      'Static-Charged Interior Air'
-    ],
-    wardrobe: [
-      'Systems Operator Utility Wear'
-    ],
-    fx: [
-      'Telemetry Overlay',
-      'Vector Wireframe Grid',
-      'Targeting Reticle',
-      'Data Box HUD',
-      'Oscilloscope Trace'
-    ],
-    composition: [
-      'HUD-Dominant Overlay',
-      'Command Screen Layout',
-      'Tactical Grid Composition'
-    ],
-    colorlogic: [
-      'Monochrome Authority Signal',
-      'Phosphor Signal Hierarchy'
-    ],
-    narrative: [
-      'The Interface Knows Before You Do',
-      'The Signal Was Classified for a Reason'
-    ]
-  };
+  // PHOSPHOR's vocabulary and card moved to the application block in 5.5.
+  // They were merged into the pools from here, where neither the generator nor
+  // the audit could see them, and the published vocabulary was short by 39
+  // signals for four releases as a result.
 
   // ------------------------------------------------------------
   // RANDOMNESS
@@ -6594,62 +6677,6 @@ rather than operate the instrument, replace `main` with a commit SHA.
   };
 
   // ------------------------------------------------------------
-  /*
-   * PHOSPHOR CARD + VOCABULARY
-   *
-   * The card was called DARPA until the name left the masthead. Two of its
-   * signal values still carry the word — DARPA Scan Lines, DARPA Interface —
-   * and stay that way on purpose: a value inside a 2,304-item vocabulary reads
-   * as a citation the way a film emulation names a stock, and renaming them
-   * would silently blank those axes in every blueprint that used the card,
-   * since applyConfiguration drops any saved value no longer in its pool.
-   */
-  // ------------------------------------------------------------
-
-  function ensureBuiltInOption(key, option) {
-    const category = categories[key];
-
-    if (
-      !category ||
-      category.options.some(
-        (existing) =>
-          existing.toLocaleLowerCase() === option.toLocaleLowerCase()
-      )
-    ) {
-      return;
-    }
-
-    category.options.push(option);
-  }
-
-  function installDarpaCard() {
-    Object.entries(darpaVocabulary).forEach(([key, options]) => {
-      options.forEach((option) => ensureBuiltInOption(key, option));
-    });
-
-    presets.PHOSPHOR = {
-      medium: 'Vector Graphics',
-      texture: 'DARPA Scan Lines',
-      style: 'DARPA Interface',
-      lighting: 'Phosphor Monitor Glow',
-      framing: 'Command Console View',
-      mood: 'Cold War Paranoia',
-      palette: 'Phosphor Green',
-      quality: 'Archive Display Fidelity',
-      fx: 'Telemetry Overlay',
-      composition: 'HUD-Dominant Overlay',
-      colorlogic: 'Monochrome Authority Signal',
-      narrative: 'The Interface Knows Before You Do'
-    };
-
-    presetMeta.PHOSPHOR = [
-      '📟',
-      'Cold-war terminal authority, phosphor raster, and classified telemetry.',
-      '#73ff75'
-    ];
-  }
-
-  // ------------------------------------------------------------
   // V5 RENDERING
   // ------------------------------------------------------------
 
@@ -7125,7 +7152,6 @@ rather than operate the instrument, replace `main` with a commit SHA.
     loadBank();
     renderBankPanel();
     syncBooruControls();
-    installDarpaCard();
     injectV5Ui();
 
     document.title =

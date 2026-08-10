@@ -1,5 +1,5 @@
 PROMPT FORGE — SIGNAL VOCABULARY
-version 5.4.0 · 17 axes · 2304 signals · CC0-1.0
+version 5.4.0 · 17 axes · 2343 signals · CC0-1.0
 
 Build a prompt by choosing at most one signal per axis, in service of one
 stated idea. Use only the values listed here, and only in the axis that
@@ -15,7 +15,7 @@ same files are served as plain text from:
 Axis order in a built prompt: narrative, action, figure, mood, composition, setting, framing, wardrobe, medium, style, lighting, palette, colorlogic, texture, weather, fx, quality
 
 ========================================================================
-NARRATIVE — STORY SIGNAL (80 signals)
+NARRATIVE — STORY SIGNAL (82 signals)
 ========================================================================
 A Promise Has Just Been Made
 A Promise Has Just Been Broken
@@ -97,9 +97,11 @@ The Scene Is Being Projected Elsewhere
 The Floor Plan Is Changing
 Something Crossed the Threshold Unseen
 The Next Frame Will Contradict This One
+The Interface Knows Before You Do
+The Signal Was Classified for a Reason
 
 ========================================================================
-ACTION — ACTION (176 signals)
+ACTION — ACTION (178 signals)
 ========================================================================
 Standing
 Sitting
@@ -277,6 +279,8 @@ Surrendering with Raised Hands
 Dealing Cards
 Tipping a Hat
 Taking a Curtain Call
+Monitoring Telemetry
+Scanning for Anomalies
 
 ========================================================================
 FIGURE — FIGURE (80 signals)
@@ -363,7 +367,7 @@ Stillness Between Two Movements
 Asymmetry Held Deliberately
 
 ========================================================================
-MOOD — MOOD (144 signals)
+MOOD — MOOD (147 signals)
 ========================================================================
 Joyful
 Euphoric
@@ -509,9 +513,12 @@ Awe Without Worship
 Optimism with Teeth
 Quietly Radioactive
 Love at the End of Infrastructure
+Cold War Paranoia
+Command-Line Authority
+Clinical Surveillance
 
 ========================================================================
-COMPOSITION — COMPOSITION (96 signals)
+COMPOSITION — COMPOSITION (99 signals)
 ========================================================================
 Single Dominant Subject
 Equal-Weight Duo
@@ -609,9 +616,12 @@ Centered Group Portrait
 Asymmetric Quartet
 Figures at Four Corners
 Group Turned Toward Offscreen Event
+HUD-Dominant Overlay
+Command Screen Layout
+Tactical Grid Composition
 
 ========================================================================
-SETTING — SETTING (176 signals)
+SETTING — SETTING (179 signals)
 ========================================================================
 Prehistoric
 Ancient Egypt
@@ -789,9 +799,12 @@ Graveyard
 Bridge at Night
 Hospital Ward
 Courtroom
+Defense Research Operations Center
+Retro Command Terminal
+Military Computing Lab
 
 ========================================================================
-FRAMING — CAMERA (144 signals)
+FRAMING — CAMERA (146 signals)
 ========================================================================
 Extreme Close-up
 Close-up
@@ -937,9 +950,11 @@ Boot-Level Low Angle
 Across a Card Table
 Saddle-Height Tracking
 Balcony Looking Down
+Command Console View
+Tactical Display Close-Up
 
 ========================================================================
-WARDROBE — WARDROBE (176 signals)
+WARDROBE — WARDROBE (177 signals)
 ========================================================================
 Casual Streetwear
 Business Attire
@@ -1117,9 +1132,10 @@ Chef Whites
 Lab Coat
 Stagehand Blacks
 Ringmaster Tailcoat
+Systems Operator Utility Wear
 
 ========================================================================
-MEDIUM — MEDIUM (176 signals)
+MEDIUM — MEDIUM (178 signals)
 ========================================================================
 Photography
 Film Photography
@@ -1297,9 +1313,11 @@ Gold Tooling on Leather
 Sand Casting
 Airbrushed Van Art
 Charcoal and White Chalk on Toned Paper
+Vector Graphics
+Oscilloscope Display Capture
 
 ========================================================================
-STYLE — STYLE (192 signals)
+STYLE — STYLE (195 signals)
 ========================================================================
 Renaissance
 Baroque
@@ -1493,9 +1511,12 @@ Social Realism
 Ashcan School
 Nihonga
 Pictorialism
+DARPA Interface
+Retro Tactical Futurism
+Defense Terminal Aesthetic
 
 ========================================================================
-LIGHTING — LIGHTING (144 signals)
+LIGHTING — LIGHTING (146 signals)
 ========================================================================
 Golden Hour
 Blue Hour
@@ -1641,9 +1662,11 @@ Oil Lamp
 Match Strike
 Signal Fire
 Projector Beam in Smoke
+Phosphor Monitor Glow
+Amber CRT Glow
 
 ========================================================================
-PALETTE — PALETTE (128 signals)
+PALETTE — PALETTE (131 signals)
 ========================================================================
 Black and White
 High Contrast B&W
@@ -1773,9 +1796,12 @@ Infrared False Color
 Thermal Spectrum
 Multispectral Vegetation Index
 Deep Space False Color
+Phosphor Green
+Terminal Amber
+Blue-White Terminal
 
 ========================================================================
-COLORLOGIC — COLOR LOGIC (80 signals)
+COLORLOGIC — COLOR LOGIC (82 signals)
 ========================================================================
 Monochrome Except Subject Accent
 Monochrome Except Each Character Accent
@@ -1857,9 +1883,11 @@ False Color Maps Loyalty
 Color Encodes Timeline
 Color Encodes Point of View
 Palette Changes at the Threshold
+Monochrome Authority Signal
+Phosphor Signal Hierarchy
 
 ========================================================================
-TEXTURE — TEXTURE (144 signals)
+TEXTURE — TEXTURE (147 signals)
 ========================================================================
 Thick Impasto
 Visible Brushstrokes
@@ -2005,9 +2033,12 @@ Velvet Curtain Nap
 Powder Coat
 Chalk Dust
 Burlap
+DARPA Scan Lines
+CRT Raster
+Phosphor Bloom
 
 ========================================================================
-WEATHER — WEATHER (128 signals)
+WEATHER — WEATHER (129 signals)
 ========================================================================
 Clear Skies
 Cloudless
@@ -2137,9 +2168,10 @@ Snow Beginning
 Warm Rain
 Blue Norther
 Harvest Dust in Late Light
+Static-Charged Interior Air
 
 ========================================================================
-FX — FX (144 signals)
+FX — FX (149 signals)
 ========================================================================
 Floating Embers
 Drifting Sparks
@@ -2285,9 +2317,14 @@ Sawdust in the Ring
 Spray Off a Wave Lip
 Ice Chips from a Skate
 Sparks from an Anvil
+Telemetry Overlay
+Vector Wireframe Grid
+Targeting Reticle
+Data Box HUD
+Oscilloscope Trace
 
 ========================================================================
-QUALITY — QUALITY (96 signals)
+QUALITY — QUALITY (98 signals)
 ========================================================================
 4K Resolution
 8K Resolution
@@ -2385,3 +2422,5 @@ Key Art Finish
 Production Design Bible
 Hero Asset Quality
 Conservation Documentation
+Archive Display Fidelity
+Declassified Technical Capture
