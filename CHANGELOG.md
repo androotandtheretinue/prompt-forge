@@ -1,6 +1,10 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
+Changed
+Moved every Signal Rig control to one band at the foot of the panel, reading in the order the work happens: set the scope with the chips, then act on it. RANDOMIZE is still first and still the primary. The band sits directly above the search field and the board, so the three things pressed most — randomize, then search, then a row — are adjacent instead of separated by the chips and a paragraph of explanation.
+The band keeps two groups rather than becoming one list of six. The first three change values, the last three change which axes are in play at all, and an undivided row invites ALL LIVE to be read as another kind of reroll.
+Fixed the rig header on a phone, where the title and the live/pinned/muted tally competed for one row and "SIGNAL RIG" lost, breaking across two lines. Title on one line, tally on the next.
 Added
 Added arrangeable panels. ⇅ ARRANGE in the header reveals ▲▼ controls on every panel between the masthead and the footer; ⇅ DONE hides them again. The arrangement is saved per browser and ↺ RESET LAYOUT restores the shipped order.
 Panels do not move by dragging, and the mode is off by default. This page already spends its drag gesture on the strum — the lane, the strip above the board, and the row labels all randomize as you move across them — so a draggable panel would be a second meaning for the same motion on the same surface, colliding on exactly the gesture used most. Nothing you do while forging can shift the furniture. The ▲▼ are also the only version of this that works with a thumb, a keyboard and a screen reader.

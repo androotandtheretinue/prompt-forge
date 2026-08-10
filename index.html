@@ -447,6 +447,15 @@
        * below. On one line the field was down to about 145px, which is not
        * enough to read a subject you are editing.
        */
+      /*
+       * The rig header: title on one line, tally on the next. At 375px the two
+       * were competing for the same row and the loser was the word "SIGNAL
+       * RIG", broken across two lines while the tally beside it also wrapped.
+       */
+      [data-section-order="actions"] > .flex.items-center { flex-wrap: wrap; }
+      [data-section-order="actions"] .category-label { white-space: nowrap; }
+      [data-section-order="actions"] #rigReadout { flex: 1 0 100%; margin-left: 0; }
+
       .subject-override { flex-wrap: wrap; }
       .subject-override .subject-override-tag { order: 0; }
       .subject-override .btn { order: 1; }
@@ -1423,6 +1432,14 @@
       border-radius: 5px;
     }
 
+    /* The control band at the foot of the Signal Rig: the value controls on
+       one line, the axis-state controls under them. */
+    .rig-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     /* ============================================
      * ARRANGE MODE
      * ============================================ */
@@ -1885,16 +1902,6 @@ rather than operate the instrument, replace `main` with a commit SHA.
         <span class="text-xs text-gray-500 ml-auto" id="rigReadout">17 live · 0 pinned · 0 muted</span>
       </div>
 
-      <div class="flex flex-wrap gap-3 mb-3" id="globalControls">
-        <button class="btn btn-primary flex-1 py-3" id="randomizeButton" onclick="randomizeAll()"
-                title="Roll every live axis. Hold Shift to set aside what you roll past, so each roll shows you something new.">
-          <span id="randomizeLabel">🎲 RANDOMIZE UNLOCKED</span>
-        </button>
-        <button class="btn btn-random py-3 px-5" onclick="mutateRandom(3)" title="Reroll three unlocked dimensions">
-          🧬 MUTATE 3
-        </button>
-      </div>
-
       <p class="text-xs text-gray-600 mb-3">
         Choose which axes are in play before you forge. Tap a chip to cycle it:
         <span class="text-cyan-400">live</span> → <span class="text-yellow-400">pinned</span> → <span style="color:var(--signal-muted);">muted</span>.
@@ -1905,10 +1912,34 @@ rather than operate the instrument, replace `main` with a commit SHA.
         <!-- Rig chips injected here -->
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <button class="btn btn-mute text-xs" onclick="muteEmptyCategories()" title="Mute every axis that is currently blank — lock in your blanks before you start">🚫 MUTE BLANKS</button>
-        <button class="btn btn-lock text-xs" onclick="pinFilledCategories()" title="Pin every axis that currently has a value">🔐 PIN FILLED</button>
-        <button class="btn btn-random text-xs" onclick="unlockAll()" title="Return every axis to live and release the subject; values are kept">🔓 ALL LIVE</button>
+      <!--
+        Every control on one band at the foot of the panel, reading in the order
+        the work happens: set the scope with the chips above, act on it here.
+
+        The band sits directly above the search field and the board, so the
+        three things you press most — randomize, then search, then a row — are
+        adjacent instead of separated by the chips and an explainer.
+
+        Two groups rather than one list. The first three change the values, the
+        last three change which axes are in play at all, and a single undivided
+        row of six invites you to read ALL LIVE as another kind of reroll.
+      -->
+      <div class="rig-controls">
+        <div class="flex flex-wrap gap-3" id="globalControls">
+          <button class="btn btn-primary flex-1 py-3" id="randomizeButton" onclick="randomizeAll()"
+                  title="Roll every live axis. Hold Shift to set aside what you roll past, so each roll shows you something new.">
+            <span id="randomizeLabel">🎲 RANDOMIZE UNLOCKED</span>
+          </button>
+          <button class="btn btn-random py-3 px-5" onclick="mutateRandom(3)" title="Reroll three unlocked dimensions">
+            🧬 MUTATE 3
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-2" id="rigStateControls">
+          <button class="btn btn-mute text-xs" onclick="muteEmptyCategories()" title="Mute every axis that is currently blank — lock in your blanks before you start">🚫 MUTE BLANKS</button>
+          <button class="btn btn-lock text-xs" onclick="pinFilledCategories()" title="Pin every axis that currently has a value">🔐 PIN FILLED</button>
+          <button class="btn btn-random text-xs" onclick="unlockAll()" title="Return every axis to live and release the subject; values are kept">🔓 ALL LIVE</button>
+        </div>
       </div>
     </div>
 
