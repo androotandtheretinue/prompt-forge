@@ -1617,9 +1617,11 @@ knowledge. Keep the axis names and this order either way.
 
 narrative    the implied event or tension — what just happened, or is about to
 action       what the subject is doing
-figure       how the body is arranged: pose, weight, spine, limbs. Not who the
-             subject is, and not the activity. Action says reclining; figure
-             says weight on one hip, chin down, hand at the nape.
+figure       how the body is arranged: pose, weight, spine, limbs, and where
+             the head and eyes are turned. Not who the subject is, and not the
+             activity. The test: a figure value survives any action. "Running,
+             weight forward on toes" reads; "Running, standing" does not, which
+             is how you know standing is a figure and not an action.
 mood         emotional register
 composition  arrangement of elements within the frame
 setting      where it happens
@@ -2324,8 +2326,18 @@ rather than operate the instrument, replace `main` with a commit SHA.
         value: '',
         options: [
           '— Select Action/State —',
-          // Static Poses
-          'Standing', 'Sitting', 'Lying Down', 'Crouching', 'Kneeling', 'Leaning', 'Reclining', 'Perched',
+          /*
+           * The "Static Poses" group lived here until 5.6 and was the whole of
+           * the ACTION/FIGURE confusion: Standing, Sitting, Lying Down,
+           * Crouching, Kneeling, Leaning, Reclining and Perched are not things
+           * a subject is doing, they are ways a body is arranged, which is
+           * FIGURE's job by this board's own definition of it. The group even
+           * said so in its name.
+           *
+           * The test: a figure value survives any action. "Running, weight
+           * forward on toes" reads; "Running, Standing" does not. Anything
+           * failing that test is in the wrong bank.
+           */
           // Movement
           'Walking', 'Running', 'Jumping', 'Leaping', 'Flying', 'Falling', 'Floating', 'Swimming',
           'Dancing', 'Twirling', 'Spinning', 'Climbing', 'Crawling',
@@ -2334,11 +2346,11 @@ rather than operate the instrument, replace `main` with a commit SHA.
           'Fighting', 'Embracing', 'Reaching', 'Pointing', 'Holding', 'Carrying',
           // Emotional States
           'Contemplating', 'Meditating', 'Praying', 'Crying', 'Laughing', 'Screaming', 'Whispering',
-          // Attention
-          'Looking Up', 'Looking Down', 'Looking Away', 'Looking at Viewer', 'Eyes Closed', 'Gazing Distantly',
-          'Staring Intensely', 'Glancing Over Shoulder',
+          // Attention — quality of regard, not direction of gaze. Where the
+          // eyes point is head arrangement and moved to FIGURE with the poses.
+          'Gazing Distantly', 'Staring Intensely',
           // Animal-Specific
-          'Stalking', 'Pouncing', 'Hunting', 'Grooming', 'Stretching', 'Curled Up', 'Alert', 'Curious',
+          'Stalking', 'Pouncing', 'Hunting', 'Grooming', 'Alert', 'Curious',
           'Playful', 'Prowling', 'Napping', 'Yawning',
           // Interaction
           'Interacting with Object', 'Emerging From', 'Disappearing Into', 'Transforming',
@@ -3196,6 +3208,29 @@ rather than operate the instrument, replace `main` with a commit SHA.
     categories.figure = {
       icon: '🧍', label: 'FIGURE', locked: false, value: '',
       options: ['— Select Figure —',
+        /*
+         * The plain ones, moved from ACTION in 5.6.
+         *
+         * This bank held only specific arrangements — Even Weight, Squared
+         * Stance; Crouched on the Balls of the Feet; Reclined Long Line — and
+         * none of the ordinary words those are variations of. So anyone who
+         * simply wanted a seated figure reached into ACTION, found Sitting
+         * there, and the two axes blurred at exactly the point they should
+         * have been clearest.
+         *
+         * Same reasoning as the settings that gained their plain versions in
+         * 5.4: tilting the ordinary should be the user's choice, and it cannot
+         * be made from a bank holding only the tilted one.
+         */
+        'Standing', 'Sitting', 'Lying Down', 'Crouching', 'Kneeling',
+        'Leaning', 'Reclining', 'Perched', 'Curled Up', 'Stretching',
+        /*
+         * Where the eyes and head point. FIGURE already held Chin Down, Eyes
+         * Up and Look Back Over the Shoulder, so gaze direction was always
+         * this axis's territory — the bare versions were just filed elsewhere.
+         */
+        'Looking Up', 'Looking Down', 'Looking Away', 'Looking at Viewer',
+        'Eyes Closed', 'Glancing Over Shoulder',
         // Weight and stance
         'Contrapposto', 'Weight on One Hip', 'Weight Back on Heels',
         'Weight Forward on Toes', 'Even Weight, Squared Stance', 'Wide Base Stance',
@@ -3641,7 +3676,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         medium: 'Watercolor', style: 'Studio Ghibli', lighting: 'Dappled Sunlight',
         framing: 'Wide Shot', mood: 'Peaceful', palette: 'Spring Pastels',
         texture: 'Paper Texture', quality: 'Painterly', setting: 'Meadow',
-        weather: 'Scattered Clouds', fx: 'Drifting Sparks', action: 'Reclining'
+        weather: 'Scattered Clouds', fx: 'Drifting Sparks', figure: 'Reclining'
       },
       'Baroque Descent': {
         medium: 'Oil Painting', style: 'Baroque', lighting: 'Chiaroscuro',
@@ -3653,7 +3688,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         medium: 'Film Photography', style: 'Liminal Space', lighting: 'Fluorescent',
         framing: '35mm Street', mood: 'Eerie', palette: 'Vintage Faded',
         texture: 'VHS Distortion', quality: 'Heavy Film Grain', setting: 'Abandoned',
-        weather: 'Haze', fx: 'Ghostly Transparency', action: 'Standing'
+        weather: 'Haze', fx: 'Ghostly Transparency', figure: 'Standing'
       },
       'Solar Bloom': {
         medium: 'Digital Illustration', style: 'Solarpunk', lighting: 'Golden Hour',
@@ -3792,7 +3827,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
        * sets all seventeen leaves the subject nothing to be.
        */
       'Komorebi': {
-        narrative: 'This Is Their First Peaceful Moment', action: 'Reclining',
+        narrative: 'This Is Their First Peaceful Moment', action: 'Napping',
         figure: 'Reclined Long Line', mood: 'Komorebi Feeling',
         composition: 'Triangular Stability', setting: 'Garden', framing: '85mm Portrait',
         wardrobe: 'Draped Fabric', medium: 'Fashion Editorial Photography',
@@ -3801,7 +3836,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         weather: 'Midsummer Haze', quality: 'Natural Skin Texture'
       },
       'Negative Fill': {
-        narrative: 'The Reflection Knows More', action: 'Glancing Over Shoulder',
+        narrative: 'The Reflection Knows More', action: 'Waiting',
         figure: 'Counter-Rotated Shoulders and Hips', mood: 'Restrained Desire',
         composition: 'Off-Axis Hero Composition', setting: 'Studio Space',
         framing: '135mm Telephoto', wardrobe: 'Sheer Organza Layers', medium: 'Photography',
@@ -3810,7 +3845,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         texture: 'Satin', quality: 'Subsurface Scattering'
       },
       'Waterline': {
-        narrative: 'This Is Their Last Ordinary Moment', action: 'Stretching',
+        narrative: 'This Is Their Last Ordinary Moment', action: 'Floating',
         figure: 'Elongated Neck and Spine', mood: 'Dangerous Tenderness',
         composition: 'Face-Centered Intimacy', setting: 'Bathhouse', framing: '50mm Standard',
         wardrobe: 'Veiled', medium: 'Film Photography', style: 'Tonalism',
@@ -3819,7 +3854,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         weather: 'Petrichor Humidity', quality: 'Optical Imperfections Preserved'
       },
       'Salt and Gold': {
-        action: 'Leaning', figure: 'Weight on One Hip', mood: 'Serene',
+        action: 'Watching the Horizon', figure: 'Weight on One Hip', mood: 'Serene',
         composition: 'Strong Diagonal Energy', setting: 'Beach', framing: 'Full Body Shot',
         wardrobe: 'One-Piece Maillot', medium: 'Fashion Editorial Photography',
         style: 'Romanticism', lighting: 'Golden Hour', palette: 'Portra 400',
@@ -4238,6 +4273,13 @@ rather than operate the instrument, replace `main` with a commit SHA.
         'Ant-Level Ground Shot': 'from below', 'Aerial Drone Shot': 'from above'
       },
       figure: {
+        // The plain poses, arrived from the action table with their signals.
+        Standing: 'standing', Sitting: 'sitting', Kneeling: 'kneeling',
+        Crouching: 'squatting', Reclining: 'lying', 'Lying Down': 'lying',
+        Stretching: 'stretching', 'Curled Up': 'fetal position',
+        'Looking Up': 'looking up', 'Looking Down': 'looking down',
+        'Looking Away': 'looking away', 'Looking at Viewer': 'looking at viewer',
+        'Eyes Closed': 'closed eyes', 'Glancing Over Shoulder': 'looking back',
         'Weight on One Hip': 'contrapposto, hand on hip',
         'Arched Back': 'arched back', 'Leaning Against Support': 'leaning',
         'Leaning Into Frame': 'leaning forward',
@@ -4263,12 +4305,14 @@ rather than operate the instrument, replace `main` with a commit SHA.
         'Hands Loose at the Sides': 'arms at sides'
       },
       action: {
-        Standing: 'standing', Sitting: 'sitting', Kneeling: 'kneeling',
-        Reclining: 'lying', Walking: 'walking', Running: 'running',
+        // Standing, Sitting, Kneeling, Reclining and Stretching moved to the
+        // figure table in 5.6, with the signals themselves. A tag keyed to an
+        // axis that no longer holds the signal is unreachable.
+        Walking: 'walking', Running: 'running',
         Jumping: 'jumping', Swimming: 'swimming', Dancing: 'dancing',
         Eating: 'eating', Drinking: 'drinking', Sleeping: 'sleeping',
         Reading: 'reading', Embracing: 'hug', Laughing: 'laughing',
-        Stretching: 'stretching', Bowing: 'bowing', Saluting: 'salute',
+        Bowing: 'bowing', Saluting: 'salute',
         'Riding Horseback': 'horseback riding', Surfing: 'surfing',
         Skating: 'skating', Cycling: 'riding bicycle'
       },
@@ -5406,6 +5450,44 @@ rather than operate the instrument, replace `main` with a commit SHA.
       };
     }
 
+    /*
+     * Signals that changed axis, and the release they changed in.
+     *
+     * applyConfiguration drops any saved value its axis no longer holds — the
+     * quiet failure this project has warned about since the card rename, and
+     * the reason two PHOSPHOR signals still carry a name nobody wants. Moving
+     * sixteen poses from ACTION to FIGURE in 5.6 would have silently emptied
+     * the action row of every blueprint that used one, with nothing on screen
+     * to say why.
+     *
+     * So the move is recorded rather than assumed. A blueprint saying
+     * action: 'Standing' now restores as figure: 'Standing', which is where
+     * that value went and what the person meant when they saved it.
+     */
+    const RELOCATED_SIGNALS = [
+      { from: 'action', to: 'figure', values: [
+        'Standing', 'Sitting', 'Lying Down', 'Crouching', 'Kneeling',
+        'Leaning', 'Reclining', 'Perched', 'Curled Up', 'Stretching',
+        'Looking Up', 'Looking Down', 'Looking Away', 'Looking at Viewer',
+        'Eyes Closed', 'Glancing Over Shoulder'
+      ] }
+    ];
+
+    function applyRelocations(savedCategories) {
+      RELOCATED_SIGNALS.forEach(({ from, to, values }) => {
+        const was = savedCategories[from];
+        if (!was || !values.includes(was.value)) return;
+        if (!categories[to] || !categories[to].options.includes(was.value)) return;
+        // Never overwrite a destination the blueprint set deliberately. A save
+        // holding both a pose in action and a real figure value keeps the
+        // figure value; only the orphan moves, and it has nowhere else to go.
+        const destination = savedCategories[to];
+        if (destination && destination.value) return;
+        categories[to].value = was.value;
+        categories[to].locked = Boolean(was.locked);
+      });
+    }
+
     function applyConfiguration(config, refresh = true) {
       if (!config || typeof config !== 'object') return;
       if (typeof config.subject === 'string') document.getElementById('subjectInput').value = config.subject;
@@ -5416,6 +5498,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
           categories[key].value = categories[key].options.includes(saved.value) ? saved.value : '';
           categories[key].locked = Boolean(saved.locked);
         });
+        applyRelocations(config.categories);
       }
       chaosLevel = Number.isFinite(Number(config.chaosLevel)) ? Math.max(0, Math.min(100, Number(config.chaosLevel))) : 0;
       pinnedChaosModifier = typeof config.pinnedChaosModifier === 'string' ? config.pinnedChaosModifier : '';

@@ -101,16 +101,8 @@ The Interface Knows Before You Do
 The Signal Was Classified for a Reason
 
 ========================================================================
-ACTION — ACTION (178 signals)
+ACTION — ACTION (162 signals)
 ========================================================================
-Standing
-Sitting
-Lying Down
-Crouching
-Kneeling
-Leaning
-Reclining
-Perched
 Walking
 Running
 Jumping
@@ -145,20 +137,12 @@ Crying
 Laughing
 Screaming
 Whispering
-Looking Up
-Looking Down
-Looking Away
-Looking at Viewer
-Eyes Closed
 Gazing Distantly
 Staring Intensely
-Glancing Over Shoulder
 Stalking
 Pouncing
 Hunting
 Grooming
-Stretching
-Curled Up
 Alert
 Curious
 Playful
@@ -283,8 +267,24 @@ Monitoring Telemetry
 Scanning for Anomalies
 
 ========================================================================
-FIGURE — FIGURE (80 signals)
+FIGURE — FIGURE (96 signals)
 ========================================================================
+Standing
+Sitting
+Lying Down
+Crouching
+Kneeling
+Leaning
+Reclining
+Perched
+Curled Up
+Stretching
+Looking Up
+Looking Down
+Looking Away
+Looking at Viewer
+Eyes Closed
+Glancing Over Shoulder
 Contrapposto
 Weight on One Hip
 Weight Back on Heels

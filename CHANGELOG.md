@@ -1,6 +1,13 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
+Fixed
+Moved sixteen poses from ACTION to FIGURE, which is where the protocol has always said they belong. ACTION opened with a group the source itself labelled `// Static Poses` — Standing, Sitting, Lying Down, Crouching, Kneeling, Leaning, Reclining, Perched — none of which is something a subject is *doing*. It shipped a bare "Leaning" while FIGURE held "Leaning Against Support", and "Reclining" while FIGURE held "Reclined Long Line". The gaze directions went too: Looking Up, Looking Down, Looking Away, Looking at Viewer, Eyes Closed, Glancing Over Shoulder are head arrangements, and FIGURE already held "Chin Down, Eyes Up" and "Look Back Over the Shoulder".
+`llms.txt` now carries the test that settles it: a Figure value survives any Action. *Running, weight forward on toes* reads; *running, standing* does not, which is how you know standing is a figure.
+Sixteen is not arbitrary. Both banks are multiples of sixteen and the audit enforces it, so the number that changes axis has to be one too — which is why this is a move rather than a deletion, and why the signal total is unchanged at 2,343. ACTION goes 176 → 160, FIGURE 80 → 96.
+Four warm-figure Forge Cards paired a pose-as-action with a real figure value, which is the confusion made visible — the author wanted a pose and ACTION had one. Komorebi, Negative Fill, Waterline and Salt and Gold now carry a verb apiece (Napping, Waiting, Floating, Watching the Horizon) beside the pose they always had. Ghibli Meadow and Analog Ghost simply moved their value to the axis it now lives on.
+Blueprints saved before this release are migrated rather than quietly emptied. `applyConfiguration` drops any value its axis no longer holds — the silent failure this project has warned about since the card rename — so a save reading `action: 'Standing'` now restores as `figure: 'Standing'`. A save that set both keeps the figure value it chose deliberately; only the orphan moves.
+Five BOORU tag mappings moved tables with their signals. A tag keyed to an axis that no longer holds the signal is unreachable, and the audit would have caught it.
 Removed
 Removed the MISSION DOCTRINE panel. It held two features and both are gone.
 RECON · 6 and STANDARD · 10 promised a chosen few and delivered a shuffle: they kept six unlocked axes at random, a different six each roll, so one press could return weather, fx and colour logic with nothing establishing what the picture was and the next could return a usable scene. The panel named a doctrine it did not have. `randomizeAll` now has one behaviour instead of three.

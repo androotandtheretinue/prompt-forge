@@ -47,9 +47,11 @@ knowledge. Keep the axis names and this order either way.
 
 narrative    the implied event or tension — what just happened, or is about to
 action       what the subject is doing
-figure       how the body is arranged: pose, weight, spine, limbs. Not who the
-             subject is, and not the activity. Action says reclining; figure
-             says weight on one hip, chin down, hand at the nape.
+figure       how the body is arranged: pose, weight, spine, limbs, and where
+             the head and eyes are turned. Not who the subject is, and not the
+             activity. The test: a figure value survives any action. "Running,
+             weight forward on toes" reads; "Running, standing" does not, which
+             is how you know standing is a figure and not an action.
 mood         emotional register
 composition  arrangement of elements within the frame
 setting      where it happens

@@ -54,6 +54,48 @@ globalThis.__forgeAudit = {
   missingMeta: Object.keys(presets).filter(name => !presetMeta[name]),
   missingFromOrder: Object.keys(categories).filter(key => !promptOrder.includes(key)),
   extraInOrder: promptOrder.filter(key => !categories[key]),
+  poses: (() => {
+    const moved = RELOCATED_SIGNALS[0].values;
+    const action = categories.action.options;
+    const figure = categories.figure.options;
+
+    // Restore after: applyConfiguration mutates the live board.
+    const before = Object.keys(categories).map(key => ({
+      key, value: categories[key].value, locked: categories[key].locked
+    }));
+
+    categories.action.value = '';
+    categories.figure.value = '';
+    applyConfiguration({ categories: { action: { value: 'Standing', locked: false } } }, false);
+    const orphanMoves = categories.figure.value === 'Standing' && categories.action.value === '';
+
+    categories.action.value = '';
+    categories.figure.value = '';
+    applyConfiguration({ categories: {
+      action: { value: 'Reclining', locked: false },
+      figure: { value: 'Arched Back', locked: false }
+    } }, false);
+    const deliberateFigureKept = categories.figure.value === 'Arched Back';
+
+    categories.action.value = '';
+    categories.figure.value = '';
+    applyConfiguration({ categories: { action: { value: 'Walking', locked: false } } }, false);
+    const unmovedStays = categories.action.value === 'Walking' && categories.figure.value === '';
+
+    before.forEach(entry => {
+      categories[entry.key].value = entry.value;
+      categories[entry.key].locked = entry.locked;
+    });
+
+    return {
+      movedCount: moved.length,
+      leftInAction: moved.filter(value => action.includes(value)),
+      missingFromFigure: moved.filter(value => !figure.includes(value)),
+      orphanMoves,
+      deliberateFigureKept,
+      unmovedStays
+    };
+  })(),
   simple: (() => {
     const before = Object.keys(categories).map(key => ({
       key, value: categories[key].value, locked: categories[key].locked
@@ -468,6 +510,34 @@ if (audit.supplementOrphans.length) {
 if (audit.presetErrors.length) fail(`Broken Forge Card values: ${JSON.stringify(audit.presetErrors)}`);
 if (audit.missingMeta.length) fail(`Forge Cards missing metadata: ${audit.missingMeta.join(', ')}`);
 if (audit.missingFromOrder.length || audit.extraInOrder.length) fail('Prompt order does not match the category registry.');
+
+/*
+ * ACTION is verbs; FIGURE is how the body is arranged doing them.
+ *
+ * The banks disagreed with the protocol for five releases. ACTION opened with
+ * a group the source itself labelled "Static Poses" — Standing, Sitting, Lying
+ * Down, Reclining — none of which is a thing a subject is doing, all of which
+ * are FIGURE's job by this board's own definition. It shipped bare "Leaning"
+ * in ACTION while FIGURE held "Leaning Against Support", and four Forge Cards
+ * paired a pose-as-action with a real figure value, which is the confusion
+ * made visible: the author wanted a pose and ACTION had one.
+ *
+ * The test that decides it: a figure value survives any action. "Running,
+ * weight forward on toes" reads; "Running, Standing" does not.
+ *
+ * Sixteen is not an arbitrary number. Both banks are multiples of sixteen and
+ * the rule is enforced, so the count that moves has to be one too — which is
+ * why this is a move rather than a deletion, and why the signal total is
+ * unchanged either side of it.
+ */
+const poses = audit.poses;
+if (poses.movedCount !== 16) fail(`RELOCATED_SIGNALS moves ${poses.movedCount} poses; both banks are multiples of 16, so the count that changes axis must be too.`);
+if (poses.leftInAction.length) fail(`These poses are still in ACTION: ${poses.leftInAction.join(', ')}. A body arrangement in the verb bank is the confusion this fixed.`);
+if (poses.missingFromFigure.length) fail(`These poses never arrived in FIGURE: ${poses.missingFromFigure.join(', ')}.`);
+if (/\/\/ Static Poses/.test(html)) fail('The "Static Poses" group is back in the ACTION bank, under the name that admitted the problem.');
+if (!poses.orphanMoves) fail('A blueprint saving a pose as its action loses it instead of restoring it as a figure. applyConfiguration drops values their axis no longer holds, which is silent, and this is the migration that stops it.');
+if (!poses.deliberateFigureKept) fail('Relocating a saved pose overwrote a figure value the blueprint had set deliberately. Only the orphan may move.');
+if (!poses.unmovedStays) fail('Relocation is touching signals that did not move axis.');
 
 /*
  * ◑ SIMPLE stages the board. It replaced RECON · 6, which promised a chosen
