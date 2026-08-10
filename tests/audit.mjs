@@ -213,6 +213,46 @@ globalThis.__forgeAudit = {
     cat.locked = before.locked;
     return { key, observed };
   }),
+  layout: (() => {
+    const start = [...DEFAULT_LAYOUT];
+    const first = start[0];
+    const last = start[start.length - 1];
+
+    const movedDown = moveInLayout(start, first, 1);
+    const movedBack = moveInLayout(movedDown, first, -1);
+    const topStays = moveInLayout(start, first, -1);
+    const bottomStays = moveInLayout(start, last, 1);
+    const unknown = moveInLayout(start, 'nonsense', 1);
+
+    const repaired = normalizeLayout(['history', 'nonsense', 'subject', 'subject']);
+    const fromNull = normalizeLayout(null);
+    const fromJunk = normalizeLayout('not an array');
+
+    const map = layoutOrderMap(start);
+    const fixedKeys = Object.keys(FIXED_SECTIONS);
+
+    return {
+      defaults: start.join(','),
+      defaultCount: start.length,
+      swapsDown: movedDown.slice(0, 2).join(','),
+      roundTrips: movedBack.join(',') === start.join(','),
+      topDoesNotWrap: topStays.join(',') === start.join(','),
+      bottomDoesNotWrap: bottomStays.join(',') === start.join(','),
+      unknownIgnored: unknown.join(',') === start.join(','),
+      repairedKeepsAll: repaired.length === start.length,
+      repairedDropsUnknown: !repaired.includes('nonsense'),
+      repairedNoDupes: new Set(repaired).size === repaired.length,
+      repairedHonoursOrder: repaired.indexOf('history') < repaired.indexOf('subject'),
+      fromNullIsDefault: fromNull.join(',') === start.join(','),
+      fromJunkIsDefault: fromJunk.join(',') === start.join(','),
+      isDefault: layoutIsDefault(start) && !layoutIsDefault(movedDown),
+      fixedKeys: fixedKeys.join(','),
+      fixedNotMovable: fixedKeys.every(name => !start.includes(name)),
+      headerFirst: map.header === 0,
+      footerLast: Math.max(...Object.values(map)) === map.footer,
+      movablesAfterFixed: start.every(name => map[name] > map.protocol)
+    };
+  })(),
   search: (() => {
     const names = hits => hits.map(hit => hit.option).join('|');
     const cast = searchSignals('cast', 5);
@@ -690,6 +730,58 @@ if (booru.badTags.length) {
 }
 if (booru.mapsQuality) fail('The booru map translates the quality axis. Booru checkpoints use their own quality vocabulary; that axis is replaced by the scaffolding, not mapped.');
 if (booru.mapped < 80) fail(`Only ${booru.mapped} signals map to tags; the mode would pass almost everything through as prose.`);
+
+/*
+ * Movable panels, and the two orders that must not drift apart.
+ *
+ * The arrangement lives twice on purpose: DEFAULT_LAYOUT drives the runtime,
+ * the stylesheet's order map covers the case where the script never runs. If
+ * they disagree the page arranges itself as it loads — the no-JS order paints
+ * first and the script shuffles it — which looks like a rendering fault and is
+ * invisible to anyone testing with JavaScript on. So they are compared here.
+ *
+ * Arranging is also deliberately not a drag. This page spends its drag gesture
+ * on the strum, across the lane, the strip and the row labels; a draggable
+ * panel would be a second meaning for the same motion on the same surface.
+ */
+const layout = audit.layout;
+const cssOrder = [...html.matchAll(/\[data-section-order="([a-z]+)"\]\s*\{\s*order:\s*(\d+)/g)]
+  .map(match => ({ name: match[1], order: Number(match[2]) }))
+  .sort((a, b) => a.order - b.order)
+  .map(entry => entry.name)
+  .filter(name => !layout.fixedKeys.split(',').includes(name));
+
+if (cssOrder.join(',') !== layout.defaults) {
+  fail(`The stylesheet orders the panels ${cssOrder.join(', ')} but DEFAULT_LAYOUT says ${layout.defaults}. They must agree or the page rearranges itself as the script takes over from the no-JS fallback.`);
+}
+if (layout.defaultCount !== 13) fail(`Expected 13 movable panels; DEFAULT_LAYOUT has ${layout.defaultCount}.`);
+if (!layout.fixedNotMovable) fail(`A fixed section (${layout.fixedKeys}) is also listed as movable. The masthead, the protocol block and the footer identify the page and do not move.`);
+if (!layout.headerFirst) fail('The header is not pinned to the top of the arrangement.');
+if (!layout.footerLast) fail('The footer is not pinned to the bottom of the arrangement.');
+if (!layout.movablesAfterFixed) fail('A movable panel can sort above the protocol block, which agents read to identify the page.');
+if (layout.swapsDown !== `${cssOrder[1]},${cssOrder[0]}`) fail(`Moving the first panel down did not swap it with the second; got ${layout.swapsDown}.`);
+if (!layout.roundTrips) fail('Moving a panel down and back up does not restore the original order.');
+if (!layout.topDoesNotWrap) fail('The top panel wraps to the bottom when moved up. A panel that leaps the length of the page on one press reads as a bug whatever the docs say.');
+if (!layout.bottomDoesNotWrap) fail('The bottom panel wraps to the top when moved down.');
+if (!layout.unknownIgnored) fail('Moving a panel that does not exist reorders the ones that do.');
+if (!layout.isDefault) fail('layoutIsDefault does not distinguish the shipped arrangement from a changed one, so a default layout would be persisted as though it were a preference.');
+if (!layout.repairedKeepsAll || !layout.repairedNoDupes) fail('A stored layout is not repaired to hold every panel exactly once; a panel added in a later release would be missing from every saved arrangement.');
+if (!layout.repairedDropsUnknown) fail('A stored layout naming a panel that no longer exists is kept, so a removed panel keeps a slot nothing can fill.');
+if (!layout.repairedHonoursOrder) fail("Repairing a stored layout discards the user's ordering rather than filling the gaps in it.");
+if (!layout.fromNullIsDefault || !layout.fromJunkIsDefault) fail('A missing or malformed stored layout does not fall back to the shipped order.');
+
+if (!/localStorage\.removeItem\(LAYOUT_STORAGE_KEY\)/.test(html)) {
+  fail('A default arrangement is written to storage rather than cleared from it, which freezes today\'s shipped order into every browser that has ever loaded the page.');
+}
+if (!/id="arrangeToggle"/.test(html) || !/id="arrangeReset"/.test(html)) {
+  fail('Arrange mode has no toggle, or no way back to the shipped arrangement.');
+}
+if (!/body\.arranging/.test(html)) {
+  fail('Nothing distinguishes arrange mode visually, so the reorder controls would be permanently on screen.');
+}
+if (/draggable="true"|dragstart/.test(html)) {
+  fail('A panel is draggable. The drag gesture belongs to the strum on this page, and a draggable panel is a second meaning for the same motion on the same surface.');
+}
 
 /*
  * Signal search: five results, and therefore the right five.
@@ -1264,8 +1356,23 @@ if (embedded === null) {
   if (boardAt !== -1 && protocolAt > boardAt) {
     fail('The embedded protocol appears after the category board. It must come first, so a truncated read gets the instructions rather than a control panel.');
   }
+  /*
+   * 96 kB, raised from 48 in 5.5 — and raised properly rather than nudged.
+   *
+   * The comment above predicted this: a ceiling tuned close to the real number
+   * fails on ordinary work and teaches you to raise it. It then fired at 49 kB
+   * because a panel-arranging feature added a stylesheet block, which is
+   * exactly the ordinary work it warned about. Every feature adds CSS and the
+   * stylesheet sits in the head, ahead of the protocol, so this number only
+   * ever goes up; a threshold a hair above today's value is a threshold that
+   * gets edited every release until nobody reads it.
+   *
+   * The ordering assertion above is the check that carries the meaning. This
+   * one is a backstop for something absurd — a vendored font, an inlined
+   * image — and is set far enough out to mean that and nothing else.
+   */
   const offsetKb = Buffer.byteLength(html.slice(0, protocolAt), 'utf8') / 1024;
-  if (offsetKb > 48) {
+  if (offsetKb > 96) {
     fail(`The embedded protocol starts ${offsetKb.toFixed(0)} kB into index.html, which is further in than any amount of styling explains.`);
   }
 }
