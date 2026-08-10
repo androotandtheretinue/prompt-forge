@@ -54,9 +54,49 @@ globalThis.__forgeAudit = {
   missingMeta: Object.keys(presets).filter(name => !presetMeta[name]),
   missingFromOrder: Object.keys(categories).filter(key => !promptOrder.includes(key)),
   extraInOrder: promptOrder.filter(key => !categories[key]),
-  clusterErrors: Object.entries(categoryClusters).flatMap(([name, keys]) => keys.filter(key => !categories[key]).map(key => ({ name, key }))),
-  clusterMembership: Object.entries(categoryClusters).flatMap(([name, keys]) => keys.map(key => ({ name, key }))),
-  clusterNames: Object.keys(categoryClusters),
+  simple: (() => {
+    const before = Object.keys(categories).map(key => ({
+      key, value: categories[key].value, locked: categories[key].locked
+    }));
+
+    const unknown = SIMPLE_AXES.filter(key => !categories[key]);
+    const duplicated = SIMPLE_AXES.filter((key, index) => SIMPLE_AXES.indexOf(key) !== index);
+
+    Object.keys(categories).forEach(key => setCategoryState(key, 'live'));
+    const stagedFromLive = boardIsStaged();
+
+    applyStaging(true);
+    const staged = boardIsStaged();
+    const liveAfter = Object.keys(categories).filter(key => categoryStateOf(categories[key]) === 'live');
+    const mutedAfter = Object.keys(categories).filter(key => categoryStateOf(categories[key]) === 'muted');
+
+    // Second press must undo, or there is no way back except ALL LIVE. That is
+    // what stageSimple decides from boardIsStaged, so drive it the same way.
+    applyStaging(!boardIsStaged());
+    const releasedCount = Object.keys(categories).filter(key => categoryStateOf(categories[key]) === 'live').length;
+
+    before.forEach(entry => {
+      categories[entry.key].value = entry.value;
+      categories[entry.key].locked = entry.locked;
+    });
+
+    return {
+      axes: SIMPLE_AXES.join(','),
+      count: SIMPLE_AXES.length,
+      unknown: unknown.join(','),
+      duplicated: duplicated.join(','),
+      stagedFromLive,
+      staged,
+      // Sorted: the live set comes back in category declaration order, which is
+      // not SIMPLE_AXES order and is not supposed to be. Comparing as a set is
+      // the actual claim — these axes, not this sequence.
+      liveAfter: [...liveAfter].sort().join(','),
+      axesSorted: [...SIMPLE_AXES].sort().join(','),
+      mutedCount: mutedAfter.length,
+      releasedCount,
+      axisCount: Object.keys(categories).length
+    };
+  })(),
   categoryKeys: Object.keys(categories),
   cardCount: Object.keys(presets).length,
   corruption: (() => {
@@ -428,7 +468,62 @@ if (audit.supplementOrphans.length) {
 if (audit.presetErrors.length) fail(`Broken Forge Card values: ${JSON.stringify(audit.presetErrors)}`);
 if (audit.missingMeta.length) fail(`Forge Cards missing metadata: ${audit.missingMeta.join(', ')}`);
 if (audit.missingFromOrder.length || audit.extraInOrder.length) fail('Prompt order does not match the category registry.');
-if (audit.clusterErrors.length) fail(`Broken cluster references: ${JSON.stringify(audit.clusterErrors)}`);
+
+/*
+ * ◑ SIMPLE stages the board. It replaced RECON · 6, which promised a chosen
+ * few and delivered a shuffle — six unlocked axes at random, a different six
+ * every roll, so one press could return weather, fx and colour logic with
+ * nothing establishing what the picture was.
+ *
+ * The point of the replacement is that the set is fixed and named, so the
+ * check that matters is that it is exactly those axes and that pressing twice
+ * puts the board back. A staging button with no release is a trap: the only
+ * other way out would be ALL LIVE, which also releases the subject.
+ */
+const simple = audit.simple;
+if (simple.unknown) fail(`SIMPLE_AXES names axes that do not exist: ${simple.unknown}.`);
+if (simple.duplicated) fail(`SIMPLE_AXES lists an axis twice: ${simple.duplicated}.`);
+if (simple.axes !== 'action,composition,setting,framing,medium,style,lighting') {
+  fail(`SIMPLE_AXES is ${simple.axes}. The staged set is chosen, not incidental — changing it is a decision that belongs in the changelog.`);
+}
+if (simple.stagedFromLive) fail('An all-live board reads as already staged, so the first press of ◑ SIMPLE would release instead of staging.');
+if (!simple.staged) fail('Pressing ◑ SIMPLE does not leave the board in a state it recognises as staged, so the button could never light up or release.');
+if (simple.liveAfter !== simple.axesSorted) fail(`After staging, the live axes are ${simple.liveAfter}; expected exactly ${simple.axesSorted}.`);
+if (simple.mutedCount !== simple.axisCount - simple.count) {
+  fail(`Staging left ${simple.mutedCount} axes muted; expected ${simple.axisCount - simple.count}. The rest must be muted rather than merely blanked, or a randomize refills them.`);
+}
+if (simple.releasedCount !== simple.axisCount) {
+  fail(`Pressing ◑ SIMPLE twice left ${simple.releasedCount} of ${simple.axisCount} axes live. It must toggle, or there is no way back except ALL LIVE.`);
+}
+if (!/id="stageSimpleBtn"/.test(html)) fail('◑ SIMPLE has no button in the Signal Rig.');
+
+/*
+ * The toggle itself is checked statically, and that is a deliberate compromise.
+ *
+ * The probe above drives applyStaging directly, because stageSimple ends in
+ * updatePreview and updatePreview reaches for a dozen elements a stub does not
+ * have. That leaves one line unverified — the line deciding which way to go —
+ * and it is exactly the line worth breaking: replacing it with applyStaging(true)
+ * leaves the board permanently staged with no way back, and every executable
+ * check above still passes. Verified by doing it.
+ */
+if (!/applyStaging\(!boardIsStaged\(\)\)/.test(html)) {
+  fail('stageSimple no longer flips on the current state, so ◑ SIMPLE would stage but never release. The executable checks cannot see this line; it is guarded here or not at all.');
+}
+
+/*
+ * The things it replaced must be gone, not merely unreachable. A dead payload
+ * density still branching inside randomizeAll is a second way to blank rows
+ * that nothing on screen can explain.
+ */
+if (/payloadDensity\s*===/.test(html)) fail('randomizeAll still branches on payloadDensity. Staging is a board state now; the density presets are gone.');
+if (/id="density-(recon|standard|full)"/.test(html)) fail('A payload density button survives.');
+if (/const categoryClusters/.test(html)) fail('categoryClusters survives with nothing reading it.');
+if (/function (rerollCluster|lockCluster|muteCluster|previewCluster|syncClusterButtons)/.test(html)) {
+  fail('A cluster scope function survives after the panel that called it was removed.');
+}
+if (/data-section-order="doctrine"/.test(html)) fail('The MISSION DOCTRINE panel survives.');
+
 
 /*
  * Every axis is sized to a multiple of sixteen. That has been true since the v4
@@ -440,17 +535,6 @@ const offGrid = Object.entries(audit.counts)
   .map(([key, count]) => [key, count - (audit.supplement[key] || 0)])
   .filter(([, base]) => base % 16 !== 0);
 if (offGrid.length) fail(`Axis banks not sized to a multiple of 16: ${offGrid.map(([key, base]) => `${key} (${base})`).join(', ')}`);
-
-/*
- * Reroll scopes must partition the axes. Overlapping scopes are what made the
- * four cluster buttons feel interchangeable before v5.2, and an uncovered axis
- * (colorlogic, until v5.2) is one no cluster button can ever reach.
- */
-const clusteredKeys = audit.clusterMembership.map(entry => entry.key);
-const duplicatedInClusters = clusteredKeys.filter((key, index) => clusteredKeys.indexOf(key) !== index);
-const uncovered = audit.categoryKeys.filter(key => !clusteredKeys.includes(key));
-if (duplicatedInClusters.length) fail(`Reroll scopes overlap on: ${[...new Set(duplicatedInClusters)].join(', ')}`);
-if (uncovered.length) fail(`Axes reachable by no reroll scope: ${uncovered.join(', ')}`);
 
 /*
  * The chaos dial corrupts signal text, and every property that makes it an
@@ -754,7 +838,7 @@ const cssOrder = [...html.matchAll(/\[data-section-order="([a-z]+)"\]\s*\{\s*ord
 if (cssOrder.join(',') !== layout.defaults) {
   fail(`The stylesheet orders the panels ${cssOrder.join(', ')} but DEFAULT_LAYOUT says ${layout.defaults}. They must agree or the page rearranges itself as the script takes over from the no-JS fallback.`);
 }
-if (layout.defaultCount !== 13) fail(`Expected 13 movable panels; DEFAULT_LAYOUT has ${layout.defaultCount}.`);
+if (layout.defaultCount !== 12) fail(`Expected 12 movable panels; DEFAULT_LAYOUT has ${layout.defaultCount}.`);
 if (!layout.fixedNotMovable) fail(`A fixed section (${layout.fixedKeys}) is also listed as movable. The masthead, the protocol block and the footer identify the page and do not move.`);
 if (!layout.headerFirst) fail('The header is not pinned to the top of the arrangement.');
 if (!layout.footerLast) fail('The footer is not pinned to the bottom of the arrangement.');
@@ -1519,7 +1603,7 @@ if (!process.exitCode) {
   console.log(`  ${Object.keys(audit.counts).length} axes`);
   console.log(`  ${total.toLocaleString()} unique signals`);
   console.log(`  ${audit.cardCount} valid Forge Cards`);
-  console.log(`  ${audit.clusterNames.length} reroll scopes partitioning all ${audit.categoryKeys.length} axes`);
+  console.log(`  ◑ SIMPLE stages ${audit.simple.count} of ${audit.simple.axisCount} axes`);
   // The bank, not the total. Reporting 178 under a line about multiples of 16
   // reads as an arithmetic error in the checker rather than a supplement.
   console.log(`  every axis bank sized to a multiple of 16 (medium ${audit.counts.medium - audit.supplement.medium}) + ${audit.supplementTotal} PHOSPHOR`);

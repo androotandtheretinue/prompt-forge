@@ -1,7 +1,17 @@
 Changelog
 All notable changes to Prompt Forge are documented here.
 [Unreleased]
+Removed
+Removed the MISSION DOCTRINE panel. It held two features and both are gone.
+RECON · 6 and STANDARD · 10 promised a chosen few and delivered a shuffle: they kept six unlocked axes at random, a different six each roll, so one press could return weather, fx and colour logic with nothing establishing what the picture was and the next could return a usable scene. The panel named a doctrine it did not have. `randomizeAll` now has one behaviour instead of three.
+The four cluster scopes went with it — twelve buttons and a screenful to save three taps of something the rig chips already do one axis at a time. `categoryClusters`, the scope functions and the partition audit check go too.
+Blueprints saved before this release carry `payloadDensity` and it is ignored. Nothing is lost: staging is a board state now, and the categories those blueprints already saved record which rows were muted.
+Added
+Added ◑ SIMPLE to the Signal Rig, replacing the density presets with an actual answer. Seven axes stay live — Action, Composition, Setting, Camera, Medium, Style, Lighting — and the other ten are muted rather than merely blanked, so a randomize does not quietly refill them. Between them they answer what is happening, where, how it is arranged and shot, and what it is made of and lit by: enough for a coherent image and little enough to hold in your head.
+It toggles. Pressing it on a staged board returns every axis to live, because a button with no effect on its second press reads as broken and the only other way out would be ALL LIVE, which also releases the subject.
+FIGURE is deliberately not in the staged set despite being a strong axis. It is a refinement of ACTION — the body's geometry while doing the verb — so the two together would spend two of seven slots on one idea.
 Changed
+The telemetry pill now reports how many axes are live rather than which density preset is set, since the rig can stage any subset.
 Sized the Signal Rig band to two tiers instead of three. RANDOMIZE had `flex-1` against two content-width buttons, so it took the whole remainder — 505px against 137 and 187, most of it empty. It is still the largest thing in the panel and no longer three and a half times the button beside it; a primary reads as primary at twice the width, and past that it is a wide box with a word in the middle. The axis-state row came up from 30px to 36px against the value row's 47px, close enough to read as one band rather than two unrelated ones, and still visibly secondary. Both rows share the width evenly rather than sizing to their labels, so the band is a block of controls instead of a ragged line.
 
 [5.5.0] — 2026-08-09 — The Bench Rebuilt

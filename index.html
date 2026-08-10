@@ -65,7 +65,7 @@
   <meta property="og:image" content="https://androotandtheretinue.github.io/prompt-forge/social-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="The Prompt Forge control board: subject field, randomize and mutate controls, mission doctrine payload sizes, cluster reroll scopes, and the chaos dial.">
+  <meta property="og:image:alt" content="The Prompt Forge control board: subject field, the Signal Rig with its axis chips and randomize controls, the signal search, and the chaos dial.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Prompt Forge">
   <meta name="twitter:description" content="Forge image prompts from 2,343 signals across 17 creative axes. Public domain, no account required.">
@@ -327,7 +327,6 @@
     [data-section-order="board"]     { order: 5; }
     [data-section-order="output"]    { order: 6; }
     [data-section-order="format"]    { order: 7; }
-    [data-section-order="doctrine"]  { order: 8; }
     [data-section-order="chaos"]     { order: 9; }
     [data-section-order="cards"]     { order: 11; }
     [data-section-order="negative"]  { order: 12; }
@@ -810,50 +809,16 @@
     }
 
     /*
-     * A scope carries the same three verbs a single row does — reroll, pin,
-     * mute — so what you can do to one axis you can do to four at once.
-     * The reroll button takes the remaining width; the two operators stay a
-     * fixed glyph wide.
+     * A row flash. The cluster scopes used this to show their blast radius
+     * before committing; they are gone, and the strum lane's keyboard
+     * navigation still needs a way to say which row the arrow keys are on.
      */
-    .cluster-group {
-      display: flex;
-      gap: 3px;
-      min-width: 0;
-    }
-
-    .cluster-group .cluster-btn {
-      flex: 1 1 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    /*
-     * Kept narrow deliberately. At the four-across breakpoint the longest label
-     * (ATMOSPHERE) clears its column by only a few pixels, and emoji metrics
-     * differ between platforms — the padding here is the margin that keeps it
-     * from truncating on someone else's machine.
-     */
-    .cluster-op {
-      flex: 0 0 auto;
-      padding: 6px 5px;
-      line-height: 1;
-    }
-
-    /* Cluster hover preview: show the blast radius before committing. */
-    .cluster-btn.previewing {
-      color: var(--neon-magenta);
-      border-color: var(--neon-magenta);
-      box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
-    }
-
-    .category-row.cluster-preview {
+    .category-row.row-flash {
       background: rgba(255, 0, 255, 0.08);
       border-left-color: var(--neon-magenta);
     }
 
-    .category-row.locked.cluster-preview {
+    .category-row.locked.row-flash {
       background: rgba(255, 0, 255, 0.05);
       border-left-color: #7a3a7a;
     }
@@ -1296,11 +1261,9 @@
       box-shadow: 0 0 12px rgba(0,240,255,.16);
     }
 
-    .doctrine-btn {
-      min-width: 94px;
-    }
-
-    .doctrine-btn.active {
+    /* ◑ SIMPLE lights up while the board is staged, the way the other rig
+       operators do while their state is engaged. */
+    #stageSimpleBtn.active {
       color: var(--neon-gold);
       border-color: var(--neon-gold);
       background: rgba(255,215,0,.1);
@@ -1967,47 +1930,24 @@ rather than operate the instrument, replace `main` with a commit SHA.
           <button class="btn btn-mute text-xs" onclick="muteEmptyCategories()" title="Mute every axis that is currently blank — lock in your blanks before you start">🚫 MUTE BLANKS</button>
           <button class="btn btn-lock text-xs" onclick="pinFilledCategories()" title="Pin every axis that currently has a value">🔐 PIN FILLED</button>
           <button class="btn btn-random text-xs" onclick="unlockAll()" title="Return every axis to live and release the subject; values are kept">🔓 ALL LIVE</button>
+          <button class="btn btn-mute text-xs" id="stageSimpleBtn" onclick="stageSimple()">◑ SIMPLE</button>
         </div>
       </div>
     </div>
 
-    <!-- Mission Doctrine -->
-    <div class="panel p-4 mb-4" data-section-order="doctrine">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="status-dot" style="background:var(--neon-gold); box-shadow:0 0 10px var(--neon-gold);"></div>
-        <span class="category-label">🛰️ MISSION DOCTRINE</span>
-        <span class="text-xs text-gray-500 ml-auto" id="densityReadout">FULL SPECTRUM · 17 dimensions</span>
-      </div>
-      <div class="flex flex-wrap gap-2 mb-3">
-        <button class="btn doctrine-btn" id="density-recon" onclick="setPayloadDensity('recon')">RECON · 6</button>
-        <button class="btn doctrine-btn" id="density-standard" onclick="setPayloadDensity('standard')">STANDARD · 10</button>
-        <button class="btn doctrine-btn active" id="density-full" onclick="setPayloadDensity('full')">FULL · 17</button>
-      </div>
-      <p class="text-xs text-gray-600 mb-3">Randomize only the selected payload size; locked intelligence survives every operation.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-2">
-        <div class="cluster-group" data-cluster="structure">
-          <button class="btn btn-random text-xs cluster-btn" id="cluster-structure" onclick="rerollCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">⟳ 🏗 STRUCTURE</button>
-          <button class="btn btn-lock cluster-op" id="cluster-lock-structure" onclick="lockCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">🔐</button>
-          <button class="btn btn-mute cluster-op" id="cluster-mute-structure" onclick="muteCluster('structure')" onmouseenter="previewCluster('structure')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('structure')" onblur="clearClusterPreview()">🚫</button>
-        </div>
-        <div class="cluster-group" data-cluster="atmosphere">
-          <button class="btn btn-random text-xs cluster-btn" id="cluster-atmosphere" onclick="rerollCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">⟳ 🌫 ATMOSPHERE</button>
-          <button class="btn btn-lock cluster-op" id="cluster-lock-atmosphere" onclick="lockCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">🔐</button>
-          <button class="btn btn-mute cluster-op" id="cluster-mute-atmosphere" onclick="muteCluster('atmosphere')" onmouseenter="previewCluster('atmosphere')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('atmosphere')" onblur="clearClusterPreview()">🚫</button>
-        </div>
-        <div class="cluster-group" data-cluster="surface">
-          <button class="btn btn-random text-xs cluster-btn" id="cluster-surface" onclick="rerollCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">⟳ 🧪 SURFACE</button>
-          <button class="btn btn-lock cluster-op" id="cluster-lock-surface" onclick="lockCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">🔐</button>
-          <button class="btn btn-mute cluster-op" id="cluster-mute-surface" onclick="muteCluster('surface')" onmouseenter="previewCluster('surface')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('surface')" onblur="clearClusterPreview()">🚫</button>
-        </div>
-        <div class="cluster-group" data-cluster="story">
-          <button class="btn btn-random text-xs cluster-btn" id="cluster-story" onclick="rerollCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">⟳ 🗝 STORY</button>
-          <button class="btn btn-lock cluster-op" id="cluster-lock-story" onclick="lockCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">🔐</button>
-          <button class="btn btn-mute cluster-op" id="cluster-mute-story" onclick="muteCluster('story')" onmouseenter="previewCluster('story')" onmouseleave="clearClusterPreview()" onfocus="previewCluster('story')" onblur="clearClusterPreview()">🚫</button>
-        </div>
-      </div>
-      <p class="text-xs text-gray-600 mt-2" id="clusterHint">Each scope rerolls, pins, or mutes its rows together. Hover to outline them. Pinned and muted rows survive every reroll.</p>
-    </div>
+    <!--
+      MISSION DOCTRINE was here, and it held two things.
+
+      RECON · 6 and STANDARD · 10 promised a chosen few and delivered a
+      shuffle: they kept six unlocked axes at random, a different six every
+      roll, so one press gave you weather, fx and colour logic with nothing
+      saying what the picture was. The panel named a doctrine it did not have.
+      ◑ SIMPLE in the Signal Rig replaces it with an actual answer.
+
+      The four cluster scopes went with it. They pinned or muted four related
+      rows at once, which the rig chips already do one at a time, and they cost
+      twelve buttons and a screenful to save three taps.
+    -->
 
     <!-- Chaos Dial & Output Mode -->
     <div class="panel p-4 mb-4" data-section-order="chaos">
@@ -3304,7 +3244,6 @@ rather than operate the instrument, replace `main` with a commit SHA.
     let outputMode = 'universal';
     let aspectRatio = 'none';
     let promptHistory = [];
-    let payloadDensity = 'full';
     let blueprints = [];
     const STORAGE_KEY = 'promptForgeDarpaV4';
     const SUBJECT_POOL_KEY = 'promptForgeSubjectPoolsV1';
@@ -3679,21 +3618,11 @@ rather than operate the instrument, replace `main` with a commit SHA.
     });
 
     /*
-     * Reroll scopes. These partition the sixteen axes: every axis belongs to
-     * exactly one cluster, and no axis belongs to two. Before v5.2 the scopes
-     * overlapped — structure and story shared three of four rows — which made
-     * the buttons feel interchangeable because they nearly were. Keep this
-     * disjoint and complete; the audit enforces both.
+     * The four reroll scopes lived here, partitioning the axes into structure,
+     * atmosphere, surface and story. They went with MISSION DOCTRINE in 5.6:
+     * twelve buttons and a screenful to save three taps of something the rig
+     * chips already do one axis at a time.
      */
-    const categoryClusters = {
-      structure: ['composition', 'framing', 'setting'],
-      atmosphere: ['lighting', 'mood', 'palette', 'weather'],
-      surface: ['medium', 'texture', 'style', 'quality', 'fx', 'colorlogic'],
-      story: ['narrative', 'action', 'figure', 'wardrobe']
-    };
-
-    // Figure sits beside action and wardrobe: what the subject is doing, how
-    // the body holds it, and what it wears. Rerolling Story now moves all four.
     const promptOrder = [
       'narrative', 'action', 'figure', 'mood', 'composition', 'setting', 'framing',
       'wardrobe', 'medium', 'style', 'lighting', 'palette', 'colorlogic', 'texture',
@@ -5316,7 +5245,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
      */
     const DEFAULT_LAYOUT = [
       'subject', 'actions', 'hint', 'board', 'output', 'format',
-      'doctrine', 'chaos', 'cards', 'negative', 'banished', 'vault', 'history'
+      'chaos', 'cards', 'negative', 'banished', 'vault', 'history'
     ];
 
     let layoutOrder = [...DEFAULT_LAYOUT];
@@ -5470,7 +5399,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
         subjectLocked,
         subjectOverrides: { ...subjectOverrides },
         categories: Object.fromEntries(Object.entries(categories).map(([key, cat]) => [key, { value: cat.value, locked: cat.locked }])),
-        chaosLevel, pinnedChaosModifier, chaosSeed, outputMode, aspectRatio, payloadDensity,
+        chaosLevel, pinnedChaosModifier, chaosSeed, outputMode, aspectRatio,
         booruSettings: { ...booruSettings },
         negativePrompts: [...negativePrompts],
         mjControls: { ...mjControls }
@@ -5520,7 +5449,9 @@ rather than operate the instrument, replace `main` with a commit SHA.
       chaosSeed = Number.isFinite(Number(config.chaosSeed)) ? Math.max(0, Math.min(999999, Number(config.chaosSeed))) : 47;
       outputMode = ['universal', 'midjourney', 'sdxl', 'booru'].includes(config.outputMode) ? config.outputMode : 'universal';
       aspectRatio = ['none', '1:1', '3:2', '4:5', '16:9', '9:16', '21:9', '2:3', '4:3'].includes(config.aspectRatio) ? config.aspectRatio : 'none';
-      payloadDensity = ['recon', 'standard', 'full'].includes(config.payloadDensity) ? config.payloadDensity : 'full';
+      // config.payloadDensity is ignored: blueprints saved before 5.6 carry it
+      // and there is nothing left to apply it to. Staging is a board state now,
+      // and the categories it saved already record which rows were muted.
       if (Array.isArray(config.negativePrompts)) negativePrompts = [...new Set(config.negativePrompts.filter(Boolean).map(String))];
       if (config.mjControls) {
         Object.keys(mjControls).forEach(key => {
@@ -5624,7 +5555,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       const chaosRow = document.getElementById('chaosPinnedRow');
       chaosRow.style.display = pinnedChaosModifier ? 'flex' : 'none';
       document.getElementById('chaosPinnedText').textContent = pinnedChaosModifier;
-      syncDensityUI();
+      syncSimpleButton();
       const controlMap = {
         mjVersion: 'version', mjStylize: 'stylize', mjWeird: 'weird', mjResolution: 'resolution',
         mjSeed: 'seed', mjSref: 'sref', mjStyleWeight: 'styleWeight', mjProfile: 'profile'
@@ -5721,7 +5652,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       });
 
       renderRig();
-      syncClusterButtons();
+      syncSimpleButton();
     }
 
     // ============================================
@@ -5802,10 +5733,10 @@ rather than operate the instrument, replace `main` with a commit SHA.
         muteBtn.title = MUTE_BUTTON_TITLES[state];
       }
 
-      // A scope's state is derived from its rows, so changing one row can
-      // change what its scope reads as. Reconcile here rather than asking every
-      // caller to remember.
-      syncClusterButtons();
+      // Whether the board counts as staged is derived from its rows, so
+      // changing one row can change what ◑ SIMPLE reads as. Reconcile here
+      // rather than asking every caller to remember.
+      syncSimpleButton();
     }
 
     function rigChipTitle(key, state) {
@@ -5884,90 +5815,79 @@ rather than operate the instrument, replace `main` with a commit SHA.
      * line. unlockAll is the survivor.
      */
 
-    // ============================================
-    // CLUSTER SCOPES
-    // ⚯ four hands on one instrument. they must not reach for the same string.
-    // ============================================
+    /* ============================================
+     * SIMPLE — a staged board, seven axes live
+     * ============================================
+     * ◑ ᛊᛖᚡᛖᚾ · fewer strings, and the ones that carry
+     *
+     * This replaces RECON · 6, which promised a chosen few and delivered a
+     * shuffle: six unlocked axes at random, a different six each roll. One
+     * press could hand you weather, fx and colour logic with nothing saying
+     * what the picture was, and the next could hand you a usable scene. The
+     * inconsistency was the whole experience of it.
+     *
+     * These seven are chosen rather than drawn. Between them they answer what
+     * is happening (action), where (setting), how it is arranged and shot
+     * (composition, camera), and what it is made of and lit by (medium, style,
+     * lighting). That is enough for a coherent image and little enough to hold
+     * in your head — which is what the protocol means by six chosen values
+     * beating seventeen supplied ones.
+     *
+     * FIGURE is deliberately not here despite being a strong axis. It is a
+     * refinement of ACTION — the body's geometry while doing the verb — so the
+     * two together would spend two of seven slots on one idea. The vocabulary
+     * agrees more than it should: ACTION opens with Standing, Sitting, Lying
+     * Down, Reclining, which are postures and belong in FIGURE by the
+     * protocol's own definition. Worth untangling one day; not a reason to
+     * stage both.
+     *
+     * The rest are muted rather than merely blanked, so a randomize does not
+     * quietly refill them. Muting is the part that makes this staging.
+     */
+    const SIMPLE_AXES = [
+      'action', 'composition', 'setting', 'framing', 'medium', 'style', 'lighting'
+    ];
 
     /*
-     * A scope reads as one of the three rig states, or as mixed.
-     *
-     * `pinned` means nothing in the scope is still live — every row is held,
-     * whether at a value or blank. That is the same equivalence the rest of the
-     * board uses: locking a row that holds no value presents as muting it.
+     * A toggle, like every other rig operator. Pressing it when the board is
+     * already staged returns everything to live rather than doing nothing —
+     * a button that has no effect on its second press reads as broken, and
+     * there would otherwise be no way back except ALL LIVE.
      */
-    function clusterStateOf(name) {
-      const keys = (categoryClusters[name] || []).filter(key => categories[key]);
-      if (!keys.length) return 'live';
-      const states = keys.map(key => categoryStateOf(categories[key]));
-      if (states.every(state => state === 'muted')) return 'muted';
-      if (states.every(state => state === 'live')) return 'live';
-      if (states.every(state => state !== 'live')) return 'pinned';
-      return 'mixed';
+    function boardIsStaged() {
+      return Object.keys(categories).every(key =>
+        SIMPLE_AXES.includes(key)
+          ? categoryStateOf(categories[key]) !== 'muted'
+          : categoryStateOf(categories[key]) === 'muted');
     }
 
-    function setClusterState(name, target) {
-      const keys = (categoryClusters[name] || []).filter(key => categories[key]);
-      // Clicking the engaged operator releases the scope, so one button both
-      // applies and undoes and no scope can be stranded held.
-      const next = clusterStateOf(name) === target ? 'live' : target;
-      keys.forEach(key => {
-        // setCategoryState refuses to pin a blank row, which would otherwise
-        // leave half a scope live. Hold it blank instead — same thing the lock
-        // button does to a single empty row.
-        if (next === 'pinned' && !categories[key].value) setCategoryState(key, 'muted');
-        else setCategoryState(key, next);
+    /*
+     * The state change, separated from the redraw so the harness can execute
+     * it. updatePreview reaches for a dozen elements and cannot run against a
+     * stub, and the thing worth testing here is which axes end up muted.
+     */
+    function applyStaging(stage) {
+      Object.keys(categories).forEach(key => {
+        if (!stage) setCategoryState(key, 'live');
+        else setCategoryState(key, SIMPLE_AXES.includes(key) ? 'live' : 'muted');
       });
-      syncClusterButtons();
-      renderRig();
+    }
+
+    function stageSimple() {
+      applyStaging(!boardIsStaged());
+      syncSimpleButton();
       updatePreview();
     }
 
-    function lockCluster(name) { setClusterState(name, 'pinned'); }
-    function muteCluster(name) { setClusterState(name, 'muted'); }
-
-    function syncClusterButtons() {
-      Object.entries(categoryClusters).forEach(([name, keys]) => {
-        const members = keys.filter(key => categories[key]);
-        const labels = members.map(key => categories[key].label);
-        const noun = `${labels.length} ${labels.length === 1 ? 'axis' : 'axes'}`;
-        const list = labels.join(' · ');
-        const state = clusterStateOf(name);
-
-        const btn = document.getElementById(`cluster-${name}`);
-        if (btn) btn.title = `Reroll ${noun}: ${list}`;
-
-        const lockBtn = document.getElementById(`cluster-lock-${name}`);
-        if (lockBtn) {
-          lockBtn.classList.toggle('active', state === 'pinned');
-          lockBtn.title = state === 'pinned'
-            ? `Held: ${list} — click to return the scope to live`
-            : `Hold ${noun} at their current values: ${list}`;
-        }
-
-        const muteBtn = document.getElementById(`cluster-mute-${name}`);
-        if (muteBtn) {
-          muteBtn.classList.toggle('active', state === 'muted');
-          muteBtn.title = state === 'muted'
-            ? `Muted: ${list} — click to return the scope to live`
-            : `Blank ${noun} and hold them blank, so the image carries none of them: ${list}`;
-        }
-      });
-    }
-
-    function previewCluster(name) {
-      clearClusterPreview();
-      const btn = document.getElementById(`cluster-${name}`);
-      if (btn) btn.classList.add('previewing');
-      (categoryClusters[name] || []).forEach(key => {
-        document.getElementById(`row-${key}`)?.classList.add('cluster-preview');
-        document.getElementById(`rig-${key}`)?.classList.add('previewing');
-      });
-    }
-
-    function clearClusterPreview() {
-      document.querySelectorAll('.cluster-preview').forEach(el => el.classList.remove('cluster-preview'));
-      document.querySelectorAll('.previewing').forEach(el => el.classList.remove('previewing'));
+    function syncSimpleButton() {
+      const button = document.getElementById('stageSimpleBtn');
+      if (!button) return;
+      const staged = boardIsStaged();
+      button.classList.toggle('active', staged);
+      button.title = staged
+        ? 'Staged: seven axes live. Press again to return every axis to live.'
+        : `Leave ${SIMPLE_AXES.length} axes live and mute the rest: ` +
+          SIMPLE_AXES.map(key => categories[key].label).join(' · ');
     }
 
     // ============================================
@@ -6028,20 +5948,19 @@ rather than operate the instrument, replace `main` with a commit SHA.
       updatePreview();
     }
 
+    /*
+     * Rolls every live axis, and only live axes.
+     *
+     * It used to keep a random six or ten when a payload density was set,
+     * blanking the rest — which is why RECON was a lottery rather than a
+     * doctrine. Staging is now an explicit act performed by ◑ SIMPLE on the
+     * rig, and muted rows are already excluded here, so this function has one
+     * behaviour instead of three.
+     */
     function randomizeAll() {
-      const unlocked = Object.keys(categories).filter(key => !categories[key].locked);
-      const shuffled = [...unlocked].sort(() => Math.random() - 0.5);
-      const target = payloadDensity === 'recon' ? 6 : payloadDensity === 'standard' ? 10 : unlocked.length;
-      const selected = new Set(shuffled.slice(0, Math.min(target, shuffled.length)));
-      if (payloadDensity !== 'full') {
-        unlocked.forEach(key => {
-          if (!selected.has(key)) {
-            categories[key].value = '';
-            document.getElementById(`select-${key}`).value = '';
-          }
-        });
-      }
-      selected.forEach(key => pickRandomOption(key));
+      Object.keys(categories)
+        .filter(key => !categories[key].locked)
+        .forEach(key => pickRandomOption(key));
       rollChaosModifier();
       updatePreview();
     }
@@ -6050,43 +5969,6 @@ rather than operate the instrument, replace `main` with a commit SHA.
       const unlocked = Object.keys(categories).filter(key => !categories[key].locked);
       [...unlocked].sort(() => Math.random() - 0.5).slice(0, count).forEach(key => pickRandomOption(key));
       updatePreview();
-    }
-
-    function rerollCluster(name) {
-      // Flash the scope so touch users, who never get a hover, see it too.
-      previewCluster(name);
-      setTimeout(() => {
-        const btn = document.getElementById(`cluster-${name}`);
-        if (btn && typeof btn.matches === 'function' && btn.matches(':hover')) return;
-        clearClusterPreview();
-      }, 900);
-      (categoryClusters[name] || []).forEach(key => pickRandomOption(key));
-      updatePreview();
-    }
-
-    function setPayloadDensity(mode) {
-      if (!['recon', 'standard', 'full'].includes(mode)) return;
-      payloadDensity = mode;
-      syncDensityUI();
-      updatePreview();
-    }
-
-    function syncDensityUI() {
-      const axisCount = Object.keys(categories).length;
-      const labels = {
-        recon: 'RECON · 6 dimensions',
-        standard: 'STANDARD · 10 dimensions',
-        full: `FULL SPECTRUM · ${axisCount} dimensions`
-      };
-      ['recon', 'standard', 'full'].forEach(mode => {
-        document.getElementById(`density-${mode}`).classList.toggle('active', payloadDensity === mode);
-      });
-      // Derive the button's count too. The static markup is a fallback for
-      // no-JS readers and scrapers; leaving it to be maintained by hand is how
-      // the footer ended up two versions behind.
-      const fullButton = document.getElementById('density-full');
-      if (fullButton) fullButton.textContent = `FULL · ${axisCount}`;
-      document.getElementById('densityReadout').textContent = labels[payloadDensity];
     }
 
     function unlockAll() {
@@ -6172,7 +6054,10 @@ rather than operate the instrument, replace `main` with a commit SHA.
         `${locked} LOCKED`,
         `${prompt.length} CHARS`,
         `${total.toLocaleString()} SIGNALS`,
-        payloadDensity.toUpperCase()
+        // Which axes are live rather than which density is set. The rig can
+        // stage any subset now, so the honest number is the count of rows that
+        // will actually roll, not the name of a preset that no longer exists.
+        `${Object.values(categories).filter(cat => categoryStateOf(cat) === 'live').length} LIVE`
       ];
       document.getElementById('telemetry').innerHTML = telemetry
         .map(value => `<span class="telemetry-pill">${value}</span>`).join('');
@@ -6185,7 +6070,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
       if (!subject) messages.push(['warn', 'SUBJECT EMPTY · the forge can still produce an atmospheric payload.']);
       if (selected === 0) messages.push(['alert', 'NO AXES SELECTED · acquire signals or deploy a Forge Card.']);
       if (selected >= 14) messages.push(['warn', 'DENSE PAYLOAD · high specificity may compete for model attention.']);
-      if (prompt.length > 1800) messages.push(['warn', 'LONG TRANSMISSION · consider RECON or STANDARD doctrine.']);
+      if (prompt.length > 1800) messages.push(['warn', 'LONG TRANSMISSION · consider ◑ SIMPLE, or mute the axes this idea does not need.']);
       if (categories.colorlogic.value && !categories.palette.value) {
         messages.push(['warn', 'COLOR LOGIC ACTIVE WITHOUT PALETTE · deliberate, but underconstrained.']);
       }
@@ -6473,33 +6358,20 @@ rather than operate the instrument, replace `main` with a commit SHA.
     text.textContent = pinnedChaosModifier;
   };
 
+  /*
+   * Every live axis, and only live axes.
+   *
+   * This carried the payload-density branch too — keep a random six or ten,
+   * blank the rest. Staging is an explicit act on the rig now, and muted rows
+   * are already excluded by the lock check, so the shuffle and the target and
+   * the blanking pass all go.
+   */
   randomizeAll = function randomizeAllV5() {
     const unlocked = Object.keys(categories).filter(
       (key) => !categories[key].locked
     );
 
-    const shuffled = shuffle(unlocked);
-    const target =
-      payloadDensity === 'recon'
-        ? 6
-        : payloadDensity === 'standard'
-          ? 10
-          : unlocked.length;
-
-    const selected = new Set(
-      shuffled.slice(0, Math.min(target, shuffled.length))
-    );
-
-    if (payloadDensity !== 'full') {
-      unlocked.forEach((key) => {
-        if (!selected.has(key)) {
-          categories[key].value = '';
-          setSelectValue(key);
-        }
-      });
-    }
-
-    selected.forEach((key) => pickRandomOption(key));
+    unlocked.forEach((key) => pickRandomOption(key));
     rollChaosModifier();
     updatePreview();
   };
@@ -7283,7 +7155,7 @@ rather than operate the instrument, replace `main` with a commit SHA.
 
     // The Signal Rig mirrors these rows; keep the two redrawn together.
     renderRig();
-    syncClusterButtons();
+    syncSimpleButton();
   };
 
   // ------------------------------------------------------------
@@ -7648,8 +7520,8 @@ rather than operate the instrument, replace `main` with a commit SHA.
           const next = Math.max(0, Math.min(rows.length - 1, current + (laneKey.key === 'ArrowDown' ? 1 : -1)));
           strumLane.dataset.row = next;
           strumLane.setAttribute('aria-valuenow', Math.round((next / (rows.length - 1)) * 100));
-          rows[next].classList.add('cluster-preview');
-          setTimeout(() => rows[next].classList.remove('cluster-preview'), 400);
+          rows[next].classList.add('row-flash');
+          setTimeout(() => rows[next].classList.remove('row-flash'), 400);
           laneKey.preventDefault();
         } else if (laneKey.key === ' ' || laneKey.key === 'Enter') {
           strumMode = (laneKey.ctrlKey || laneKey.metaKey) ? 'step' : 'random';

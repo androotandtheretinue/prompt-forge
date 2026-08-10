@@ -18,7 +18,7 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - **Figure**: 80 signals for how the body is arranged, as distinct from what it is doing. Contrapposto, counter-rotated shoulders and hips, weight on one hip, chin down with the eyes up. Action tells you the subject is reclining; Figure tells you how.
 - **Color Logic**: 80 *relational* instructions rather than colors — chromatic skin against achromatic clothing, warm subject in a cool world, pearlescence only in the highlights. It describes a relationship between regions of the image, which is how a colorist thinks and is the axis with no equivalent in other prompt tools.
 - **29 Forge Cards**, including eight warm-figure doctrines — Komorebi, Waterline, Salt and Gold, Poolside Noon, Lido 1972 and others — and the **PHOSPHOR** card for phosphor-terminal, scan-line, telemetry, and retro-interface aesthetics.
-- **Shift + any reroll** surveys instead of shuffling — the roll-all button, a single axis's 🎲, a cluster scope, or the strum lane. Hold Shift and every value you roll past is set aside, so each roll shows you something you have not seen and the pool narrows as you refuse it. Release and everything comes back. A plain reroll only declines to repeat the value already on screen, which on a 176-option axis means you never meet most of it.
+- **Shift + any reroll** surveys instead of shuffling — the roll-all button, a single axis's 🎲, or the strum lane. Hold Shift and every value you roll past is set aside, so each roll shows you something you have not seen and the pool narrows as you refuse it. Release and everything comes back. A plain reroll only declines to repeat the value already on screen, which on a 176-option axis means you never meet most of it.
 - **Shift + strum** surveys as you drag, so a sweep down the board shows you signals you have not seen instead of the same handful. Banking is deliberately unavailable to a strum: one drag refuses hundreds of signals, and a permanent decision should not be reachable by a gesture built to be careless. Holding the banking modifier while dragging surveys instead.
 - **Ctrl+Shift + any reroll click** banks instead of surveying. A banked signal is filtered out of every draw whether or not a key is held, and stays out until you let it back in — the difference between "not this pass" and "not again". The **⚱ BANISHED SIGNALS** panel lists everything banked by axis, each entry its own undo, with one button to release the lot. The bank persists across sessions and refuses to take any axis below two signals, since nothing rescues a permanent ban.
 - **Mobile layout** puts the board first: the panels that tune the instrument sit below the rows rather than above them, and the rows pack into two lines. Nothing is removed — locks stay inline on every row, and the heavy panels are a tap away.
@@ -29,12 +29,11 @@ It is a single static HTML file. There is no account, backend, build step, or se
 - Custom signals participate in randomization, strumming, signal search, and Blueprint saves.
 - **Clear Unlocked** clears the subject and every unlocked axis while preserving locked values and intentionally locked blanks.
 - Centralized browser randomness avoids immediate repeat selections where possible.
-- **RECON / STANDARD / FULL** missions randomize 6, 10, or all 17 unlocked axes.
+- **◑ SIMPLE** stages the board: seven axes live — Action, Composition, Setting, Camera, Medium, Style, Lighting — and the other ten muted. Enough for a coherent image and little enough to hold in your head. Press it again to return every axis to live.
 - **Mutate 3** creates controlled variation without destroying the whole composition.
 - **Signal Rig**: set every axis to **live**, **pinned**, or **muted** before you forge. Muted axes stay blank through everything.
 - **MUTE BLANKS / PIN FILLED / ALL LIVE** configure the whole rig in one move.
-- **Cluster scopes** target Structure, Atmosphere, Surface, or Story. The four scopes partition the seventeen axes, and hovering one outlines exactly the rows it will change.
-- Each scope carries **⟳ reroll, 🔐 pin, and 🚫 mute** — the same three verbs a single row has. Mute Story to build an image that carries no narrative, action, figure or wardrobe at all. Both operators toggle back to live.
+- **Mute what the idea does not need.** An image that carries no weather, no wardrobe and no colour logic is a choice, and a muted row makes it one that survives every reroll.
 - **Arrange** reorders the panels. Press ⇅ ARRANGE in the header and every panel between the masthead and the footer gains ▲▼ controls; press ⇅ DONE and they disappear. The arrangement is saved in your browser, and ↺ RESET LAYOUT puts everything back where it shipped. Panels do not move by dragging — this page spends its drag gesture on the strum, and a draggable panel would be a second meaning for the same motion on the same surface.
 - **Signal search** sits in the strip above the board and answers as you type, five ranked suggestions at a time, across built-in and custom signals. Click one to load it into its axis, or press Enter for the top hit.
 - **Chaos Dial** corrupts the signal text itself, on a meter that documents its own thresholds: **DRIFT** at 25 (semantic variants), **MISSPELL** at 50, **LEET** at 75, **ZALGO** at the last tick. Zones are cumulative, so high chaos gives a mix rather than a uniform filter. Locked signals are immune, the corruption is seeded and saved with Blueprints, and every damaged signal is shown beside its original.
@@ -98,7 +97,7 @@ Both vocabulary files are generated from the application by `npm run vocabulary`
 ## Five-minute doctrine
 
 1. Enter the subject.
-2. Choose **RECON**, **STANDARD**, or **FULL**.
+2. Press **◑ SIMPLE** for a staged board of seven axes, or leave all seventeen live.
 3. Randomize—or strum across the board.
 4. Pin discoveries that feel alive. Mute the axes this image has no use for.
 5. Add custom signals when the existing vocabulary cannot hold the idea.
@@ -140,7 +139,7 @@ muted  =  locked && value === ''
 
 So a rig saves to the Blueprint Vault with everything else, and persists across reloads on its own.
 
-The rig is the deliberate counterpart to the mission doctrines: RECON gives you a random six, the rig lets you choose the six.
+◑ SIMPLE is the fast path through the same idea: it stages a chosen seven so you do not have to pick them, and the chips are there when you want a different set.
 
 ## Custom pools
 
