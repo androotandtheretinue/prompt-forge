@@ -13,7 +13,7 @@
   <a class="skip-link" href="#main">Skip to character editor</a>
   <header class="masthead">
     <a class="brand" href="#" aria-label="Persona Prompt Forge home"><span class="brand-mark" aria-hidden="true">◈</span><span>FORGE <b>SUITE</b><small>INSTRUMENTS FOR POSSIBILITY</small></span></a>
-    <div class="header-right"><span class="local-pill"><span></span> LOCAL FIRST</span><span class="version">PERSONA / 0.1</span></div>
+    <div class="header-right"><span class="local-pill"><span></span> LOCAL FIRST</span><span class="version">PERSONA / 0.2</span></div>
   </header>
   <main id="main">
     <section class="intro" aria-labelledby="page-title">
@@ -42,10 +42,16 @@
             <div class="identity-grid"><div id="name-field"></div><div id="pronouns-field"></div></div>
             <div id="premise-field"></div>
           </div>
+          <section class="archetype-section" aria-labelledby="archetype-heading">
+            <div class="section-heading"><div><span class="overline">FICTIONAL ARCHETYPES</span><h2 id="archetype-heading">One role is only a beginning.</h2></div><button id="browse-archetypes" class="text-button">Browse archetypes ↗</button></div>
+            <p class="board-help">Stack roles from across fiction, or invent your own. Personality stays independent.</p>
+            <div id="archetype-stack" class="archetype-stack"></div>
+            <div class="archetype-stack-actions"><button id="add-archetype" class="button subtle">+ Add archetype</button><button id="roll-archetypes" class="button export">⚄ Roll archetypes</button><button class="text-button" data-action="bank" data-key="archetype">Edit archetype bank</button></div>
+          </section>
           <div class="section-heading board-heading"><div><span class="overline">PERSONALITY SIGNALS</span><h2>Follow the interesting combination.</h2></div><button id="unlock-all" class="text-button">Unpin all</button></div>
           <p class="board-help">Pins protect traits from rolls. Edit any value directly. Approve a discovery when you choose.</p>
           <div id="trait-board" class="trait-board"></div>
-          <div class="board-bottom"><span id="bank-summary"></span><button id="open-banished" class="text-button">Banished signals <span id="banished-count">0</span></button></div>
+          <div class="board-bottom"><span id="bank-summary"></span><button id="expand-starter-banks" class="text-button" hidden>Add latest starter signals</button><button id="open-banished" class="text-button">Banished signals <span id="banished-count">0</span></button></div>
           <details class="rights-block"><summary>Character rights <span>unspecified by default</span></summary><label>License or rights statement<input id="rights-license" type="text" placeholder="unspecified"></label><label>Attribution<textarea id="rights-attribution" rows="2" placeholder="Optional creator credit or rights notes"></textarea></label><p>The app’s CC0 dedication does not license your character.</p></details>
         </div>
 
@@ -83,10 +89,11 @@
         <div class="preview-card"><div class="preview-top"><span class="overline">CHARACTER IN VIEW</span><span class="live-indicator"><i></i> LIVE</span></div>
           <div class="persona-glyph" aria-hidden="true"><div class="glyph-ring"></div><span>✧</span><i></i></div>
           <div class="preview-identity"><span class="overline" id="preview-stage">UNWRITTEN POSSIBILITY</span><h2 id="preview-name">Someone unexpected.</h2><p id="preview-pronouns"></p><p id="preview-premise">A few signals can be a beginning. Forge a sketch, then make it yours.</p></div>
+          <div id="preview-archetypes" class="preview-archetypes"></div>
           <div class="preview-divider"><span>THE SELECTED SIGNALS</span><span id="preview-count">00</span></div>
           <div id="preview-traits" class="preview-traits"></div>
           <div id="preview-modules" class="preview-modules"></div>
-          <div class="preview-foot"><span id="approved-count">0 approved entries</span><span>Schema 1.0.0</span></div>
+          <div class="preview-foot"><span id="approved-count">0 approved entries</span><span>Schema 1.1.0</span></div>
         </div>
         <div class="device-note"><span aria-hidden="true">⌁</span><div><strong id="storage-status">Saved on this device</strong><p>No account. No uploads. Your character stays in this browser until you export it.</p></div></div>
       </aside>
@@ -99,8 +106,17 @@
     <div class="dialog-heading"><div><span class="overline">DESCRIPTOR BANK</span><h2 id="bank-title">Edit signals</h2></div><button class="icon-button close-dialog" aria-label="Close bank editor">✕</button></div>
     <p>One descriptor per line. Add, edit, or remove freely. Selected character text is kept even if its bank entry is removed.</p>
     <label>Descriptors<textarea id="bank-text" rows="12" spellcheck="true"></textarea></label>
+    <button id="add-starter-signals" class="text-button">Add missing starter signals to this list</button>
     <div id="bank-bans" class="bank-bans"></div>
     <div class="dialog-actions"><button class="button subtle close-dialog">Cancel</button><button id="save-bank" class="button primary">Save bank</button></div>
+  </dialog>
+
+  <dialog id="archetype-dialog" class="wide-dialog" aria-labelledby="archetype-browser-title">
+    <div class="dialog-heading"><div><span class="overline">A CAST OF POSSIBILITIES</span><h2 id="archetype-browser-title">Find another side of them.</h2></div><button class="icon-button close-dialog" aria-label="Close archetype browser">✕</button></div>
+    <p>Browse fictional roles across genres. Every choice can coexist with any other. Add one, then keep exploring.</p>
+    <div class="archetype-filters"><label>Search archetypes<input id="archetype-search" type="search" placeholder="Trickster, machine, tragic…"></label><label>Browse family<select id="archetype-group" aria-label="Browse archetype family"><option value="">All families</option></select></label></div>
+    <div class="archetype-browser-summary"><span id="archetype-result-count"></span><span id="archetype-selected-count"></span></div>
+    <div id="archetype-results" class="archetype-results"></div>
   </dialog>
 
   <dialog id="banished-dialog" aria-labelledby="banished-title"><div class="dialog-heading"><div><span class="overline">SET ASIDE, NOT LOST</span><h2 id="banished-title">Banished signals</h2></div><button class="icon-button close-dialog" aria-label="Close banished signals">✕</button></div><p>These values stay out of future rolls. Restore a signal whenever you like.</p><div id="banished-list"></div></dialog>
@@ -118,6 +134,7 @@
   </dialog>
   <dialog id="new-dialog" aria-labelledby="new-title"><div class="dialog-heading"><h2 id="new-title">Begin a new character?</h2><button class="icon-button close-dialog" aria-label="Close new character">✕</button></div><p>Your current draft will be saved as a local snapshot first. The new character starts with fresh starter banks and an unspecified relationship.</p><div class="dialog-actions"><button class="button subtle close-dialog">Keep editing</button><button id="confirm-new" class="button primary">Save &amp; begin</button></div></dialog>
   <script>/* __BANKS__ */</script>
+  <script>/* __ARCHETYPES__ */</script>
   <script>/* __CORE__ */</script>
   <script>/* __APP__ */</script>
 </body>

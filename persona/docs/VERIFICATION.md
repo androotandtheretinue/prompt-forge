@@ -1,12 +1,16 @@
-# Verification · 0.1.0
+# Verification · 0.2.0
 
 ## Automated
 
-`npm test` in `persona/`: **21 tests pass**. Coverage includes pins and pinned blanks; individual and full rolls; exhausted and empty banks; case-insensitive banishment and restoration; bank editing; manual text preservation; origin versus approval; undo with later edits; all optional modules; unsupported and malformed imports; rights; local snapshots; deterministic Codify; and JSON round-trip integrity. The property-style edit sequence performs 75 export/import cycles. Distribution tests verify the generated HTML matches source and has no external runtime dependencies or connection calls.
+`npm test` in `persona/`: **33 tests pass**. Coverage includes multi-archetype stacking, independent role pins and blank slots, cross-family combinations without compatibility rules, source-ID-safe starter expansion, legacy 1.0.0 migration, role removal and undo by stable ID, archetype JSON/Markdown integrity; pins and pinned blanks; individual and full rolls; exhausted and empty banks; case-insensitive banishment and restoration; bank editing; manual text preservation; origin versus approval; undo with later edits; all optional modules; unsupported and malformed imports; rights; local snapshots; deterministic Codify; and JSON round-trip integrity. The property-style edit sequence performs 75 export/import cycles. Distribution tests verify the generated HTML matches source and has no external runtime dependencies or connection calls.
 
 The existing Image Prompt Forge’s root `npm test` also passes. Its application, banks, and vocabulary files were not changed.
 
-## Observed in the browser
+## Archetype update observed in the browser
+
+The existing 1.0.0 workspace loaded as 1.1.0 without invented roles or lost curation. The picker searched and combined roles across families, including the anime/dynamics family. A pinned role survived a full roll while another changed; a manual role edit survived undo. Archetype banishment and restoration worked. Explicit starter-bank expansion preserved the selected character object exactly. The multi-archetype JSON export → paste/import → export comparison was byte-for-byte equal. Reload retained the role stack and its independent pin. The archetype picker and character board fit a 375px usable viewport without horizontal overflow.
+
+## Original prototype browser checks
 
 | Scenario | Result |
 | --- | --- |

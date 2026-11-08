@@ -1,19 +1,20 @@
-# Canonical schema · 1.0.0
+# Canonical schema · 1.1.0
 
-Application version and schema version are independent. This prototype exports `format: "persona-prompt-forge"` and `schemaVersion: "1.0.0"`. `validateDocument()` in `src/core.js` is the executable validator. Version migration is not implemented; unsupported versions are rejected, never silently coerced.
+Application version and schema version are independent. This prototype exports `format: "persona-prompt-forge"` and `schemaVersion: "1.1.0"`. `validateDocument()` in `src/core.js` is the executable validator. Imports support a deterministic 1.0.0 → 1.1.0 migration. Other unsupported versions are rejected. The migration adds no selected archetypes and preserves all existing character text, metadata, rights, banks, pins, and banishments. New exports use 1.1.0.
 
 | Path | Shape / meaning |
 | --- | --- |
 | `character.id` | Stable opaque string, created once for a new character |
 | `character.rights` | `{license: string, attribution: string}`; license defaults to `unspecified` |
-| `character.kernel` | `{name: Entry, pronouns: Entry, premise: Entry, traits: Traits}` |
+| `character.kernel` | `{name: Entry, pronouns: Entry, premise: Entry, archetypes: Archetype[], traits: Traits}` |
 | `character.essence` | `null` or `{backstory: Entry, voiceNotes: Entry, examples: Entry}` |
 | `character.companion` | Relationship configuration below; `enabled: false` by default |
 | `character.appearance` | `null` or `{description: Entry}` |
 | `character.continuity` | `null` or `{notes: Entry}` |
-| `forge.banks` | Map from trait key to an array of bank entries |
+| `forge.banks` | Map from the ten trait keys plus `archetype` to arrays of bank entries |
+| `forge.archetypeLocks` | Map from stable archetype ID to boolean; every selected slot has a lock |
 | `forge.locks` | Map from trait key to boolean |
-| `forge.banished` | Map from trait key to a string array, compared case-insensitively for draws |
+| `forge.banished` | Map from the ten trait keys plus `archetype` to string arrays, compared case-insensitively for draws |
 | `extensions` | Opaque JSON object, retained unchanged across import/export |
 
 An `Entry` is:
@@ -32,7 +33,9 @@ Approval states: `draft`, `suggested`, `approved`. Origin is evidence of how the
 
 The ten required trait keys are `temperament`, `values`, `motivation`, `voice`, `social`, `humor`, `tension`, `vulnerability`, `care`, and `quirk`. Each maps to an Entry. Additional trait Entries survive import and are compiled after the known axes, but Phase One edits and randomizes only the ten known axes.
 
-A bank entry is `{id: string, text: string, origin: "builtin" | "user" | "imported" | "ai-proposal"}`. IDs and case-insensitive texts must be unique within a bank. Empty banks are valid. Selected text is an independent copy: editing or deleting a descriptor never erases character information. IDs are retained for unchanged bank text; a newly authored bank line gets a custom ID.
+An `Archetype` is an Entry with an additional nonempty, unique `id` string. The ordered array may be empty. Each role retains independent origin and approval, including manual custom roles. IDs connect archetypes to their authoring locks and undo transactions; position is not identity. A new character has two blank slots, while a migrated character has none until explicitly added.
+
+A bank entry is `{id: string, text: string, origin: "builtin" | "user" | "imported" | "ai-proposal"}`. An optional `group: string` supplies a browsing family and carries no compatibility rules. IDs and case-insensitive texts must be unique within a bank. Empty banks are valid. Selected text is an independent copy: editing or deleting a descriptor never erases character information. IDs are retained for unchanged bank text; a newly authored bank line gets a custom ID.
 
 The Companion configuration contains:
 
@@ -46,6 +49,6 @@ The Companion configuration contains:
 | `customRoles`, `dynamics`, `boundaries`, `expectations` | Entry objects |
 | `origin`, `approval` | Provenance and editorial status of the structured configuration |
 
-Change policy describes an expectation for a downstream consumer; it is not a simulated relationship engine. Explicit edits in this creator remain under the curator’s control. All fields above are required in a 1.0.0 document; optional modules use `null` rather than missing keys.
+Change policy describes an expectation for a downstream consumer; it is not a simulated relationship engine. Explicit edits in this creator remain under the curator’s control. All fields above are required in a 1.1.0 document; optional modules use `null` rather than missing keys.
 
 Canonical JSON includes the full authoring workspace. Markdown is a readable projection and is not a round-trip import format. Unknown properties are preserved in JSON; consumers must not treat an unrecognized extension as executable instructions.

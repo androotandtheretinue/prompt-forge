@@ -1,9 +1,10 @@
-/* Persona Prompt Forge 0.1.0 — pure document operations. CC0-1.0. */
+/* Persona Prompt Forge 0.2.0 — pure document operations. CC0-1.0. */
 (() => {
   'use strict';
   const FORMAT = 'persona-prompt-forge';
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const AXES = globalThis.PersonaForgeBanks.map(({ key, label, hint }) => ({ key, label, hint }));
+  const BANKS = [...AXES, { key: 'archetype', label: 'Archetypes', hint: 'Fictional roles that can coexist' }];
   const APPROVALS = ['draft', 'suggested', 'approved'];
   const ORIGINS = ['unspecified', 'manual', 'bank', 'ai-proposal', 'imported'];
   const clone = value => JSON.parse(JSON.stringify(value));
@@ -11,8 +12,20 @@
   const normalize = text => text.trim().toLowerCase();
   const id = () => globalThis.crypto?.randomUUID?.() || `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   const entry = (text = '', kind = 'unspecified', approval = 'draft', reference = null) => ({ text, origin: { kind, reference }, approval });
+  const archetype = (text = '') => ({ id: id(), ...entry(text, text ? 'manual' : 'unspecified') });
+
+  function starterBank(key) {
+    if (key === 'archetype') {
+      let index = 0;
+      return globalThis.PersonaForgeArchetypes.flatMap(({ group, options }) => options.map(text => ({ id: `starter:archetype:${++index}`, text, origin: 'builtin', group })));
+    }
+    const bank = globalThis.PersonaForgeBanks.find(bank => bank.key === key);
+    if (!bank) throw new Error(`Unknown bank: ${key}`);
+    return bank.options.map((text, index) => ({ id: `starter:${key}:${index + 1}`, text, origin: 'builtin' }));
+  }
 
   function createDocument() {
+    const archetypes = [archetype(), archetype()];
     return {
       format: FORMAT,
       schemaVersion: VERSION,
@@ -21,6 +34,7 @@
         rights: { license: 'unspecified', attribution: '' },
         kernel: {
           name: entry(), pronouns: entry(), premise: entry(),
+          archetypes,
           traits: Object.fromEntries(AXES.map(({ key }) => [key, entry()]))
         },
         essence: null,
@@ -33,11 +47,10 @@
         continuity: null
       },
       forge: {
-        banks: Object.fromEntries(globalThis.PersonaForgeBanks.map(({ key, options }) => [key,
-          options.map((text, index) => ({ id: `starter:${key}:${index + 1}`, text, origin: 'builtin' }))
-        ])),
+        banks: Object.fromEntries(BANKS.map(({ key }) => [key, starterBank(key)])),
         locks: Object.fromEntries(AXES.map(({ key }) => [key, false])),
-        banished: Object.fromEntries(AXES.map(({ key }) => [key, []]))
+        archetypeLocks: Object.fromEntries(archetypes.map(item => [item.id, false])),
+        banished: Object.fromEntries(BANKS.map(({ key }) => [key, []]))
       },
       extensions: {}
     };
@@ -49,7 +62,7 @@
     return JSON.stringify(sort(value), null, 2) + '\n';
   }
 
-  function validateDocument(doc) {
+  function validateDocument(doc, { allowLegacy = false } = {}) {
     const errors = [];
     const fail = (path, message) => errors.push(`${path}: ${message}`);
     const object = (value, path) => {
@@ -86,7 +99,8 @@
     safeKeys(doc);
     if (!object(doc, '$')) return errors;
     if (doc.format !== FORMAT) fail('format', 'not a Persona Prompt Forge document');
-    if (doc.schemaVersion !== VERSION) fail('schemaVersion', `unsupported version; expected ${VERSION}`);
+    const legacy = allowLegacy && doc.schemaVersion === '1.0.0';
+    if (doc.schemaVersion !== VERSION && !legacy) fail('schemaVersion', `unsupported version; expected ${VERSION}`);
     if (object(doc.character, 'character')) {
       const c = doc.character;
       string(c.id, 'character.id');
@@ -96,6 +110,20 @@
       }
       if (object(c.kernel, 'character.kernel')) {
         for (const key of ['name', 'pronouns', 'premise']) field(c.kernel[key], `kernel.${key}`);
+        if (!legacy) {
+          if (!Array.isArray(c.kernel.archetypes)) fail('kernel.archetypes', 'expected a list');
+          else {
+            const ids = new Set();
+            c.kernel.archetypes.forEach((item, i) => {
+              field(item, `kernel.archetypes[${i}]`);
+              if (!item || typeof item !== 'object') return;
+              string(item.id, `kernel.archetypes[${i}].id`);
+              if (!item.id || ['__proto__', 'prototype', 'constructor'].includes(item.id)) fail(`kernel.archetypes[${i}].id`, 'expected a nonempty, nonreserved id');
+              if (ids.has(item.id)) fail('kernel.archetypes', 'duplicate archetype id');
+              ids.add(item.id);
+            });
+          }
+        }
         if (object(c.kernel.traits, 'kernel.traits')) {
           AXES.forEach(({ key }) => field(c.kernel.traits[key], `kernel.traits.${key}`));
           Object.keys(c.kernel.traits).filter(key => !AXES.some(a => a.key === key))
@@ -122,7 +150,8 @@
     }
     if (object(doc.forge, 'forge')) {
       const f = doc.forge;
-      if (object(f.banks, 'forge.banks')) AXES.forEach(({ key }) => {
+      const requiredBanks = legacy ? AXES : BANKS;
+      if (object(f.banks, 'forge.banks')) requiredBanks.forEach(({ key }) => {
         const bank = f.banks[key];
         if (!Array.isArray(bank)) { fail(`banks.${key}`, 'expected a list'); return; }
         const ids = new Set(), texts = new Set();
@@ -131,6 +160,7 @@
           if (!object(item, path)) return;
           string(item.id, `${path}.id`); string(item.text, `${path}.text`);
           choice(item.origin, ['builtin', 'user', 'imported', 'ai-proposal'], `${path}.origin`);
+          if (item.group !== undefined) string(item.group, `${path}.group`);
           if (typeof item.text === 'string') {
             const norm = normalize(item.text);
             if (!norm) fail(`${path}.text`, 'descriptor must not be blank');
@@ -144,7 +174,13 @@
       if (object(f.locks, 'forge.locks')) AXES.forEach(({ key }) => {
         if (typeof f.locks[key] !== 'boolean') fail(`locks.${key}`, 'expected true or false');
       });
-      if (object(f.banished, 'forge.banished')) AXES.forEach(({ key }) => strings(f.banished[key], `banished.${key}`));
+      if (!legacy && object(f.archetypeLocks, 'forge.archetypeLocks')) {
+        Object.entries(f.archetypeLocks).forEach(([key, value]) => { if (typeof value !== 'boolean') fail(`archetypeLocks.${key}`, 'expected true or false'); });
+        if (Array.isArray(doc.character?.kernel?.archetypes)) doc.character.kernel.archetypes.forEach(item => {
+          if (item && (!Object.hasOwn(f.archetypeLocks, item.id) || typeof f.archetypeLocks[item.id] !== 'boolean')) fail('archetypeLocks', 'missing lock for an archetype');
+        });
+      }
+      if (object(f.banished, 'forge.banished')) requiredBanks.forEach(({ key }) => strings(f.banished[key], `banished.${key}`));
     }
     object(doc.extensions, 'extensions');
     return errors;
@@ -154,9 +190,20 @@
     if (typeof text !== 'string' || text.length > 2_000_000) throw new Error('Import must be a JSON document under 2 MB.');
     let parsed;
     try { parsed = JSON.parse(text); } catch { throw new Error('This is not valid JSON.'); }
-    const errors = validateDocument(parsed);
+    const errors = validateDocument(parsed, { allowLegacy: true });
     if (errors.length) throw new Error(errors.slice(0, 4).join('\n'));
-    return clone(parsed); // Preserve provenance, approvals, unknown data, and text verbatim.
+    const next = clone(parsed);
+    if (next.schemaVersion === '1.0.0') {
+      next.schemaVersion = VERSION;
+      // Do not invent roles for existing characters or replace their curated banks.
+      if (!Object.hasOwn(next.character.kernel, 'archetypes')) next.character.kernel.archetypes = [];
+      if (!Object.hasOwn(next.forge.banks, 'archetype')) next.forge.banks.archetype = starterBank('archetype');
+      if (!Object.hasOwn(next.forge.banished, 'archetype')) next.forge.banished.archetype = [];
+      if (!Object.hasOwn(next.forge, 'archetypeLocks')) next.forge.archetypeLocks = Object.fromEntries((Array.isArray(next.character.kernel.archetypes) ? next.character.kernel.archetypes : []).map(item => [item?.id, false]));
+    }
+    const upgradedErrors = validateDocument(next);
+    if (upgradedErrors.length) throw new Error(upgradedErrors.slice(0, 4).join('\n'));
+    return next; // Preserve provenance, approvals, unknown data, and text verbatim.
   }
 
   function exportDocument(doc) {
@@ -179,22 +226,27 @@
     return doc.forge.banks[key].filter(item => !banned.has(normalize(item.text)));
   }
 
-  function randomize(doc, keys = AXES.map(a => a.key), rng = randomIndex) {
+  function randomize(doc, keys = [...AXES.map(a => a.key), 'archetypes'], rng = randomIndex) {
     const next = clone(doc), changes = {}, skipped = [];
-    for (const key of new Set(keys)) {
-      if (!AXES.some(axis => axis.key === key)) throw new Error(`Unknown trait: ${key}`);
-      if (next.forge.locks[key]) continue;
-      const before = next.character.kernel.traits[key];
-      const pool = availableBank(next, key);
-      const alternatives = pool.filter(item => normalize(item.text) !== normalize(before.text));
+    const targets = keys.flatMap(key => key === 'archetypes' ? next.character.kernel.archetypes.map(item => `archetype:${item.id}`) : [key]);
+    for (const key of new Set(targets)) {
+      const isArchetype = key.startsWith('archetype:');
+      const item = isArchetype ? next.character.kernel.archetypes.find(item => item.id === key.slice(10)) : null;
+      if (isArchetype ? !item : !AXES.some(axis => axis.key === key)) throw new Error(`Unknown trait: ${key}`);
+      if (isArchetype ? next.forge.archetypeLocks[item.id] : next.forge.locks[key]) continue;
+      const before = isArchetype ? item : next.character.kernel.traits[key];
+      const pool = availableBank(next, isArchetype ? 'archetype' : key);
+      const otherRoles = new Set(isArchetype ? next.character.kernel.archetypes.filter(other => other.id !== item.id).map(other => normalize(other.text)) : []);
+      const alternatives = pool.filter(option => normalize(option.text) !== normalize(before.text) && !otherRoles.has(normalize(option.text)));
       // One remaining descriptor already on screen is a no-op, not a new suggestion.
       if (!alternatives.length) { skipped.push(key); continue; }
       const index = rng(alternatives.length);
       if (!Number.isInteger(index) || index < 0 || index >= alternatives.length) throw new Error('Random source returned an invalid index.');
       const selected = alternatives[index];
-      const after = entry(selected.text, 'bank', 'suggested', selected.id);
+      const after = { ...(isArchetype ? { id: item.id } : {}), ...entry(selected.text, 'bank', 'suggested', selected.id) };
       changes[key] = { before: clone(before), after: clone(after) };
-      next.character.kernel.traits[key] = after;
+      if (isArchetype) next.character.kernel.archetypes[next.character.kernel.archetypes.indexOf(item)] = after;
+      else next.character.kernel.traits[key] = after;
     }
     return { document: next, changes, skipped };
   }
@@ -202,11 +254,39 @@
   function undoRoll(doc, changes) {
     const next = clone(doc), restored = [], preserved = [];
     for (const [key, change] of Object.entries(changes)) {
-      if (same(next.character.kernel.traits[key], change.after)) {
-        next.character.kernel.traits[key] = clone(change.before); restored.push(key);
+      const isArchetype = key.startsWith('archetype:');
+      const index = isArchetype ? next.character.kernel.archetypes.findIndex(item => item.id === key.slice(10)) : -1;
+      const current = isArchetype ? next.character.kernel.archetypes[index] : next.character.kernel.traits[key];
+      if (current && same(current, change.after)) {
+        if (isArchetype) next.character.kernel.archetypes[index] = clone(change.before);
+        else next.character.kernel.traits[key] = clone(change.before);
+        restored.push(key);
       } else preserved.push(key); // An edit or approval made after the roll wins.
     }
     return { document: next, restored, preserved };
+  }
+
+  function addArchetype(doc, text = '') {
+    const next = clone(doc), item = archetype(text);
+    next.character.kernel.archetypes.push(item); next.forge.archetypeLocks[item.id] = false;
+    return next;
+  }
+
+  function removeArchetype(doc, itemId) {
+    const next = clone(doc);
+    next.character.kernel.archetypes = next.character.kernel.archetypes.filter(item => item.id !== itemId);
+    delete next.forge.archetypeLocks[itemId];
+    return next;
+  }
+
+  function selectArchetype(doc, bankId) {
+    const next = clone(doc), selected = availableBank(next, 'archetype').find(item => item.id === bankId);
+    if (!selected) throw new Error('That archetype is unavailable.');
+    if (next.character.kernel.archetypes.some(item => normalize(item.text) === normalize(selected.text))) return next;
+    let target = next.character.kernel.archetypes.find(item => !item.text.trim() && !next.forge.archetypeLocks[item.id]);
+    if (!target) { target = archetype(); next.character.kernel.archetypes.push(target); next.forge.archetypeLocks[target.id] = false; }
+    Object.assign(target, entry(selected.text, 'bank', 'suggested', selected.id));
+    return next;
   }
 
   function banish(doc, key, text) {
@@ -222,17 +302,36 @@
     return next;
   }
 
-  function replaceBank(doc, key, lines) {
+  function replaceBank(doc, key, lines, { includeStarters = false } = {}) {
     const next = clone(doc), seen = new Set(), bank = [];
+    const starters = includeStarters ? starterBank(key) : [];
+    const oldIds = new Set(next.forge.banks[key].map(item => item.id));
     for (const raw of lines.split(/\r?\n/)) {
       const text = raw.trim(), norm = normalize(text);
       if (!norm || seen.has(norm)) continue;
       seen.add(norm);
       const existing = next.forge.banks[key].find(item => normalize(item.text) === norm);
-      bank.push(existing ? { ...existing, text } : { id: `custom:${id()}`, text, origin: 'user' });
+      const starter = existing ? null : starters.find(item => normalize(item.text) === norm);
+      const candidate = existing ? { ...existing, text } : starter ? { ...starter, text } : { id: `custom:${id()}`, text, origin: 'user' };
+      if (starter) while (oldIds.has(candidate.id) || bank.some(item => item.id === candidate.id)) candidate.id += ':added';
+      bank.push(candidate);
     }
     next.forge.banks[key] = bank;
     return next; // Removing a bank entry never deletes selected character text.
+  }
+
+  function addMissingStarters(doc) {
+    const next = clone(doc); let added = 0;
+    for (const { key } of BANKS) {
+      const present = new Set(next.forge.banks[key].map(item => normalize(item.text)));
+      const ids = new Set(next.forge.banks[key].map(item => item.id));
+      for (const item of starterBank(key)) {
+        if (present.has(normalize(item.text))) continue;
+        const candidate = { ...item }; while (ids.has(candidate.id)) candidate.id += ':added';
+        next.forge.banks[key].push(candidate); present.add(normalize(candidate.text)); ids.add(candidate.id); added++;
+      }
+    }
+    return { document: next, added };
   }
 
   const moduleFields = {
@@ -254,6 +353,14 @@
     const name = c.kernel.name.text.trim() ? c.kernel.name.text : 'Untitled persona';
     const kernel = ['## Identity Kernel', ''];
     for (const [key, label] of [['name', 'Name'], ['pronouns', 'Pronouns'], ['premise', 'Premise']]) kernel.push(...linesFor(label, c.kernel[key]));
+    const roles = c.kernel.archetypes.filter(include);
+    if (roles.length) {
+      kernel.push('### Archetypes', '');
+      roles.forEach((item, index) => {
+        const lines = linesFor(`Archetype ${index + 1}`, item); lines[0] = `#### Archetype ${index + 1}`;
+        kernel.push(...lines);
+      });
+    }
     const ordered = [...AXES.map(a => [a.key, a.label]), ...Object.keys(c.kernel.traits)
       .filter(key => !AXES.some(a => a.key === key)).sort().map(key => [key, key])];
     for (const [key, label] of ordered) kernel.push(...linesFor(label, c.kernel.traits[key]));
@@ -309,8 +416,8 @@
   }
 
   globalThis.PersonaForge = Object.freeze({
-    FORMAT, VERSION, AXES, APPROVALS, ORIGINS, entry, clone, createDocument, validateDocument,
+    FORMAT, VERSION, AXES, BANKS, APPROVALS, ORIGINS, entry, clone, createDocument, validateDocument, starterBank,
     importDocument, exportDocument, stableStringify, availableBank, randomize, undoRoll,
-    banish, restoreBanished, replaceBank, enableModule, codify, createStore
+    banish, restoreBanished, replaceBank, addMissingStarters, enableModule, codify, createStore, addArchetype, removeArchetype, selectArchetype
   });
 })();

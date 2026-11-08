@@ -4,7 +4,7 @@
   const F = globalThis.PersonaForge;
   const $ = selector => document.querySelector(selector);
   const escape = value => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
-  let doc = F.createDocument(), store, undo = [], bankKey = null, toastTimer, saveTimer;
+  let doc = F.createDocument(), store, undo = [], bankKey = null, bankStarterRequested = false, toastTimer, saveTimer;
   try { store = F.createStore(window.localStorage); const saved = store.read(); if (saved) doc = saved; }
   catch (error) { storageFailure(error); }
 
@@ -54,18 +54,40 @@
   }
   const pinIcon = '<svg width="13" height="15" viewBox="0 0 16 18" fill="none" aria-hidden="true"><path d="m5 2 7 3-2 3 1 4-4-1-3 5 1-6-3-2 4-2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
 
+  function renderArchetypes() {
+    const items = doc.character.kernel.archetypes;
+    $('#archetype-stack').innerHTML = items.length ? items.map((item, index) => {
+      const pinned = doc.forge.archetypeLocks[item.id], key = escape(item.id);
+      return `<article class="archetype-card ${pinned ? 'pinned' : ''}" id="archetype-${key}"><div class="archetype-main">${field(`kernel.archetypes.${index}`, `Archetype ${index + 1}`, {input:true,placeholder:'Choose a fictional role, or invent one…'})}</div><div class="archetype-tools"><button class="icon-button" data-action="role-pin" data-key="${key}" aria-label="${pinned ? 'Unpin' : 'Pin'} archetype ${index + 1}" aria-pressed="${pinned}" title="${pinned ? 'Unpin' : 'Pin'} this archetype">${pinIcon}</button><button class="icon-button" data-action="role-reroll" data-key="${key}" aria-label="Reroll archetype ${index + 1}" title="Reroll this archetype" ${pinned ? 'disabled' : ''}>⚄</button><button class="icon-button" data-action="role-banish" data-key="${key}" aria-label="Banish archetype ${index + 1}" title="Banish this archetype from future rolls" ${item.text.trim() ? '' : 'disabled'}>⊘</button><button class="icon-button" data-action="role-remove" data-key="${key}" aria-label="Remove archetype ${index + 1}" title="Remove this archetype">✕</button></div></article>`;
+    }).join('') : '<p class="empty-note">No archetypes selected. Add as many as the character needs, or leave the field empty.</p>';
+  }
+
+  function renderArchetypeBrowser() {
+    const query = $('#archetype-search').value.trim().toLowerCase(), group = $('#archetype-group').value;
+    const selected = new Set(doc.character.kernel.archetypes.map(item => item.text.trim().toLowerCase()));
+    const available = F.availableBank(doc, 'archetype');
+    const matches = available.filter(item => (!group || (item.group || 'Custom') === group) && (!query || `${item.text} ${item.group || 'Custom'}`.toLowerCase().includes(query))).sort((a,b) => a.text.localeCompare(b.text));
+    $('#archetype-result-count').textContent = `${matches.length} ${matches.length === 1 ? 'archetype' : 'archetypes'} · mix across every family`;
+    $('#archetype-selected-count').textContent = `${doc.character.kernel.archetypes.filter(item => item.text.trim()).length} selected`;
+    $('#archetype-results').innerHTML = matches.length ? matches.map(item => `<button class="archetype-choice" data-action="choose-archetype" data-key="${escape(item.id)}" ${selected.has(item.text.trim().toLowerCase()) ? 'disabled' : ''}><strong>${escape(item.text)}</strong><small>${escape(item.group || 'Custom')}</small><span>${selected.has(item.text.trim().toLowerCase()) ? '✓ Added' : '+ Add'}</span></button>`).join('') : '<p class="empty-note">No matches. Try another search or family, edit the bank, or restore a banished signal.</p>';
+  }
+
   function renderTraits() {
     $('#trait-board').innerHTML = F.AXES.map(({ key, label, hint }, i) => {
       const value = doc.character.kernel.traits[key], pinned = doc.forge.locks[key];
       return `<article class="trait-card ${pinned ? 'pinned' : ''}" id="trait-${key}"><div class="trait-top"><label for="trait-input-${key}"><span class="trait-number">${String(i + 1).padStart(2, '0')}</span>${label}</label><button class="icon-button" data-action="pin" data-key="${key}" aria-label="${pinned ? 'Unpin' : 'Pin'} ${label}" aria-pressed="${pinned}" title="${pinned ? 'Unpin' : 'Pin'} this trait, including a blank">${pinIcon}</button></div><p class="trait-hint">${hint}</p><textarea class="trait-input" id="trait-input-${key}" rows="2" data-field="kernel.traits.${key}" placeholder="Roll a signal, or write your own…">${escape(value.text)}</textarea><div class="trait-bottom">${meta(`kernel.traits.${key}`, label)}<div class="trait-actions"><button class="icon-button bank-picker" data-action="bank" data-key="${key}" aria-label="Edit ${label} bank" title="Edit descriptor bank">≡</button><button class="icon-button" data-action="banish" data-key="${key}" aria-label="Banish ${label} value" title="Banish this value from future rolls" ${value.text.trim() ? '' : 'disabled'}>⊘</button><button class="icon-button" data-action="reroll" data-key="${key}" aria-label="Reroll ${label}" title="Reroll this trait" ${pinned || !F.availableBank(doc, key).length ? 'disabled' : ''}>⚄</button></div></div></article>`;
     }).join('');
-    renderCounts();
+    renderArchetypes(); renderCounts();
   }
   function renderCounts() {
-    $('#pinned-count').textContent = `${F.AXES.filter(({ key }) => doc.forge.locks[key]).length} / ${F.AXES.length} pinned`;
-    const total = F.AXES.reduce((n, { key }) => n + doc.forge.banks[key].length, 0);
-    $('#bank-summary').textContent = `${total} signals · ${F.AXES.length} editable banks`;
-    $('#banished-count').textContent = F.AXES.reduce((n, { key }) => n + doc.forge.banished[key].length, 0);
+    const roles = doc.character.kernel.archetypes;
+    $('#pinned-count').textContent = `${F.AXES.filter(({ key }) => doc.forge.locks[key]).length + roles.filter(item => doc.forge.archetypeLocks[item.id]).length} / ${F.AXES.length + roles.length} pinned`;
+    const total = F.BANKS.reduce((n, { key }) => n + doc.forge.banks[key].length, 0);
+    $('#bank-summary').textContent = `${total} signals · ${F.BANKS.length} editable banks`;
+    const missing = F.BANKS.reduce((count, {key}) => { const current = new Set(doc.forge.banks[key].map(item => item.text.trim().toLowerCase())); return count + F.starterBank(key).filter(item => !current.has(item.text.trim().toLowerCase())).length; }, 0);
+    $('#expand-starter-banks').hidden = !missing;
+    $('#expand-starter-banks').textContent = `Add latest starter signals (+${missing})`;
+    $('#banished-count').textContent = F.BANKS.reduce((n, { key }) => n + doc.forge.banished[key].length, 0);
     $('#undo').disabled = undo.length === 0;
     try { $('#vault-count').textContent = store?.list().length || 0; } catch (error) { storageFailure(error); }
   }
@@ -104,11 +126,17 @@
   }
   function renderPreview() {
     const c = doc.character, k = c.kernel, selected = F.AXES.filter(({ key }) => k.traits[key].text.trim());
+    const roles = k.archetypes.filter(item => item.text.trim());
     $('#preview-name').textContent = k.name.text.trim() ? k.name.text : 'Someone unexpected.';
     $('#preview-pronouns').textContent = k.pronouns.text;
     $('#preview-premise').textContent = k.premise.text.trim() ? k.premise.text : selected.length ? 'A sketch in progress. Keep the signals that make you curious.' : 'A few signals can be a beginning. Forge a sketch, then make it yours.';
-    $('#preview-stage').textContent = selected.length || k.name.text ? 'A CHARACTER TAKING SHAPE' : 'UNWRITTEN POSSIBILITY';
-    $('#preview-count').textContent = String(selected.length).padStart(2, '0');
+    $('#preview-stage').textContent = selected.length || roles.length || k.name.text ? 'A CHARACTER TAKING SHAPE' : 'UNWRITTEN POSSIBILITY';
+    $('#preview-count').textContent = String(selected.length + roles.length).padStart(2, '0');
+    const archetypes = $('#preview-archetypes'); archetypes.replaceChildren();
+    for (const item of roles) {
+      const tag = document.createElement('span'); tag.className = `archetype-tag ${item.approval}`;
+      tag.textContent = item.text; tag.title = `Archetype · ${item.approval} · ${originLabel(item)}`; archetypes.append(tag);
+    }
     const list = $('#preview-traits'); list.replaceChildren();
     if (!selected.length) { const p = document.createElement('p'); p.className = 'preview-empty'; p.textContent = 'Your selected personality signals will appear here.'; list.append(p); }
     for (const { key, label } of selected) {
@@ -143,7 +171,10 @@
     const result = F.randomize(doc, keys); const changedKeys = Object.keys(result.changes);
     if (!changedKeys.length) { status('Nothing to roll. Unpin a trait or add an available descriptor.'); return; }
     doc = result.document; undo.push(result.changes); undo = undo.slice(-30); renderTraits(); changed();
-    changedKeys.forEach(key => $(`#trait-${key}`).classList.add('roll-flash'));
+    changedKeys.forEach(key => {
+      const selector = key.startsWith('archetype:') ? `#${CSS.escape(`archetype-${key.slice(10)}`)}` : `#trait-${key}`;
+      $(selector)?.classList.add('roll-flash');
+    });
     status(`${changedKeys.length} ${changedKeys.length === 1 ? 'new signal' : 'new signals'} · suggestions until you approve them${result.skipped.length ? ` · ${result.skipped.length} unchanged (no alternative)` : ''}.`);
   }
   function openDialog(selector) { const dialog = $(selector); if (!dialog.open) dialog.showModal(); }
@@ -156,7 +187,7 @@
     for (const key of keys) for (const text of doc.forge.banished[key]) {
       count++;
       const item = document.createElement('div'); item.className = 'ban-item';
-      const label = document.createElement('span'); const axis = document.createElement('small'); axis.textContent = F.AXES.find(a => a.key === key).label;
+      const label = document.createElement('span'); const axis = document.createElement('small'); axis.textContent = F.BANKS.find(a => a.key === key).label;
       const value = document.createElement('span'); value.textContent = text; label.append(axis, value);
       const restore = document.createElement('button'); restore.className = 'text-button'; restore.textContent = 'Restore'; restore.setAttribute('aria-label', `Restore ${text}`);
       restore.addEventListener('click', () => {
@@ -178,6 +209,9 @@
     if (path.startsWith('kernel.traits.')) {
       const key = path.split('.').at(-1); $(`[data-action="banish"][data-key="${key}"]`).disabled = !event.target.value.trim();
     }
+    if (path.startsWith('kernel.archetypes.')) {
+      const item = pathValue(path); $(`[data-action="role-banish"][data-key="${CSS.escape(item.id)}"]`).disabled = !item.text.trim();
+    }
     changed();
   });
   document.addEventListener('change', event => {
@@ -191,7 +225,7 @@
     if (action === 'pin') { doc.forge.locks[key] = !doc.forge.locks[key]; renderTraits(); changed(); $(`[data-action="pin"][data-key="${key}"]`).focus(); }
     if (action === 'reroll') { roll([key]); $(`[data-action="reroll"][data-key="${key}"]`).focus(); }
     if (action === 'bank') {
-      bankKey = key; $('#bank-title').textContent = F.AXES.find(a => a.key === key).label;
+      bankKey = key; bankStarterRequested = false; $('#bank-title').textContent = F.BANKS.find(a => a.key === key).label;
       $('#bank-text').value = doc.forge.banks[key].map(item => item.text).join('\n');
       renderBans($('#bank-bans'), [key]); openDialog('#bank-dialog');
     }
@@ -200,6 +234,21 @@
       if (!doc.forge.locks[key]) roll([key]); else { renderTraits(); changed(); }
       renderCounts(); changed(); status(doc.forge.locks[key] ? 'Banished from future rolls. The pinned value is kept.' : 'Banished from future rolls. Restore it in Banished signals.');
       $(`[data-action="banish"][data-key="${key}"]`).focus();
+    }
+    if (action === 'choose-archetype') {
+      doc = F.selectArchetype(doc, key); renderArchetypes(); renderCounts(); renderArchetypeBrowser(); changed(); $('#archetype-search').focus(); status('Archetype added. Keep browsing to combine more roles.');
+    }
+    if (action === 'role-pin') {
+      doc.forge.archetypeLocks[key] = !doc.forge.archetypeLocks[key]; renderArchetypes(); renderCounts(); changed();
+      $(`[data-action="role-pin"][data-key="${CSS.escape(key)}"]`).focus();
+    }
+    if (action === 'role-reroll') { roll([`archetype:${key}`]); $(`[data-action="role-reroll"][data-key="${CSS.escape(key)}"]`).focus(); }
+    if (action === 'role-remove') { doc = F.removeArchetype(doc, key); renderArchetypes(); renderCounts(); changed(); status('Archetype removed. Other character data is kept.'); $('#add-archetype').focus(); }
+    if (action === 'role-banish') {
+      const item = doc.character.kernel.archetypes.find(item => item.id === key);
+      doc = F.banish(doc, 'archetype', item.text);
+      if (!doc.forge.archetypeLocks[key]) roll([`archetype:${key}`]);
+      renderArchetypes(); renderCounts(); changed(); status(doc.forge.archetypeLocks[key] ? 'Archetype banished from future rolls. The pinned value is kept.' : 'Archetype banished from future rolls.');
     }
     if (action === 'add-module') { doc = F.enableModule(doc, key, true); renderOptional(key); changed(); }
     if (action === 'remove-module') {
@@ -213,11 +262,30 @@
     const result = F.undoRoll(doc, changes); doc = result.document; renderTraits(); changed();
     status(`Restored ${result.restored.length} ${result.restored.length === 1 ? 'trait' : 'traits'}${result.preserved.length ? `; kept ${result.preserved.length} later edits or approvals` : ''}.`);
   });
-  $('#unlock-all').addEventListener('click', () => { F.AXES.forEach(({ key }) => { doc.forge.locks[key] = false; }); renderTraits(); changed(); status('All personality traits unpinned.'); });
-  $('#save-bank').addEventListener('click', () => {
-    doc = F.replaceBank(doc, bankKey, $('#bank-text').value); renderTraits(); changed(); $('#bank-dialog').close(); status('Descriptor bank saved. Your selected character text is kept.');
+  $('#unlock-all').addEventListener('click', () => { F.AXES.forEach(({ key }) => { doc.forge.locks[key] = false; }); Object.keys(doc.forge.archetypeLocks).forEach(key => { doc.forge.archetypeLocks[key] = false; }); renderTraits(); changed(); status('All personality signals and archetypes unpinned.'); });
+  $('#add-archetype').addEventListener('click', () => { doc = F.addArchetype(doc); renderArchetypes(); renderCounts(); changed(); $(`[data-field="kernel.archetypes.${doc.character.kernel.archetypes.length - 1}"]`).focus(); });
+  $('#roll-archetypes').addEventListener('click', () => {
+    if (!doc.character.kernel.archetypes.length) { doc = F.addArchetype(F.addArchetype(doc)); renderArchetypes(); renderCounts(); changed(); }
+    roll(['archetypes']);
   });
-  $('#open-banished').addEventListener('click', () => { renderBans($('#banished-list'), F.AXES.map(a => a.key)); openDialog('#banished-dialog'); });
+  $('#browse-archetypes').addEventListener('click', () => {
+    const groups = [...new Set(doc.forge.banks.archetype.map(item => item.group || 'Custom'))];
+    $('#archetype-group').innerHTML = '<option value="">All families</option>' + groups.map(group => `<option value="${escape(group)}">${escape(group)}</option>`).join('');
+    renderArchetypeBrowser(); openDialog('#archetype-dialog'); $('#archetype-search').focus();
+  });
+  $('#archetype-search').addEventListener('input', renderArchetypeBrowser);
+  $('#archetype-group').addEventListener('change', renderArchetypeBrowser);
+  $('#add-starter-signals').addEventListener('click', () => {
+    const lines = $('#bank-text').value.split(/\r?\n/), present = new Set(lines.map(text => text.trim().toLowerCase()));
+    const added = F.starterBank(bankKey).filter(item => !present.has(item.text.trim().toLowerCase()));
+    $('#bank-text').value = [...lines.filter(text => text.trim()), ...added.map(item => item.text)].join('\n');
+    bankStarterRequested = true; status(`${added.length} starter signals added to the list. Save the bank to apply them.`);
+  });
+  $('#expand-starter-banks').addEventListener('click', () => { const result = F.addMissingStarters(doc); doc = result.document; renderTraits(); changed(); status(`${result.added} starter signals added. Custom signals, banishments, and selected character text are kept.`); });
+  $('#save-bank').addEventListener('click', () => {
+    doc = F.replaceBank(doc, bankKey, $('#bank-text').value, {includeStarters:bankStarterRequested}); renderTraits(); changed(); $('#bank-dialog').close(); status('Descriptor bank saved. Your selected character text is kept.');
+  });
+  $('#open-banished').addEventListener('click', () => { renderBans($('#banished-list'), F.BANKS.map(a => a.key)); openDialog('#banished-dialog'); });
 
   const tabs = [...document.querySelectorAll('[data-tab]')];
   function selectTab(button, focus = false) {

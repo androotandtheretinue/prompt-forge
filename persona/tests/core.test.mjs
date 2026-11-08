@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../src/banks.js';
+import '../src/archetypes.js';
 import '../src/core.js';
 const F = globalThis.PersonaForge;
 const rolled = () => F.randomize(F.createDocument(), undefined, () => 0).document;

@@ -4,7 +4,7 @@ The prototype is usable without settling these choices.
 
 | Deferred feature | Decision for Root |
 | --- | --- |
-| Richer starter banks and user-defined axes | Which personality dimensions deserve a permanent place, and which should be optional packs? The ten initial axes are a provisional vocabulary. |
+| Richer starter banks and user-defined axes | Which personality dimensions deserve a permanent place, and which should be optional packs? The ten personality axes and nine archetype browsing families remain a provisional vocabulary. Stacking archetypes and the broader fiction bank are now implemented. |
 | AI Refine | Prefer local models, a user-supplied service, or a copy/paste workflow? All must produce reviewable proposals rather than silently changing canon. |
 | Platform adapters | Which target comes first: plain system prompts, character-card formats, or a particular companion platform? Canonical JSON remains the source of truth. |
 | More detailed Essence / Companion exports | How compact should deployment prompts be? Keep the current separate modules and explicit approval filtering. |
