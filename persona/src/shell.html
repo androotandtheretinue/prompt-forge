@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="description" content="A local-first character creator. Roll possibilities, pin discoveries, and carry your character with you.">
+  <meta name="theme-color" content="#17191c">
+  <title>Persona Prompt Forge</title>
+  <style>/* __STYLES__ */</style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to character editor</a>
+  <header class="masthead">
+    <a class="brand" href="#" aria-label="Persona Prompt Forge home"><span class="brand-mark" aria-hidden="true">◈</span><span>FORGE <b>SUITE</b><small>INSTRUMENTS FOR POSSIBILITY</small></span></a>
+    <div class="header-right"><span class="local-pill"><span></span> LOCAL FIRST</span><span class="version">PERSONA / 0.2</span></div>
+  </header>
+  <main id="main">
+    <section class="intro" aria-labelledby="page-title">
+      <div><div class="eyebrow"><span class="mini-line"></span> THE CHARACTER WORKBENCH</div><h1 id="page-title">Persona Prompt <em>Forge.</em></h1><p>Roll possibilities. Pin what feels alive. Make someone unexpected.</p></div>
+      <div class="intro-note"><span aria-hidden="true">✳</span><p>A character is yours to curate.<br>Contradictions welcome.</p></div>
+    </section>
+
+    <div class="workbar">
+      <div class="workbar-primary"><button id="roll-all" class="button primary"><span aria-hidden="true">⚄</span> Forge persona <kbd>Alt R</kbd></button><button id="undo" class="button subtle" disabled><span aria-hidden="true">↶</span> Undo roll</button><span id="pinned-count" class="quiet-count">0 / 10 pinned</span></div>
+      <div class="workbar-secondary"><button id="open-vault" class="button subtle">Saved sketches <span id="vault-count" class="count">0</span></button><button id="open-transfer" class="button export">Codify / export <span aria-hidden="true">↗</span></button></div>
+    </div>
+
+    <div class="workspace">
+      <section class="editor" aria-label="Character editor">
+        <nav class="module-tabs" aria-label="Character modules" role="tablist">
+          <button id="tab-kernel" data-tab="kernel" role="tab" aria-selected="true" aria-controls="panel-kernel" class="active"><span>01</span> Identity</button>
+          <button id="tab-essence" data-tab="essence" role="tab" aria-selected="false" aria-controls="panel-essence" tabindex="-1"><span>02</span> Essence</button>
+          <button id="tab-companion" data-tab="companion" role="tab" aria-selected="false" aria-controls="panel-companion" tabindex="-1"><span>03</span> Relationship</button>
+          <button id="tab-appearance" data-tab="appearance" role="tab" aria-selected="false" aria-controls="panel-appearance" tabindex="-1"><span>04</span> Appearance</button>
+          <button id="tab-continuity" data-tab="continuity" role="tab" aria-selected="false" aria-controls="panel-continuity" tabindex="-1"><span>05</span> Continuity</button>
+        </nav>
+
+        <div id="panel-kernel" role="tabpanel" aria-labelledby="tab-kernel">
+          <div class="identity-block">
+            <div class="section-heading"><div><span class="overline">THE IDENTITY KERNEL</span><h2>A few things to begin.</h2></div><span class="module-badge">CORE</span></div>
+            <div class="identity-grid"><div id="name-field"></div><div id="pronouns-field"></div></div>
+            <div id="premise-field"></div>
+          </div>
+          <section class="archetype-section" aria-labelledby="archetype-heading">
+            <div class="section-heading"><div><span class="overline">FICTIONAL ARCHETYPES</span><h2 id="archetype-heading">One role is only a beginning.</h2></div><button id="browse-archetypes" class="text-button">Browse archetypes ↗</button></div>
+            <p class="board-help">Stack roles from across fiction, or invent your own. Personality stays independent.</p>
+            <div id="archetype-stack" class="archetype-stack"></div>
+            <div class="archetype-stack-actions"><button id="add-archetype" class="button subtle">+ Add archetype</button><button id="roll-archetypes" class="button export">⚄ Roll archetypes</button><button class="text-button" data-action="bank" data-key="archetype">Edit archetype bank</button></div>
+          </section>
+          <div class="section-heading board-heading"><div><span class="overline">PERSONALITY SIGNALS</span><h2>Follow the interesting combination.</h2></div><button id="unlock-all" class="text-button">Unpin all</button></div>
+          <p class="board-help">Pins protect traits from rolls. Edit any value directly. Approve a discovery when you choose.</p>
+          <div id="trait-board" class="trait-board"></div>
+          <div class="board-bottom"><span id="bank-summary"></span><button id="expand-starter-banks" class="text-button" hidden>Add latest starter signals</button><button id="open-banished" class="text-button">Banished signals <span id="banished-count">0</span></button></div>
+          <details class="rights-block"><summary>Character rights <span>unspecified by default</span></summary><label>License or rights statement<input id="rights-license" type="text" placeholder="unspecified"></label><label>Attribution<textarea id="rights-attribution" rows="2" placeholder="Optional creator credit or rights notes"></textarea></label><p>The app’s CC0 dedication does not license your character.</p></details>
+        </div>
+
+        <div id="panel-essence" role="tabpanel" aria-labelledby="tab-essence" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL ENRICHMENT</span><h2>Give the pattern some depth.</h2></div><span class="module-badge">SIDECAR</span></div>
+          <p>Backstory, voice notes, and examples enrich the identity. Write only what this character needs.</p><div id="essence-content"></div>
+        </div>
+        <div id="panel-companion" role="tabpanel" aria-labelledby="tab-companion" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL COMPANION SIDECAR</span><h2>Choose the relationship.</h2></div><span class="module-badge">NEVER ROLLED</span></div>
+          <p>Everything starts unspecified. Romance and erotic interaction are independent choices; roles can overlap.</p>
+          <label class="switch-row"><input id="relationship-enabled" type="checkbox"><span>Include a relationship configuration</span></label>
+          <div id="companion-content" hidden>
+            <fieldset class="roles"><legend>Roles <span>Choose any that fit</span></legend>
+              <label><input type="checkbox" name="role" value="friendship"> Friendship</label><label><input type="checkbox" name="role" value="platonic companionship"> Platonic companion</label><label><input type="checkbox" name="role" value="mentorship"> Mentorship</label><label><input type="checkbox" name="role" value="collaboration"> Collaboration</label><label><input type="checkbox" name="role" value="pet / familiar"> Pet / familiar</label><label><input type="checkbox" name="role" value="nonhuman companion"> Nonhuman companion</label>
+            </fieldset>
+            <div class="form-grid">
+              <label>Romance<select id="relationship-romance" aria-label="Romance"><option value="unspecified">Unspecified</option><option value="none">No romance</option><option value="nonsexual">Nonsexual romance</option><option value="romantic">Romance</option></select></label>
+              <label>Erotic interaction<select id="relationship-erotic" aria-label="Erotic interaction"><option value="unspecified">Unspecified</option><option value="excluded">Excluded</option><option value="permitted">Permitted</option></select></label>
+            </div>
+            <label class="policy-label">Canonical relationship changes<select id="relationship-changePolicy" aria-label="Canonical relationship changes"><option value="unspecified">Unspecified</option><option value="fixed">Fixed configuration</option><option value="evolving">May evolve</option><option value="confirm">Require explicit confirmation</option></select></label>
+            <p class="help">This records an expectation for a downstream system. This editor never changes it automatically.</p>
+            <div id="relationship-fields"></div>
+            <div class="config-approval"><span id="configuration-origin"></span><label>Configuration status<select id="relationship-approval"><option value="draft">Draft</option><option value="suggested">Suggested</option><option value="approved">Approved</option></select></label></div>
+          </div>
+        </div>
+        <div id="panel-appearance" role="tabpanel" aria-labelledby="tab-appearance" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL APPEARANCE</span><h2>A form of their own.</h2></div><span class="module-badge">SIDECAR</span></div><p>Human, nonhuman, abstract, or unspecified. Appearance stays separate from identity.</p><div id="appearance-content"></div>
+        </div>
+        <div id="panel-continuity" role="tabpanel" aria-labelledby="tab-continuity" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL CONTINUITY</span><h2>Leave a thread to return to.</h2></div><span class="module-badge">NOTES</span></div><p>Record context, sources, or open threads. These notes travel with the character; they do not create automatic memory.</p><div id="continuity-content"></div>
+        </div>
+      </section>
+
+      <aside class="preview-column" aria-label="Live character preview">
+        <div class="preview-card"><div class="preview-top"><span class="overline">CHARACTER IN VIEW</span><span class="live-indicator"><i></i> LIVE</span></div>
+          <div class="persona-glyph" aria-hidden="true"><div class="glyph-ring"></div><span>✧</span><i></i></div>
+          <div class="preview-identity"><span class="overline" id="preview-stage">UNWRITTEN POSSIBILITY</span><h2 id="preview-name">Someone unexpected.</h2><p id="preview-pronouns"></p><p id="preview-premise">A few signals can be a beginning. Forge a sketch, then make it yours.</p></div>
+          <div id="preview-archetypes" class="preview-archetypes"></div>
+          <div class="preview-divider"><span>THE SELECTED SIGNALS</span><span id="preview-count">00</span></div>
+          <div id="preview-traits" class="preview-traits"></div>
+          <div id="preview-modules" class="preview-modules"></div>
+          <div class="preview-foot"><span id="approved-count">0 approved entries</span><span>Schema 1.1.0</span></div>
+        </div>
+        <div class="device-note"><span aria-hidden="true">⌁</span><div><strong id="storage-status">Saved on this device</strong><p>No account. No uploads. Your character stays in this browser until you export it.</p></div></div>
+      </aside>
+    </div>
+    <footer><span>ROOT &amp; THE RETINUE <span class="footer-dot">/</span> FORGE SUITE</span><span>Original app &amp; starter banks: CC0 <span class="footer-dot">·</span> Your character rights remain yours</span><button id="new-character" class="text-button">New blank character</button></footer>
+  </main>
+  <div id="status" role="status" aria-live="polite" class="toast" hidden></div>
+
+  <dialog id="bank-dialog" aria-labelledby="bank-title">
+    <div class="dialog-heading"><div><span class="overline">DESCRIPTOR BANK</span><h2 id="bank-title">Edit signals</h2></div><button class="icon-button close-dialog" aria-label="Close bank editor">✕</button></div>
+    <p>One descriptor per line. Add, edit, or remove freely. Selected character text is kept even if its bank entry is removed.</p>
+    <label>Descriptors<textarea id="bank-text" rows="12" spellcheck="true"></textarea></label>
+    <button id="add-starter-signals" class="text-button">Add missing starter signals to this list</button>
+    <div id="bank-bans" class="bank-bans"></div>
+    <div class="dialog-actions"><button class="button subtle close-dialog">Cancel</button><button id="save-bank" class="button primary">Save bank</button></div>
+  </dialog>
+
+  <dialog id="archetype-dialog" class="wide-dialog" aria-labelledby="archetype-browser-title">
+    <div class="dialog-heading"><div><span class="overline">A CAST OF POSSIBILITIES</span><h2 id="archetype-browser-title">Find another side of them.</h2></div><button class="icon-button close-dialog" aria-label="Close archetype browser">✕</button></div>
+    <p>Browse fictional roles across genres. Every choice can coexist with any other. Add one, then keep exploring.</p>
+    <div class="archetype-filters"><label>Search archetypes<input id="archetype-search" type="search" placeholder="Trickster, machine, tragic…"></label><label>Browse family<select id="archetype-group" aria-label="Browse archetype family"><option value="">All families</option></select></label></div>
+    <div class="archetype-browser-summary"><span id="archetype-result-count"></span><span id="archetype-selected-count"></span></div>
+    <div id="archetype-results" class="archetype-results"></div>
+  </dialog>
+
+  <dialog id="banished-dialog" aria-labelledby="banished-title"><div class="dialog-heading"><div><span class="overline">SET ASIDE, NOT LOST</span><h2 id="banished-title">Banished signals</h2></div><button class="icon-button close-dialog" aria-label="Close banished signals">✕</button></div><p>These values stay out of future rolls. Restore a signal whenever you like.</p><div id="banished-list"></div></dialog>
+
+  <dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-heading"><div><span class="overline">ON THIS DEVICE</span><h2 id="vault-title">Saved sketches</h2></div><button class="icon-button close-dialog" aria-label="Close saved sketches">✕</button></div><p>Save a named snapshot, including banks, pins, and banishments. Export JSON for a backup outside this browser.</p><div class="save-row"><label>Sketch name<input id="sketch-name" type="text" placeholder="A name for this version"></label><button id="save-sketch" class="button primary">Save snapshot</button></div><div id="vault-list"></div></dialog>
+
+  <dialog id="transfer-dialog" class="wide-dialog" aria-labelledby="transfer-title">
+    <div class="dialog-heading"><div><span class="overline">PORTABLE BY DESIGN</span><h2 id="transfer-title">Codify &amp; carry.</h2></div><button class="icon-button close-dialog" aria-label="Close import and export">✕</button></div>
+    <p>Codify organizes your selected words. It does not rewrite or approve them.</p>
+    <div class="transfer-buttons"><a id="download-json" role="button" class="button primary">Export canonical JSON <span aria-hidden="true">↓</span></a><a id="download-markdown" role="button" class="button export">Export Markdown <span aria-hidden="true">↓</span></a><a id="download-companion" role="button" class="button subtle">Companion sidecar ↓</a></div>
+    <div class="codify-controls"><label class="checkbox-label"><input id="approved-only" type="checkbox"> Approved entries only in Markdown</label><button id="copy-markdown" class="text-button">Copy Markdown</button></div>
+    <label>Readable character document<textarea id="codified-output" readonly rows="12" spellcheck="false"></textarea></label>
+    <details id="canonical-section"><summary>Inspect canonical JSON</summary><label for="canonical-output" class="sr-only">Canonical JSON document</label><textarea id="canonical-output" readonly rows="8" spellcheck="false"></textarea><button id="copy-json" class="text-button">Copy JSON</button></details>
+    <details id="import-section"><summary>Import a canonical JSON document</summary><p>A valid import replaces this workspace, preserving the document’s provenance and approvals. Save a snapshot to keep your current sketch. Invalid imports change nothing.</p><label class="file-label">Choose JSON file<input id="import-file" type="file" accept=".json,application/json"></label><label>Or paste JSON<textarea id="import-text" rows="5" spellcheck="false" placeholder="{ ... }"></textarea></label><div id="import-error" class="inline-error" role="alert" hidden></div><button id="import-json" class="button export">Import into workspace</button></details>
+  </dialog>
+  <dialog id="new-dialog" aria-labelledby="new-title"><div class="dialog-heading"><h2 id="new-title">Begin a new character?</h2><button class="icon-button close-dialog" aria-label="Close new character">✕</button></div><p>Your current draft will be saved as a local snapshot first. The new character starts with fresh starter banks and an unspecified relationship.</p><div class="dialog-actions"><button class="button subtle close-dialog">Keep editing</button><button id="confirm-new" class="button primary">Save &amp; begin</button></div></dialog>
+  <script>/* __BANKS__ */</script>
+  <script>/* __ARCHETYPES__ */</script>
+  <script>/* __CORE__ */</script>
+  <script>/* __APP__ */</script>
+</body>
+</html>
