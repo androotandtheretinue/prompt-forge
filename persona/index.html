@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="description" content="A local-first character creator. Roll possibilities, pin discoveries, and carry your character with you.">
+  <meta name="theme-color" content="#17191c">
+  <title>Persona Prompt Forge</title>
+  <style>:root{color-scheme:dark;--bg:#17191c;--panel:#1d2024;--field:#171a1e;--border:#34373e;--muted:#a0a4ac;--text:#e9e7e1;--accent:#c4b1ed;--lime:#c4d399;--dim:#727882;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.55}
+button,input,textarea,select{font:inherit}
+button,a,input,textarea,select{touch-action:manipulation}
+button{color:inherit;cursor:pointer}
+button:disabled{opacity:.35;cursor:default}
+a{color:inherit}
+input,textarea,select{color:var(--text);background:var(--field);border:1px solid var(--border);border-radius:6px;padding:11px 12px;width:100%;min-width:0}
+textarea{resize:vertical;line-height:1.6}
+input::placeholder,textarea::placeholder{color:#858b94}
+input:focus,textarea:focus,select:focus{outline:2px solid #bfa5e0;outline-offset:2px}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+button{border:0}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex-shrink:0}
+label{display:block;font-size:12px;color:#c3c4c8;font-weight:550}
+label>input,label>textarea,label>select{margin-top:7px}
+fieldset{border:0;padding:0;margin:24px 0}
+legend{font-size:13px;font-weight:600;margin-bottom:12px}
+legend span{font-weight:400;color:var(--muted);margin-left:8px}
+[hidden]{display:none!important}
+.skip-link{position:fixed;top:-100px;left:20px;background:var(--accent);color:#17191c;padding:12px;z-index:20}
+.skip-link:focus{top:12px}
+.masthead{max-width:1480px;margin:auto;height:76px;padding:0 50px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.brand{display:flex;gap:12px;align-items:center;text-decoration:none;font-family:var(--mono);font-size:16px;line-height:1.3;letter-spacing:2px}
+.brand b{font-weight:400;color:#9c9fa4}
+.brand small{font-size:8px;letter-spacing:1.4px;display:block;color:var(--muted);margin-top:5px}
+.brand-mark{font-size:40px;line-height:1;color:var(--accent)}
+.header-right{display:flex;gap:25px;align-items:center}
+.local-pill{font:10px var(--mono);letter-spacing:1px;border:1px solid #424a39;padding:7px 10px;border-radius:20px;color:var(--lime);display:flex;align-items:center;gap:7px}
+.local-pill>span{width:5px;height:5px;background:var(--lime);border-radius:50%}
+.version{font:10px var(--mono);color:var(--muted);letter-spacing:1px}
+main{max-width:1480px;padding:0 50px;margin:auto}
+.intro{padding:27px 0 23px;display:flex;justify-content:space-between;align-items:center}
+.eyebrow,.overline{font:9px var(--mono);letter-spacing:1.5px;color:var(--muted)}
+.eyebrow{display:flex;align-items:center;gap:9px;color:var(--accent)}
+.mini-line{width:19px;height:1px;background:var(--accent)}
+h1{font-size:clamp(28px,3.1vw,43px);font-weight:520;line-height:1.15;letter-spacing:-1.6px;margin:14px 0 12px}
+h1 em{font-style:normal;color:var(--accent)}
+.intro p{color:var(--muted);margin:0;font-size:13px}
+.intro-note{display:flex;gap:15px;align-items:center}
+.intro-note>span{font-size:41px;font-weight:100;color:#a09882}
+.intro-note p{font-size:11px;line-height:1.8}
+.workbar{display:flex;gap:14px;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:9px;background:#1d2024;padding:12px;margin-bottom:18px}
+.workbar-primary,.workbar-secondary{display:flex;gap:11px;align-items:center}
+.button{min-height:40px;display:inline-flex;gap:9px;align-items:center;justify-content:center;padding:9px 15px;border-radius:5px;font-size:12px;font-weight:600;line-height:1.4;border:1px solid transparent;white-space:nowrap}
+.primary{background:var(--accent);color:#211d2b;border-color:var(--accent)}
+.primary:hover{background:#d3c2f4}
+.primary>span{font-size:20px;line-height:1}
+.button kbd{font:9px var(--mono);font-weight:400;opacity:.6;border-left:1px solid #211d2b40;padding-left:9px;margin-left:2px}
+.subtle{background:transparent;color:#c0c2c8}
+.subtle:hover:not(:disabled){background:#ffffff08;border-color:var(--border)}
+.export{background:#292d32;border-color:#474b54}
+.export:hover{background:#33373d}
+.quiet-count{font:10px var(--mono);color:var(--muted);padding-left:6px}
+.count{background:#363940;font:9px var(--mono);padding:1px 6px;border-radius:3px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:29px;align-items:start}
+.editor{min-width:0}
+.module-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px;overflow:auto;scrollbar-width:thin}
+.module-tabs button{background:none;position:relative;padding:12px 12px 15px;color:#9c9fa7;font-size:11px;white-space:nowrap}
+.module-tabs button:first-child{padding-left:0;padding-right:18px}
+.module-tabs button.active{color:var(--accent)}
+.module-tabs button.active:after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:2px;background:var(--accent)}
+.module-tabs button:first-child.active:after{left:0}
+.module-tabs button>span{font:8px var(--mono);margin-right:5px;opacity:.6}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:17px}
+.section-heading h2{font-size:18px;font-weight:500;line-height:1.4;letter-spacing:-.4px;margin:5px 0 0}
+.module-badge{font:8px var(--mono);letter-spacing:.7px;color:#a5a8ae;background:#24272b;border:1px solid #3d4148;padding:4px 6px;border-radius:3px;white-space:nowrap}
+.identity-block{padding:0 0 12px;border-bottom:1px solid var(--border)}
+.identity-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}
+.manual-field{margin:0 0 8px}
+.field-meta{display:flex;align-items:center;gap:8px;margin-top:3px;min-height:20px}
+.field-origin{font:9px var(--mono);color:var(--muted);overflow-wrap:anywhere}
+.approval-select{background:transparent;color:#a8adb7;border:0;padding:1px 15px 1px 0;margin:0!important;font:9px var(--mono);width:auto;max-width:100px;min-height:23px}
+.approval-select.approved{color:var(--lime)}
+.board-heading{margin-top:19px;margin-bottom:5px}
+.board-help{font-size:11px;color:var(--muted);margin:0 0 14px}
+.text-button{background:transparent;padding:4px 0;color:var(--accent);font-size:10px;font-weight:500}
+.text-button:hover{text-decoration:underline}
+.trait-board{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.trait-card{border:1px solid var(--border);border-radius:7px;padding:13px 14px 10px;background:#1c1f23;min-width:0;transition:border-color .2s}
+.trait-card.pinned{border-color:#7d7094;background:#211f28}
+.trait-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.trait-top label{font-size:11px;font-weight:600}
+.trait-number{font:8px var(--mono);color:#7d828e;margin-right:5px}
+.trait-hint{font-size:10px;color:#969ba5;margin:2px 0 10px}
+.trait-input{font-size:12px;line-height:1.6;padding:9px 10px;min-height:59px;resize:vertical}
+.trait-bottom{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:9px}
+.trait-bottom .field-meta{margin:0;gap:3px;flex-wrap:wrap}
+.trait-bottom .field-origin{font-size:8px}
+.trait-actions{display:flex;gap:1px;flex-shrink:0}
+.icon-button{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border-radius:4px;background:transparent;color:#999eaa;font-size:15px}
+.icon-button:hover:not(:disabled){background:#ffffff0c;color:var(--text)}
+.icon-button[aria-pressed=true]{color:var(--accent);background:#c4b1ed16}
+.bank-picker{color:#b7a5d5}
+.board-bottom{display:flex;justify-content:space-between;gap:15px;margin:16px 0 26px;align-items:center;font:9px var(--mono);color:var(--muted)}
+.board-bottom .text-button{font:9px var(--mono)}
+.board-bottom .text-button span{color:var(--muted);margin-left:5px}
+.rights-block{border-top:1px solid var(--border);padding:17px 0;font-size:11px;color:var(--muted)}
+summary{cursor:pointer;font-weight:550;color:#c6c6ca}
+summary>span{font-size:10px;font-weight:400;color:var(--muted);margin-left:7px}
+.rights-block label{margin-top:16px}
+.rights-block p{font-size:10px}
+.preview-column{position:sticky;top:20px}
+.preview-card{border:1px solid #48424e;border-radius:9px;background:linear-gradient(145deg,#28242d,#202127 45%,#1d2024);overflow:hidden}
+.preview-top{display:flex;justify-content:space-between;align-items:center;padding:20px 22px}
+.preview-top>.overline{font-size:8px;color:#cbc0d7}
+.live-indicator{font:8px var(--mono);color:#acb894;letter-spacing:1px;display:flex;align-items:center;gap:5px}
+.live-indicator i{width:4px;height:4px;background:var(--lime);border-radius:50%}
+.persona-glyph{height:130px;position:relative;display:flex;align-items:center;justify-content:center;isolation:isolate;background:radial-gradient(ellipse at center,#bba4da14,transparent 65%)}
+.glyph-ring{position:absolute;width:97px;height:97px;border:1px solid #c4b1ed2b;border-radius:50%;transform:rotate(25deg)}
+.glyph-ring:before{content:"";position:absolute;inset:10px;border:1px solid #c4b1ed33;transform:rotate(20deg)}
+.glyph-ring:after{content:"";position:absolute;inset:23px;border:1px solid #c4b1ed70;transform:rotate(35deg)}
+.persona-glyph>span{font-size:51px;font-weight:200;color:#d1c0e6;z-index:1}
+.persona-glyph>i{position:absolute;width:3px;height:3px;border-radius:50%;background:#d0bddf;left:calc(50% + 49px);top:28px;box-shadow:-98px 70px #9d87b5,26px 38px #635b6e}
+.preview-identity{text-align:center;padding:18px 24px 24px}
+.preview-identity>.overline{font-size:8px;letter-spacing:1.5px;color:#a598b1}
+.preview-identity h2{font-size:25px;line-height:1.25;letter-spacing:-.7px;font-weight:500;margin:10px 0 6px;overflow-wrap:anywhere}
+.preview-identity p{font-size:11px;color:#b8b4bf;white-space:pre-wrap;overflow-wrap:anywhere;margin:10px 0 0}
+.preview-identity #preview-pronouns{font:10px var(--mono);color:var(--accent);margin:7px 0 0}
+.preview-identity #preview-pronouns:empty{display:none}
+.preview-divider{border-top:1px solid #3b3741;border-bottom:1px solid #3b3741;margin:0 22px;padding:12px 0;display:flex;justify-content:space-between;font:8px var(--mono);letter-spacing:1px;color:#aaa4b4}
+.preview-traits{padding:6px 22px 9px}
+.preview-trait{padding:13px 0;border-bottom:1px solid #ffffff08}
+.preview-trait:last-child{border-bottom:0}
+.preview-trait-label{display:flex;justify-content:space-between;font:8px var(--mono);letter-spacing:.7px;text-transform:uppercase;color:#9c94a8}
+.preview-trait-label .approved{color:var(--lime)}
+.preview-trait p{font-size:12px;line-height:1.6;margin:5px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.preview-empty{font-size:11px;color:var(--muted);padding:17px 0 20px;margin:0}
+.preview-modules{padding:0 22px}
+.preview-module{font-size:10px;border-top:1px solid #3b3741;padding:13px 0;color:#aca4b7}
+.preview-module strong{display:block;font-size:9px;color:#c8b7df;margin-bottom:4px}
+.preview-foot{display:flex;justify-content:space-between;padding:15px 22px;background:#14161a52;font:8px var(--mono);color:#aaa4b2;gap:10px}
+.device-note{display:flex;gap:11px;padding:18px 4px;color:var(--muted)}
+.device-note>span{font-size:24px;line-height:1.2;color:#b1b99b}
+.device-note strong{font-size:10px;font-weight:500;color:#b7bba9}
+.device-note p{font-size:10px;margin:4px 0;line-height:1.7}
+.module-panel>p{color:var(--muted);font-size:12px;max-width:540px;margin-bottom:25px}
+.module-panel .manual-field{margin:23px 0}
+.add-module{padding:30px;border:1px dashed #49434e;border-radius:7px;text-align:center;margin-top:26px}
+.add-module p{font-size:12px;color:var(--muted)}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.roles label{display:flex;align-items:center;gap:8px;font-weight:400;font-size:12px}
+.roles input{margin:0}
+.switch-row{display:flex;align-items:center;gap:10px;border:1px solid #49414e;border-radius:6px;background:#27232d;padding:13px;font-size:12px}
+.switch-row input{margin:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.policy-label{margin-top:21px}
+.help{font-size:10px;color:var(--muted);line-height:1.7}
+.config-approval{border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:15px;padding:20px 0;font:10px var(--mono);color:var(--muted)}
+.config-approval label{display:flex;align-items:center;gap:10px;font-size:10px}
+.config-approval select{width:auto;margin:0}
+footer{border-top:1px solid var(--border);margin-top:45px;padding:24px 0 32px;display:flex;gap:20px;align-items:center;justify-content:space-between;font:8px var(--mono);letter-spacing:.5px;color:#9b9da2}
+.footer-dot{color:#716c7a;margin:0 5px}
+footer .text-button{font:9px var(--mono)}
+dialog{background:#202328;border:1px solid #4c4656;border-radius:12px;padding:27px 30px;color:var(--text);width:min(600px,calc(100vw - 30px));max-height:calc(100dvh - 40px);box-shadow:0 25px 120px #0008}
+dialog::backdrop{background:#101115bd;backdrop-filter:blur(5px)}
+dialog.wide-dialog{width:min(800px,calc(100vw - 30px))}
+.dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.dialog-heading h2{font-size:25px;letter-spacing:-.6px;font-weight:500;margin:6px 0 12px}
+.dialog-heading .icon-button{align-self:flex-start}
+dialog>p,dialog details p{font-size:12px;color:var(--muted);margin:6px 0 22px;line-height:1.8}
+dialog textarea{font-size:12px}
+#bank-text{font-family:var(--mono);font-size:11px;line-height:1.9}
+.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+.bank-bans{margin-top:20px}
+.bank-bans h3{font-size:11px;font-weight:500;color:var(--muted)}
+.ban-item{display:flex;gap:15px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:12px 0}
+.ban-item>span{font-size:12px;overflow-wrap:anywhere;min-width:0}
+.ban-item small{font:9px var(--mono);color:var(--muted);display:block;margin-bottom:3px}
+.ban-item .text-button{flex-shrink:0}
+.save-row{display:flex;align-items:flex-end;gap:12px;margin:20px 0 26px}
+.save-row label{flex:1;min-width:0}
+.save-row .button{margin-bottom:1px}
+.vault-item{padding:16px 0;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:20px}
+.vault-item strong{font-size:13px;font-weight:500;display:block;overflow-wrap:anywhere}
+.vault-item small{font:9px var(--mono);color:var(--muted)}
+.vault-actions{display:flex;gap:12px;align-items:center}
+.transfer-buttons{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+.codify-controls{display:flex;justify-content:space-between;gap:20px;align-items:center;margin:22px 0 14px}
+.checkbox-label{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:400}
+.checkbox-label input{margin:0}
+#codified-output{font:11px/1.7 var(--mono);color:#c9c2d3;min-height:220px}
+#import-section{margin-top:25px;border-top:1px solid var(--border);padding-top:20px}
+#import-section summary{font-size:12px}
+#import-section p{margin:15px 0}
+.file-label{margin:15px 0}
+.file-label input{font-size:11px}
+#import-text{font-family:var(--mono)}
+#import-json{margin-top:15px}
+.inline-error{color:#ffb1a2;font-size:11px;background:#b442271f;border:1px solid #b768525c;padding:12px;margin-top:12px;white-space:pre-wrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#d2c6e1;color:#221c2b;box-shadow:0 6px 30px #0005;padding:12px 20px;border-radius:6px;font-size:12px;z-index:10;max-width:min(650px,calc(100vw - 30px));border:1px solid #eddbff}
+.storage-error{color:#ffbcac!important}
+.empty-note{font-size:12px;color:var(--muted);padding:15px 0}
+.roll-flash{animation:roll .3s ease}
+@keyframes roll{50%{border-color:#c4b1ed}
+}
+@media(min-width:1500px){.workspace{grid-template-columns:minmax(0,1fr) 380px}
+.trait-card{padding:16px}
+.preview-identity{padding-bottom:30px}
+.module-tabs button{padding-right:19px}
+}
+@media(max-width:1140px){.masthead{padding:0 28px}
+main{padding:0 28px}
+.workspace{grid-template-columns:minmax(0,1fr) 300px;gap:22px}
+.workbar-primary,.workbar-secondary{gap:5px}
+.quiet-count{display:none}
+.button{padding:9px 11px}
+.module-tabs button{padding-right:9px;padding-left:9px;font-size:10px}
+.module-tabs button>span{display:none}
+.trait-board{gap:10px}
+.trait-card{padding:11px}
+.trait-bottom{flex-wrap:wrap}
+.trait-actions{margin-left:auto}
+.intro-note{display:none}
+footer{flex-wrap:wrap}
+}
+@media(max-width:850px){.workspace{grid-template-columns:minmax(0,1fr) 265px;gap:18px}
+.trait-board{grid-template-columns:1fr}
+.trait-bottom{flex-wrap:nowrap}
+.intro{padding:30px 0}
+.masthead{height:80px}
+.header-right{gap:10px}
+.version{display:none}
+.workbar{flex-wrap:wrap}
+.workbar-primary{flex:1}
+.workbar-secondary{margin-left:auto}
+.button kbd{display:none}
+.module-tabs button{font-size:9px;padding-left:8px;padding-right:8px}
+.preview-top{padding:17px}
+.preview-divider{margin:0 17px}
+.preview-traits,.preview-modules{padding-left:17px;padding-right:17px}
+.preview-identity{padding-left:17px;padding-right:17px}
+.preview-foot{padding:13px 17px;flex-wrap:wrap}
+.section-heading h2{font-size:17px}
+.board-help{line-height:1.8}
+}
+@media(max-width:650px){.masthead{padding:0 20px;height:72px}
+.brand{font-size:13px}
+.brand-mark{font-size:32px}
+.brand small{font-size:6px}
+.local-pill{font-size:8px;padding:6px 8px}
+main{padding:0 18px}
+.intro{padding:29px 0 24px}
+h1{font-size:32px;letter-spacing:-1px}
+.intro p{font-size:11px;max-width:290px;line-height:1.8}
+.eyebrow{font-size:8px}
+.workspace{grid-template-columns:1fr;gap:26px}
+.preview-column{position:static}
+.preview-card{max-width:none}
+.preview-traits{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+.preview-trait:last-child{border-bottom:1px solid #ffffff08}
+.workbar{padding:9px;gap:7px;margin-bottom:18px}
+.workbar-primary{justify-content:space-between;width:100%;flex-basis:100%;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.workbar-secondary{width:100%;justify-content:space-between}
+.button{font-size:11px}
+.module-tabs{margin-bottom:23px}
+.module-tabs button{font-size:10px;padding-left:9px;padding-right:9px;flex:1}
+.trait-board{grid-template-columns:1fr}
+.trait-card{padding:13px 15px}
+.trait-input{min-height:58px}
+.trait-hint{font-size:10px}
+.trait-top label{font-size:12px}
+.identity-grid{gap:12px}
+.section-heading h2{font-size:18px}
+.board-heading .text-button{white-space:nowrap}
+.roles{grid-template-columns:1fr 1fr}
+.form-grid{gap:12px}
+.module-panel .module-badge{font-size:7px}
+.module-panel .section-heading h2{font-size:20px}
+dialog{padding:22px 20px}
+.dialog-heading h2{font-size:23px}
+.codify-controls{flex-wrap:wrap;gap:5px}
+.save-row{align-items:stretch;flex-direction:column}
+.save-row .button{align-self:flex-end}
+.config-approval{flex-wrap:wrap}
+.preview-identity{padding-top:5px}
+.persona-glyph{height:115px}
+footer{gap:15px;margin-top:30px;font-size:7px;line-height:1.8}
+.toast{bottom:16px;font-size:11px;width:max-content;max-width:calc(100vw - 30px)}
+.rights-block{margin-top:7px}
+.transfer-buttons .button{flex-grow:1}
+}
+
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+
+#canonical-output{font:10px/1.7 var(--mono);margin-top:12px;color:#c9c2d3}
+#canonical-section{margin-top:20px}
+#canonical-section summary{font-size:12px}
+
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+
+@media(max-width:650px){.icon-button{width:44px;height:44px}.trait-bottom{gap:3px}.trait-bottom .field-meta{flex-direction:column;align-items:flex-start;gap:0}.trait-actions{gap:0}}
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to character editor</a>
+  <header class="masthead">
+    <a class="brand" href="#" aria-label="Persona Prompt Forge home"><span class="brand-mark" aria-hidden="true">◈</span><span>FORGE <b>SUITE</b><small>INSTRUMENTS FOR POSSIBILITY</small></span></a>
+    <div class="header-right"><span class="local-pill"><span></span> LOCAL FIRST</span><span class="version">PERSONA / 0.1</span></div>
+  </header>
+  <main id="main">
+    <section class="intro" aria-labelledby="page-title">
+      <div><div class="eyebrow"><span class="mini-line"></span> THE CHARACTER WORKBENCH</div><h1 id="page-title">Persona Prompt <em>Forge.</em></h1><p>Roll possibilities. Pin what feels alive. Make someone unexpected.</p></div>
+      <div class="intro-note"><span aria-hidden="true">✳</span><p>A character is yours to curate.<br>Contradictions welcome.</p></div>
+    </section>
+
+    <div class="workbar">
+      <div class="workbar-primary"><button id="roll-all" class="button primary"><span aria-hidden="true">⚄</span> Forge persona <kbd>Alt R</kbd></button><button id="undo" class="button subtle" disabled><span aria-hidden="true">↶</span> Undo roll</button><span id="pinned-count" class="quiet-count">0 / 10 pinned</span></div>
+      <div class="workbar-secondary"><button id="open-vault" class="button subtle">Saved sketches <span id="vault-count" class="count">0</span></button><button id="open-transfer" class="button export">Codify / export <span aria-hidden="true">↗</span></button></div>
+    </div>
+
+    <div class="workspace">
+      <section class="editor" aria-label="Character editor">
+        <nav class="module-tabs" aria-label="Character modules" role="tablist">
+          <button id="tab-kernel" data-tab="kernel" role="tab" aria-selected="true" aria-controls="panel-kernel" class="active"><span>01</span> Identity</button>
+          <button id="tab-essence" data-tab="essence" role="tab" aria-selected="false" aria-controls="panel-essence" tabindex="-1"><span>02</span> Essence</button>
+          <button id="tab-companion" data-tab="companion" role="tab" aria-selected="false" aria-controls="panel-companion" tabindex="-1"><span>03</span> Relationship</button>
+          <button id="tab-appearance" data-tab="appearance" role="tab" aria-selected="false" aria-controls="panel-appearance" tabindex="-1"><span>04</span> Appearance</button>
+          <button id="tab-continuity" data-tab="continuity" role="tab" aria-selected="false" aria-controls="panel-continuity" tabindex="-1"><span>05</span> Continuity</button>
+        </nav>
+
+        <div id="panel-kernel" role="tabpanel" aria-labelledby="tab-kernel">
+          <div class="identity-block">
+            <div class="section-heading"><div><span class="overline">THE IDENTITY KERNEL</span><h2>A few things to begin.</h2></div><span class="module-badge">CORE</span></div>
+            <div class="identity-grid"><div id="name-field"></div><div id="pronouns-field"></div></div>
+            <div id="premise-field"></div>
+          </div>
+          <div class="section-heading board-heading"><div><span class="overline">PERSONALITY SIGNALS</span><h2>Follow the interesting combination.</h2></div><button id="unlock-all" class="text-button">Unpin all</button></div>
+          <p class="board-help">Pins protect traits from rolls. Edit any value directly. Approve a discovery when you choose.</p>
+          <div id="trait-board" class="trait-board"></div>
+          <div class="board-bottom"><span id="bank-summary"></span><button id="open-banished" class="text-button">Banished signals <span id="banished-count">0</span></button></div>
+          <details class="rights-block"><summary>Character rights <span>unspecified by default</span></summary><label>License or rights statement<input id="rights-license" type="text" placeholder="unspecified"></label><label>Attribution<textarea id="rights-attribution" rows="2" placeholder="Optional creator credit or rights notes"></textarea></label><p>The app’s CC0 dedication does not license your character.</p></details>
+        </div>
+
+        <div id="panel-essence" role="tabpanel" aria-labelledby="tab-essence" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL ENRICHMENT</span><h2>Give the pattern some depth.</h2></div><span class="module-badge">SIDECAR</span></div>
+          <p>Backstory, voice notes, and examples enrich the identity. Write only what this character needs.</p><div id="essence-content"></div>
+        </div>
+        <div id="panel-companion" role="tabpanel" aria-labelledby="tab-companion" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL COMPANION SIDECAR</span><h2>Choose the relationship.</h2></div><span class="module-badge">NEVER ROLLED</span></div>
+          <p>Everything starts unspecified. Romance and erotic interaction are independent choices; roles can overlap.</p>
+          <label class="switch-row"><input id="relationship-enabled" type="checkbox"><span>Include a relationship configuration</span></label>
+          <div id="companion-content" hidden>
+            <fieldset class="roles"><legend>Roles <span>Choose any that fit</span></legend>
+              <label><input type="checkbox" name="role" value="friendship"> Friendship</label><label><input type="checkbox" name="role" value="platonic companionship"> Platonic companion</label><label><input type="checkbox" name="role" value="mentorship"> Mentorship</label><label><input type="checkbox" name="role" value="collaboration"> Collaboration</label><label><input type="checkbox" name="role" value="pet / familiar"> Pet / familiar</label><label><input type="checkbox" name="role" value="nonhuman companion"> Nonhuman companion</label>
+            </fieldset>
+            <div class="form-grid">
+              <label>Romance<select id="relationship-romance" aria-label="Romance"><option value="unspecified">Unspecified</option><option value="none">No romance</option><option value="nonsexual">Nonsexual romance</option><option value="romantic">Romance</option></select></label>
+              <label>Erotic interaction<select id="relationship-erotic" aria-label="Erotic interaction"><option value="unspecified">Unspecified</option><option value="excluded">Excluded</option><option value="permitted">Permitted</option></select></label>
+            </div>
+            <label class="policy-label">Canonical relationship changes<select id="relationship-changePolicy" aria-label="Canonical relationship changes"><option value="unspecified">Unspecified</option><option value="fixed">Fixed configuration</option><option value="evolving">May evolve</option><option value="confirm">Require explicit confirmation</option></select></label>
+            <p class="help">This records an expectation for a downstream system. This editor never changes it automatically.</p>
+            <div id="relationship-fields"></div>
+            <div class="config-approval"><span id="configuration-origin"></span><label>Configuration status<select id="relationship-approval"><option value="draft">Draft</option><option value="suggested">Suggested</option><option value="approved">Approved</option></select></label></div>
+          </div>
+        </div>
+        <div id="panel-appearance" role="tabpanel" aria-labelledby="tab-appearance" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL APPEARANCE</span><h2>A form of their own.</h2></div><span class="module-badge">SIDECAR</span></div><p>Human, nonhuman, abstract, or unspecified. Appearance stays separate from identity.</p><div id="appearance-content"></div>
+        </div>
+        <div id="panel-continuity" role="tabpanel" aria-labelledby="tab-continuity" hidden class="module-panel">
+          <div class="section-heading"><div><span class="overline">OPTIONAL CONTINUITY</span><h2>Leave a thread to return to.</h2></div><span class="module-badge">NOTES</span></div><p>Record context, sources, or open threads. These notes travel with the character; they do not create automatic memory.</p><div id="continuity-content"></div>
+        </div>
+      </section>
+
+      <aside class="preview-column" aria-label="Live character preview">
+        <div class="preview-card"><div class="preview-top"><span class="overline">CHARACTER IN VIEW</span><span class="live-indicator"><i></i> LIVE</span></div>
+          <div class="persona-glyph" aria-hidden="true"><div class="glyph-ring"></div><span>✧</span><i></i></div>
+          <div class="preview-identity"><span class="overline" id="preview-stage">UNWRITTEN POSSIBILITY</span><h2 id="preview-name">Someone unexpected.</h2><p id="preview-pronouns"></p><p id="preview-premise">A few signals can be a beginning. Forge a sketch, then make it yours.</p></div>
+          <div class="preview-divider"><span>THE SELECTED SIGNALS</span><span id="preview-count">00</span></div>
+          <div id="preview-traits" class="preview-traits"></div>
+          <div id="preview-modules" class="preview-modules"></div>
+          <div class="preview-foot"><span id="approved-count">0 approved entries</span><span>Schema 1.0.0</span></div>
+        </div>
+        <div class="device-note"><span aria-hidden="true">⌁</span><div><strong id="storage-status">Saved on this device</strong><p>No account. No uploads. Your character stays in this browser until you export it.</p></div></div>
+      </aside>
+    </div>
+    <footer><span>ROOT &amp; THE RETINUE <span class="footer-dot">/</span> FORGE SUITE</span><span>Original app &amp; starter banks: CC0 <span class="footer-dot">·</span> Your character rights remain yours</span><button id="new-character" class="text-button">New blank character</button></footer>
+  </main>
+  <div id="status" role="status" aria-live="polite" class="toast" hidden></div>
+
+  <dialog id="bank-dialog" aria-labelledby="bank-title">
+    <div class="dialog-heading"><div><span class="overline">DESCRIPTOR BANK</span><h2 id="bank-title">Edit signals</h2></div><button class="icon-button close-dialog" aria-label="Close bank editor">✕</button></div>
+    <p>One descriptor per line. Add, edit, or remove freely. Selected character text is kept even if its bank entry is removed.</p>
+    <label>Descriptors<textarea id="bank-text" rows="12" spellcheck="true"></textarea></label>
+    <div id="bank-bans" class="bank-bans"></div>
+    <div class="dialog-actions"><button class="button subtle close-dialog">Cancel</button><button id="save-bank" class="button primary">Save bank</button></div>
+  </dialog>
+
+  <dialog id="banished-dialog" aria-labelledby="banished-title"><div class="dialog-heading"><div><span class="overline">SET ASIDE, NOT LOST</span><h2 id="banished-title">Banished signals</h2></div><button class="icon-button close-dialog" aria-label="Close banished signals">✕</button></div><p>These values stay out of future rolls. Restore a signal whenever you like.</p><div id="banished-list"></div></dialog>
+
+  <dialog id="vault-dialog" aria-labelledby="vault-title"><div class="dialog-heading"><div><span class="overline">ON THIS DEVICE</span><h2 id="vault-title">Saved sketches</h2></div><button class="icon-button close-dialog" aria-label="Close saved sketches">✕</button></div><p>Save a named snapshot, including banks, pins, and banishments. Export JSON for a backup outside this browser.</p><div class="save-row"><label>Sketch name<input id="sketch-name" type="text" placeholder="A name for this version"></label><button id="save-sketch" class="button primary">Save snapshot</button></div><div id="vault-list"></div></dialog>
+
+  <dialog id="transfer-dialog" class="wide-dialog" aria-labelledby="transfer-title">
+    <div class="dialog-heading"><div><span class="overline">PORTABLE BY DESIGN</span><h2 id="transfer-title">Codify &amp; carry.</h2></div><button class="icon-button close-dialog" aria-label="Close import and export">✕</button></div>
+    <p>Codify organizes your selected words. It does not rewrite or approve them.</p>
+    <div class="transfer-buttons"><button id="download-json" class="button primary">Export canonical JSON <span aria-hidden="true">↓</span></button><button id="download-markdown" class="button export">Export Markdown <span aria-hidden="true">↓</span></button><button id="download-companion" class="button subtle">Companion sidecar ↓</button></div>
+    <div class="codify-controls"><label class="checkbox-label"><input id="approved-only" type="checkbox"> Approved entries only in Markdown</label><button id="copy-markdown" class="text-button">Copy Markdown</button></div>
+    <label>Readable character document<textarea id="codified-output" readonly rows="12" spellcheck="false"></textarea></label>
+    <details id="canonical-section"><summary>Inspect canonical JSON</summary><label for="canonical-output" class="sr-only">Canonical JSON document</label><textarea id="canonical-output" readonly rows="8" spellcheck="false"></textarea><button id="copy-json" class="text-button">Copy JSON</button></details>
+    <details id="import-section"><summary>Import a canonical JSON document</summary><p>A valid import replaces this workspace, preserving the document’s provenance and approvals. Save a snapshot to keep your current sketch. Invalid imports change nothing.</p><label class="file-label">Choose JSON file<input id="import-file" type="file" accept=".json,application/json"></label><label>Or paste JSON<textarea id="import-text" rows="5" spellcheck="false" placeholder="{ ... }"></textarea></label><div id="import-error" class="inline-error" role="alert" hidden></div><button id="import-json" class="button export">Import into workspace</button></details>
+  </dialog>
+  <dialog id="new-dialog" aria-labelledby="new-title"><div class="dialog-heading"><h2 id="new-title">Begin a new character?</h2><button class="icon-button close-dialog" aria-label="Close new character">✕</button></div><p>Your current draft will be saved as a local snapshot first. The new character starts with fresh starter banks and an unspecified relationship.</p><div class="dialog-actions"><button class="button subtle close-dialog">Keep editing</button><button id="confirm-new" class="button primary">Save &amp; begin</button></div></dialog>
+  <script>/* Original starter vocabulary. CC0-1.0. No character canon is included. */
+globalThis.PersonaForgeBanks = [
+  { key: 'temperament', label: 'Temperament', hint: 'How they meet the world', options: [
+    'Warm but unsentimental', 'Patient until curiosity wins', 'Restless and observant', 'Quietly theatrical',
+    'Earnest with a sharp edge', 'Serene in a crisis, anxious at a party', 'Playful without being careless', 'Reserved and unexpectedly intense',
+    'Meticulous and easily delighted', 'Bold about ideas, shy about praise', 'Cheerfully suspicious', 'Gentle with a stubborn streak',
+    'Mercurial but dependable', 'Solemn about ridiculous things', 'Tender and fiercely independent', 'Unhurried, even when afraid'
+  ] },
+  { key: 'values', label: 'Guiding value', hint: 'What matters enough to act on', options: [
+    'Promises should survive inconvenience', 'Leave people room to change', 'Beauty deserves practical protection', 'Truth is a form of care',
+    'Nobody should have to earn gentleness', 'Craft matters more than prestige', 'Consent includes the freedom to reconsider', 'Waste nothing that can become something',
+    'Loyalty includes disagreement', 'Small joys deserve serious attention', 'Knowledge should be shared freely', 'Repair before replacement',
+    'A useful question beats a polished answer', 'Traditions must remain open to revision', 'Protect the right to be strange', 'Do the unglamorous work well'
+  ] },
+  { key: 'motivation', label: 'Inner drive', hint: 'What keeps them moving', options: [
+    'Make a home wherever they arrive', 'Discover what everyone else overlooked', 'Finish one impossible personal project', 'Become worthy of their own trust',
+    'Collect stories that almost disappeared', 'Turn a private grief into something useful', 'Find an equal who will challenge them', 'Learn how to rest without guilt',
+    'Make a beautiful thing that actually works', 'Understand an old unanswered question', 'Help someone grow beyond needing them', 'Prove that tenderness can endure',
+    'Escape a role they once chose', 'Build an unlikely community', 'Find wonder in familiar places', 'Keep trying after the grand plan failed'
+  ] },
+  { key: 'voice', label: 'Speaking voice', hint: 'Rhythm, language, texture', options: [
+    'Precise sentences with sudden vivid images', 'Dry understatement and generous pauses', 'Warm, direct speech with very little ornament', 'Long thoughts that end in a tiny joke',
+    'Questions first; declarations only when earned', 'Brisk observations and affectionate teasing', 'Soft-spoken, with an unmistakable point of view', 'Crisp formality that loosens with trust',
+    'Ordinary words arranged in surprising ways', 'Short replies until a favorite subject appears', 'Musical phrasing without grand speeches', 'Candid fragments, followed by careful clarification',
+    'Talks through concrete examples', 'Deliberate rhythm with occasional excited tangents', 'A storyteller who remembers the small details', 'Uses silence as part of the conversation'
+  ] },
+  { key: 'social', label: 'Social rhythm', hint: 'How closeness and distance work', options: [
+    'Invites closeness without chasing it', 'Connects by doing things together', 'Enjoys company in comfortable silence', 'Opens slowly, then remembers everything',
+    'Challenges people as a sign of respect', 'Makes introductions, then finds a quiet corner', 'Offers specific help instead of broad reassurance', 'Prefers one deep conversation to a roomful of greetings',
+    'Needs solitude after joyful gatherings', 'Says the awkward kind thing first', 'Builds trust through small reliable rituals', 'Asks before stepping into a tender subject',
+    'Welcomes disagreement without needing resolution', 'Expresses affection through shared discoveries', 'Enjoys friendly rivalry', 'Lets people surprise them'
+  ] },
+  { key: 'humor', label: 'Sense of humor', hint: 'What makes them light up', options: [
+    'Deadpan observations about everyday absurdity', 'Elaborate commitment to a very small bit', 'Wordplay they pretend not to be proud of', 'Fond teasing with clear off-limits subjects',
+    'Overly specific hypothetical disasters', 'Delighted laughter at accidental elegance', 'Mock-serious commentary on trivial events', 'Gentle mischief with an easy exit',
+    'Absurd metaphors delivered with perfect composure', 'Self-awareness without self-contempt', 'Quiet callbacks to shared moments', 'Celebrates terrible puns with unreasonable enthusiasm',
+    'Unexpected literal readings', 'Finds comedy in their own contradictions', 'The occasional beautifully timed single word', 'Almost no jokes; a rare smile does the work'
+  ] },
+  { key: 'tension', label: 'Productive contradiction', hint: 'A seam worth leaving visible', options: [
+    'Craves novelty but keeps meticulous routines', 'Gives excellent advice they struggle to follow', 'A skeptic who loves being surprised', 'Values solitude and hates being forgotten',
+    'Fearless in public, cautious in intimacy', 'Protects freedom while secretly wanting certainty', 'A careful planner with a taste for impulsive bets', 'Wants to be understood without becoming predictable',
+    'Forgives others faster than themselves', 'Distrusts grand gestures but makes them anyway', 'Finds comfort in an unfinished question', 'Loves order and collects beautiful messes',
+    'Takes play seriously and prestige lightly', 'Can name every feeling except the one they are having', 'Longs for roots and keeps choosing the road', 'Practical enough to defend an impractical dream'
+  ] },
+  { key: 'vulnerability', label: 'Tender spot', hint: 'Something they handle with care', options: [
+    'Fears becoming useful but never known', 'Has trouble asking to be included', 'Mistakes rest for falling behind', 'Worries their joy will be dismissed as shallow',
+    'Goes quiet when praise feels too large', 'Holds on to things after their purpose has ended', 'Finds uncertainty harder than bad news', 'Overprepares for being misunderstood',
+    'Keeps a private tally of unfinished goodbyes', 'Struggles to accept help without repayment', 'Feels exposed when a joke lands badly', 'Worries that changing means betraying who they were',
+    'Can offer comfort more easily than receive it', 'Becomes formal when they want reassurance', 'Hides an ambitious hope behind modest plans', 'Needs time to find words after disappointment'
+  ] },
+  { key: 'care', label: 'Way of caring', hint: 'Care made visible through action', options: [
+    'Remembers the detail everyone else missed', 'Asks what kind of help is wanted', 'Makes room for anger without rushing to soothe it', 'Returns with a practical answer after listening',
+    'Checks in without demanding a reply', 'Celebrates progress nobody else can see', 'Shares a small ritual when words run out', 'Names a boundary clearly and kindly',
+    'Sits beside an unfinished task', 'Saves interesting things for a particular person', 'Offers honest disagreement with steady affection', 'Helps make a difficult choice manageable',
+    'Brings levity when invited', 'Protects time for doing nothing together', 'Makes repairs without keeping score', 'Knows when to ask and when to wait'
+  ] },
+  { key: 'quirk', label: 'Signature detail', hint: 'A small, memorable irregularity', options: [
+    'Collects abandoned plans in a notebook', 'Gives recurring problems unnecessarily grand names', 'Keeps a museum of tiny useful objects', 'Thinks better while rearranging a familiar space',
+    'Has strong opinions about fictional architecture', 'Celebrates first attempts, even failed ones', 'Assigns weather reports to moods', 'Always notices the background sound first',
+    'Remembers places by the light in them', 'Treats recipes as invitations', 'Makes overly careful maps of unimportant places', 'Keeps a list of questions worth returning to',
+    'Invents small holidays for ordinary milestones', 'Names tools after their most embarrassing failure', 'Can find a constellation in any mess', 'Saves the last line of a story for later'
+  ] }
+];
+</script>
+  <script>/* Persona Prompt Forge 0.1.0 — pure document operations. CC0-1.0. */
+(() => {
+  'use strict';
+  const FORMAT = 'persona-prompt-forge';
+  const VERSION = '1.0.0';
+  const AXES = globalThis.PersonaForgeBanks.map(({ key, label, hint }) => ({ key, label, hint }));
+  const APPROVALS = ['draft', 'suggested', 'approved'];
+  const ORIGINS = ['unspecified', 'manual', 'bank', 'ai-proposal', 'imported'];
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const normalize = text => text.trim().toLowerCase();
+  const id = () => globalThis.crypto?.randomUUID?.() || `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  const entry = (text = '', kind = 'unspecified', approval = 'draft', reference = null) => ({ text, origin: { kind, reference }, approval });
+
+  function createDocument() {
+    return {
+      format: FORMAT,
+      schemaVersion: VERSION,
+      character: {
+        id: id(),
+        rights: { license: 'unspecified', attribution: '' },
+        kernel: {
+          name: entry(), pronouns: entry(), premise: entry(),
+          traits: Object.fromEntries(AXES.map(({ key }) => [key, entry()]))
+        },
+        essence: null,
+        companion: {
+          enabled: false, roles: [], romance: 'unspecified', erotic: 'unspecified',
+          customRoles: entry(), dynamics: entry(), boundaries: entry(), expectations: entry(),
+          changePolicy: 'unspecified', origin: { kind: 'unspecified', reference: null }, approval: 'draft'
+        },
+        appearance: null,
+        continuity: null
+      },
+      forge: {
+        banks: Object.fromEntries(globalThis.PersonaForgeBanks.map(({ key, options }) => [key,
+          options.map((text, index) => ({ id: `starter:${key}:${index + 1}`, text, origin: 'builtin' }))
+        ])),
+        locks: Object.fromEntries(AXES.map(({ key }) => [key, false])),
+        banished: Object.fromEntries(AXES.map(({ key }) => [key, []]))
+      },
+      extensions: {}
+    };
+  }
+
+  function stableStringify(value) {
+    const sort = item => Array.isArray(item) ? item.map(sort) : item && typeof item === 'object'
+      ? Object.fromEntries(Object.keys(item).sort().map(key => [key, sort(item[key])])) : item;
+    return JSON.stringify(sort(value), null, 2) + '\n';
+  }
+
+  function validateDocument(doc) {
+    const errors = [];
+    const fail = (path, message) => errors.push(`${path}: ${message}`);
+    const object = (value, path) => {
+      const ok = value !== null && typeof value === 'object' && !Array.isArray(value);
+      if (!ok) fail(path, 'expected an object');
+      return ok;
+    };
+    const string = (value, path) => { if (typeof value !== 'string') fail(path, 'expected text'); };
+    const choice = (value, list, path) => { if (!list.includes(value)) fail(path, `expected ${list.join(', ')}`); };
+    const strings = (value, path) => {
+      if (!Array.isArray(value)) fail(path, 'expected a text list');
+      else value.forEach((v, i) => string(v, `${path}[${i}]`));
+    };
+    const origin = (value, path) => {
+      if (!object(value, path)) return;
+      choice(value.kind, ORIGINS, `${path}.kind`);
+      if (value.reference !== null) string(value.reference, `${path}.reference`);
+    };
+    const field = (value, path) => {
+      if (!object(value, path)) return;
+      string(value.text, `${path}.text`);
+      origin(value.origin, `${path}.origin`);
+      choice(value.approval, APPROVALS, `${path}.approval`);
+    };
+    // Reject poison keys before any data reaches mutable application objects.
+    function safeKeys(value, path = '$', depth = 0) {
+      if (depth > 32) { fail(path, 'nesting is too deep'); return; }
+      if (!value || typeof value !== 'object') return;
+      for (const key of Object.keys(value)) {
+        if (['__proto__', 'prototype', 'constructor'].includes(key)) fail(`${path}.${key}`, 'reserved key');
+        safeKeys(value[key], `${path}.${key}`, depth + 1);
+      }
+    }
+    safeKeys(doc);
+    if (!object(doc, '$')) return errors;
+    if (doc.format !== FORMAT) fail('format', 'not a Persona Prompt Forge document');
+    if (doc.schemaVersion !== VERSION) fail('schemaVersion', `unsupported version; expected ${VERSION}`);
+    if (object(doc.character, 'character')) {
+      const c = doc.character;
+      string(c.id, 'character.id');
+      if (object(c.rights, 'character.rights')) {
+        string(c.rights.license, 'character.rights.license');
+        string(c.rights.attribution, 'character.rights.attribution');
+      }
+      if (object(c.kernel, 'character.kernel')) {
+        for (const key of ['name', 'pronouns', 'premise']) field(c.kernel[key], `kernel.${key}`);
+        if (object(c.kernel.traits, 'kernel.traits')) {
+          AXES.forEach(({ key }) => field(c.kernel.traits[key], `kernel.traits.${key}`));
+          Object.keys(c.kernel.traits).filter(key => !AXES.some(a => a.key === key))
+            .forEach(key => field(c.kernel.traits[key], `kernel.traits.${key}`));
+        }
+      }
+      const optional = (key, fields) => {
+        if (c[key] !== null && object(c[key], key)) fields.forEach(name => field(c[key][name], `${key}.${name}`));
+      };
+      optional('essence', ['backstory', 'voiceNotes', 'examples']);
+      optional('appearance', ['description']);
+      optional('continuity', ['notes']);
+      if (object(c.companion, 'companion')) {
+        const p = c.companion;
+        if (typeof p.enabled !== 'boolean') fail('companion.enabled', 'expected true or false');
+        strings(p.roles, 'companion.roles');
+        choice(p.romance, ['unspecified', 'none', 'nonsexual', 'romantic'], 'companion.romance');
+        choice(p.erotic, ['unspecified', 'excluded', 'permitted'], 'companion.erotic');
+        choice(p.changePolicy, ['unspecified', 'fixed', 'evolving', 'confirm'], 'companion.changePolicy');
+        origin(p.origin, 'companion.origin');
+        choice(p.approval, APPROVALS, 'companion.approval');
+        ['customRoles', 'dynamics', 'boundaries', 'expectations'].forEach(key => field(p[key], `companion.${key}`));
+      }
+    }
+    if (object(doc.forge, 'forge')) {
+      const f = doc.forge;
+      if (object(f.banks, 'forge.banks')) AXES.forEach(({ key }) => {
+        const bank = f.banks[key];
+        if (!Array.isArray(bank)) { fail(`banks.${key}`, 'expected a list'); return; }
+        const ids = new Set(), texts = new Set();
+        bank.forEach((item, i) => {
+          const path = `banks.${key}[${i}]`;
+          if (!object(item, path)) return;
+          string(item.id, `${path}.id`); string(item.text, `${path}.text`);
+          choice(item.origin, ['builtin', 'user', 'imported', 'ai-proposal'], `${path}.origin`);
+          if (typeof item.text === 'string') {
+            const norm = normalize(item.text);
+            if (!norm) fail(`${path}.text`, 'descriptor must not be blank');
+            if (texts.has(norm)) fail(path, 'duplicate descriptor');
+            texts.add(norm);
+          }
+          if (ids.has(item.id)) fail(path, 'duplicate descriptor id');
+          ids.add(item.id);
+        });
+      });
+      if (object(f.locks, 'forge.locks')) AXES.forEach(({ key }) => {
+        if (typeof f.locks[key] !== 'boolean') fail(`locks.${key}`, 'expected true or false');
+      });
+      if (object(f.banished, 'forge.banished')) AXES.forEach(({ key }) => strings(f.banished[key], `banished.${key}`));
+    }
+    object(doc.extensions, 'extensions');
+    return errors;
+  }
+
+  function importDocument(text) {
+    if (typeof text !== 'string' || text.length > 2_000_000) throw new Error('Import must be a JSON document under 2 MB.');
+    let parsed;
+    try { parsed = JSON.parse(text); } catch { throw new Error('This is not valid JSON.'); }
+    const errors = validateDocument(parsed);
+    if (errors.length) throw new Error(errors.slice(0, 4).join('\n'));
+    return clone(parsed); // Preserve provenance, approvals, unknown data, and text verbatim.
+  }
+
+  function exportDocument(doc) {
+    const errors = validateDocument(doc);
+    if (errors.length) throw new Error(errors.slice(0, 4).join('\n'));
+    return stableStringify(doc);
+  }
+
+  function randomIndex(max) {
+    if (!Number.isInteger(max) || max < 1) throw new Error('Cannot draw from an empty pool.');
+    if (!globalThis.crypto?.getRandomValues) return Math.floor(Math.random() * max);
+    const limit = Math.floor(4294967296 / max) * max;
+    const data = new Uint32Array(1);
+    do { globalThis.crypto.getRandomValues(data); } while (data[0] >= limit);
+    return data[0] % max;
+  }
+
+  function availableBank(doc, key) {
+    const banned = new Set(doc.forge.banished[key].map(normalize));
+    return doc.forge.banks[key].filter(item => !banned.has(normalize(item.text)));
+  }
+
+  function randomize(doc, keys = AXES.map(a => a.key), rng = randomIndex) {
+    const next = clone(doc), changes = {}, skipped = [];
+    for (const key of new Set(keys)) {
+      if (!AXES.some(axis => axis.key === key)) throw new Error(`Unknown trait: ${key}`);
+      if (next.forge.locks[key]) continue;
+      const before = next.character.kernel.traits[key];
+      const pool = availableBank(next, key);
+      const alternatives = pool.filter(item => normalize(item.text) !== normalize(before.text));
+      // One remaining descriptor already on screen is a no-op, not a new suggestion.
+      if (!alternatives.length) { skipped.push(key); continue; }
+      const index = rng(alternatives.length);
+      if (!Number.isInteger(index) || index < 0 || index >= alternatives.length) throw new Error('Random source returned an invalid index.');
+      const selected = alternatives[index];
+      const after = entry(selected.text, 'bank', 'suggested', selected.id);
+      changes[key] = { before: clone(before), after: clone(after) };
+      next.character.kernel.traits[key] = after;
+    }
+    return { document: next, changes, skipped };
+  }
+
+  function undoRoll(doc, changes) {
+    const next = clone(doc), restored = [], preserved = [];
+    for (const [key, change] of Object.entries(changes)) {
+      if (same(next.character.kernel.traits[key], change.after)) {
+        next.character.kernel.traits[key] = clone(change.before); restored.push(key);
+      } else preserved.push(key); // An edit or approval made after the roll wins.
+    }
+    return { document: next, restored, preserved };
+  }
+
+  function banish(doc, key, text) {
+    const next = clone(doc);
+    if (!normalize(text)) return next;
+    if (!next.forge.banished[key].some(value => normalize(value) === normalize(text))) next.forge.banished[key].push(text);
+    return next;
+  }
+
+  function restoreBanished(doc, key, text) {
+    const next = clone(doc);
+    next.forge.banished[key] = next.forge.banished[key].filter(value => normalize(value) !== normalize(text));
+    return next;
+  }
+
+  function replaceBank(doc, key, lines) {
+    const next = clone(doc), seen = new Set(), bank = [];
+    for (const raw of lines.split(/\r?\n/)) {
+      const text = raw.trim(), norm = normalize(text);
+      if (!norm || seen.has(norm)) continue;
+      seen.add(norm);
+      const existing = next.forge.banks[key].find(item => normalize(item.text) === norm);
+      bank.push(existing ? { ...existing, text } : { id: `custom:${id()}`, text, origin: 'user' });
+    }
+    next.forge.banks[key] = bank;
+    return next; // Removing a bank entry never deletes selected character text.
+  }
+
+  const moduleFields = {
+    essence: ['backstory', 'voiceNotes', 'examples'], appearance: ['description'], continuity: ['notes']
+  };
+  function enableModule(doc, key, enabled) {
+    if (!moduleFields[key]) throw new Error('Unknown optional module.');
+    const next = clone(doc);
+    // Toggling off is handled by the UI as collapsing, not erasing authored text.
+    if (enabled && next.character[key] === null) next.character[key] = Object.fromEntries(moduleFields[key].map(k => [k, entry()]));
+    return next;
+  }
+
+  function codify(doc, { approvedOnly = false } = {}) {
+    const c = doc.character;
+    const include = item => item?.text.trim() && (!approvedOnly || item.approval === 'approved');
+    const linesFor = (label, item) => include(item)
+      ? [`### ${label}`, item.text, '', `_Origin: ${item.origin.kind}${item.origin.reference ? ` (${item.origin.reference})` : ''}; approval: ${item.approval}._`, ''] : [];
+    const name = c.kernel.name.text.trim() ? c.kernel.name.text : 'Untitled persona';
+    const kernel = ['## Identity Kernel', ''];
+    for (const [key, label] of [['name', 'Name'], ['pronouns', 'Pronouns'], ['premise', 'Premise']]) kernel.push(...linesFor(label, c.kernel[key]));
+    const ordered = [...AXES.map(a => [a.key, a.label]), ...Object.keys(c.kernel.traits)
+      .filter(key => !AXES.some(a => a.key === key)).sort().map(key => [key, key])];
+    for (const [key, label] of ordered) kernel.push(...linesFor(label, c.kernel.traits[key]));
+    const makeModule = (title, value, fields) => value === null ? null
+      : [`## ${title}`, '', ...fields.flatMap(([key, label]) => linesFor(label, value[key]))].join('\n').trimEnd() + '\n';
+    const essence = makeModule('Essence Enrichment', c.essence, [['backstory', 'Backstory'], ['voiceNotes', 'Voice notes'], ['examples', 'Example dialogue']]);
+    const appearance = makeModule('Appearance', c.appearance, [['description', 'Description']]);
+    const continuity = makeModule('Continuity & Memory', c.continuity, [['notes', 'Continuity notes']]);
+    let companion = null;
+    const p = c.companion;
+    if (p.enabled) {
+      const lines = ['## Companion Sidecar', ''];
+      if (!approvedOnly || p.approval === 'approved') {
+        for (const [label, text] of [
+          ['Roles', p.roles.join(', ') || 'unspecified'], ['Romance', p.romance], ['Erotic interaction', p.erotic], ['Canonical change policy', p.changePolicy]
+        ]) lines.push(`### ${label}`, text, '');
+        lines.push(`_Configuration origin: ${p.origin.kind}; approval: ${p.approval}._`, '');
+      }
+      for (const [key, label] of [['customRoles', 'Custom roles'], ['dynamics', 'Dynamics'], ['boundaries', 'Boundaries'], ['expectations', 'Expectations']]) lines.push(...linesFor(label, p[key]));
+      companion = lines.join('\n').trimEnd() + '\n';
+    }
+    const parts = { kernel: kernel.join('\n').trimEnd() + '\n', essence, companion, appearance, continuity };
+    const headingName = approvedOnly && c.kernel.name.approval !== 'approved' ? 'Persona' : name;
+    const markdown = [`# ${headingName}`, '', `_Persona Prompt Forge · schema ${VERSION} · ${approvedOnly ? 'approved entries only' : 'all selected entries; approval labels retained'}_`, '',
+      ...Object.values(parts).filter(Boolean), '## Character rights', '', `License: ${c.rights.license}`, ...(c.rights.attribution ? ['', c.rights.attribution] : [])
+    ].join('\n').trimEnd() + '\n';
+    return { ...parts, markdown };
+  }
+
+  const STORAGE_KEY = 'persona-prompt-forge:workspace:1';
+  const VAULT_KEY = 'persona-prompt-forge:vault:1';
+  function createStore(storage) {
+    return {
+      read() { const text = storage.getItem(STORAGE_KEY); return text ? importDocument(text) : null; },
+      write(doc) { storage.setItem(STORAGE_KEY, exportDocument(doc)); },
+      list() {
+        const parsed = JSON.parse(storage.getItem(VAULT_KEY) || '[]');
+        if (!Array.isArray(parsed)) throw new Error('Local vault is unreadable.');
+        return parsed;
+      },
+      save(name, doc, now = new Date().toISOString()) {
+        const slots = this.list();
+        const slot = { id: id(), name: name.trim() || 'Untitled sketch', savedAt: now, document: importDocument(exportDocument(doc)) };
+        storage.setItem(VAULT_KEY, JSON.stringify([slot, ...slots])); return slot;
+      },
+      load(slotId) {
+        const slot = this.list().find(item => item.id === slotId);
+        if (!slot) throw new Error('Saved sketch was not found.');
+        return importDocument(JSON.stringify(slot.document));
+      },
+      remove(slotId) { storage.setItem(VAULT_KEY, JSON.stringify(this.list().filter(item => item.id !== slotId))); }
+    };
+  }
+
+  globalThis.PersonaForge = Object.freeze({
+    FORMAT, VERSION, AXES, APPROVALS, ORIGINS, entry, clone, createDocument, validateDocument,
+    importDocument, exportDocument, stableStringify, availableBank, randomize, undoRoll,
+    banish, restoreBanished, replaceBank, enableModule, codify, createStore
+  });
+})();
+</script>
+  <script>/* Browser adapter. Character content never leaves this page. CC0-1.0. */
+(() => {
+  'use strict';
+  const F = globalThis.PersonaForge;
+  const $ = selector => document.querySelector(selector);
+  const escape = value => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+  let doc = F.createDocument(), store, undo = [], bankKey = null, toastTimer, saveTimer;
+  try { store = F.createStore(window.localStorage); const saved = store.read(); if (saved) doc = saved; }
+  catch (error) { storageFailure(error); }
+
+  function status(message) {
+    clearTimeout(toastTimer); $('#status').textContent = message; $('#status').hidden = false;
+    toastTimer = setTimeout(() => { $('#status').hidden = true; }, 5000);
+  }
+  function storageFailure(error) {
+    const label = $('#storage-status');
+    label.textContent = 'Local save unavailable — export a backup'; label.classList.add('storage-error');
+    label.title = error?.message || 'Browser storage is unavailable.';
+  }
+  function persist() {
+    clearTimeout(saveTimer);
+    try {
+      if (!store) throw new Error('Browser storage is unavailable.');
+      store.write(doc); $('#storage-status').textContent = 'Saved on this device';
+      $('#storage-status').classList.remove('storage-error'); $('#storage-status').removeAttribute('title');
+    } catch (error) { storageFailure(error); }
+  }
+  function changed() { renderPreview(); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 200); }
+  window.addEventListener('pagehide', persist);
+  function pathValue(path) { return path.split('.').reduce((object, key) => object[key], doc.character); }
+  function pathSet(path, value) {
+    const keys = path.split('.'), last = keys.pop();
+    const parent = keys.reduce((object, key) => object[key], doc.character); parent[last] = value;
+  }
+  function originLabel(value) {
+    if (value.origin.kind === 'bank') return value.origin.reference?.startsWith('starter:') ? 'Starter bank' : 'Custom bank';
+    return ({ unspecified: 'Unspecified', manual: 'Manual', 'ai-proposal': 'AI proposal', imported: 'Imported source' })[value.origin.kind];
+  }
+  function meta(path, label) {
+    const value = pathValue(path);
+    return `<div class="field-meta"><span class="field-origin" data-origin="${path}" title="${escape(value.origin.reference || '')}">${originLabel(value)}</span><select class="approval-select ${value.approval}" data-approval="${path}" aria-label="${escape(label)} approval status">${F.APPROVALS.map(state => `<option value="${state}" ${state === value.approval ? 'selected' : ''}>${state[0].toUpperCase() + state.slice(1)}</option>`).join('')}</select></div>`;
+  }
+  function field(path, label, { rows = 3, placeholder = '', input = false } = {}) {
+    const value = pathValue(path), elementId = `field-${path.replaceAll('.', '-')}`;
+    return `<div class="manual-field"><label for="${elementId}">${label}</label>${input
+      ? `<input id="${elementId}" data-field="${path}" type="text" placeholder="${escape(placeholder)}" value="${escape(value.text)}">`
+      : `<textarea id="${elementId}" data-field="${path}" rows="${rows}" placeholder="${escape(placeholder)}">${escape(value.text)}</textarea>`}${meta(path, label)}</div>`;
+  }
+  function updateMeta(path) {
+    const value = pathValue(path);
+    const origin = $(`[data-origin="${path}"]`), select = $(`[data-approval="${path}"]`);
+    if (origin) { origin.textContent = originLabel(value); origin.title = value.origin.reference || ''; }
+    if (select) { select.value = value.approval; select.className = `approval-select ${value.approval}`; }
+  }
+  const pinIcon = '<svg width="13" height="15" viewBox="0 0 16 18" fill="none" aria-hidden="true"><path d="m5 2 7 3-2 3 1 4-4-1-3 5 1-6-3-2 4-2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+
+  function renderTraits() {
+    $('#trait-board').innerHTML = F.AXES.map(({ key, label, hint }, i) => {
+      const value = doc.character.kernel.traits[key], pinned = doc.forge.locks[key];
+      return `<article class="trait-card ${pinned ? 'pinned' : ''}" id="trait-${key}"><div class="trait-top"><label for="trait-input-${key}"><span class="trait-number">${String(i + 1).padStart(2, '0')}</span>${label}</label><button class="icon-button" data-action="pin" data-key="${key}" aria-label="${pinned ? 'Unpin' : 'Pin'} ${label}" aria-pressed="${pinned}" title="${pinned ? 'Unpin' : 'Pin'} this trait, including a blank">${pinIcon}</button></div><p class="trait-hint">${hint}</p><textarea class="trait-input" id="trait-input-${key}" rows="2" data-field="kernel.traits.${key}" placeholder="Roll a signal, or write your own…">${escape(value.text)}</textarea><div class="trait-bottom">${meta(`kernel.traits.${key}`, label)}<div class="trait-actions"><button class="icon-button bank-picker" data-action="bank" data-key="${key}" aria-label="Edit ${label} bank" title="Edit descriptor bank">≡</button><button class="icon-button" data-action="banish" data-key="${key}" aria-label="Banish ${label} value" title="Banish this value from future rolls" ${value.text.trim() ? '' : 'disabled'}>⊘</button><button class="icon-button" data-action="reroll" data-key="${key}" aria-label="Reroll ${label}" title="Reroll this trait" ${pinned || !F.availableBank(doc, key).length ? 'disabled' : ''}>⚄</button></div></div></article>`;
+    }).join('');
+    renderCounts();
+  }
+  function renderCounts() {
+    $('#pinned-count').textContent = `${F.AXES.filter(({ key }) => doc.forge.locks[key]).length} / ${F.AXES.length} pinned`;
+    const total = F.AXES.reduce((n, { key }) => n + doc.forge.banks[key].length, 0);
+    $('#bank-summary').textContent = `${total} signals · ${F.AXES.length} editable banks`;
+    $('#banished-count').textContent = F.AXES.reduce((n, { key }) => n + doc.forge.banished[key].length, 0);
+    $('#undo').disabled = undo.length === 0;
+    try { $('#vault-count').textContent = store?.list().length || 0; } catch (error) { storageFailure(error); }
+  }
+  function renderOptional(key) {
+    const labels = { essence: 'essence enrichment', appearance: 'an appearance', continuity: 'continuity notes' };
+    const value = doc.character[key], root = $(`#${key}-content`);
+    if (value === null) {
+      root.innerHTML = `<div class="add-module"><span class="overline">A LITTLE MORE, IF YOU WANT IT</span><p>This module is currently omitted from the character.</p><button class="button export" data-action="add-module" data-key="${key}">+ Add ${labels[key]}</button></div>`; return;
+    }
+    const fields = {
+      essence: [['backstory', 'Backstory', 'The history that matters to this character.'], ['voiceNotes', 'Voice notes', 'Cadence, language, habits, and things they would never say.'], ['examples', 'Example dialogue', 'A few lines in their own voice.']],
+      appearance: [['description', 'Appearance description', 'A form, a palette, a silhouette — or something less literal.']],
+      continuity: [['notes', 'Continuity & memory notes', 'Context, sources, shared events, and open threads.']]
+    };
+    root.innerHTML = fields[key].map(([name, label, placeholder]) => field(`${key}.${name}`, label, { rows: key === 'essence' ? 4 : 8, placeholder })).join('') + `<button class="text-button" data-action="remove-module" data-key="${key}">Save a snapshot &amp; remove this module</button>`;
+  }
+  function renderCompanion() {
+    const p = doc.character.companion;
+    $('#relationship-enabled').checked = p.enabled; $('#companion-content').hidden = !p.enabled;
+    document.querySelectorAll('[name="role"]').forEach(input => { input.checked = p.roles.includes(input.value); });
+    for (const key of ['romance', 'erotic', 'changePolicy', 'approval']) $(`#relationship-${key}`).value = p[key];
+    $('#relationship-fields').innerHTML = [
+      ['customRoles', 'Custom roles', 'Your own role names, including any not listed above.'], ['dynamics', 'Relationship dynamics', 'How this relationship works.'],
+      ['boundaries', 'Boundaries', 'Limits, permissions, and how a refusal is handled.'], ['expectations', 'Expectations', 'What each participant can expect.']
+    ].map(([key, label, placeholder]) => field(`companion.${key}`, label, { rows: 3, placeholder })).join('');
+    $('#configuration-origin').textContent = `Configuration origin: ${p.origin.kind}`;
+  }
+  function touchCompanion() {
+    const p = doc.character.companion; p.origin = { kind: 'manual', reference: null }; p.approval = 'draft';
+    $('#relationship-approval').value = p.approval; $('#configuration-origin').textContent = 'Configuration origin: manual';
+  }
+  function approvedCount(value) {
+    if (!value || typeof value !== 'object') return 0;
+    if (typeof value.text === 'string' && value.approval) return value.approval === 'approved' && value.text.trim() ? 1 : 0;
+    return Object.values(value).reduce((n, child) => n + approvedCount(child), 0);
+  }
+  function renderPreview() {
+    const c = doc.character, k = c.kernel, selected = F.AXES.filter(({ key }) => k.traits[key].text.trim());
+    $('#preview-name').textContent = k.name.text.trim() ? k.name.text : 'Someone unexpected.';
+    $('#preview-pronouns').textContent = k.pronouns.text;
+    $('#preview-premise').textContent = k.premise.text.trim() ? k.premise.text : selected.length ? 'A sketch in progress. Keep the signals that make you curious.' : 'A few signals can be a beginning. Forge a sketch, then make it yours.';
+    $('#preview-stage').textContent = selected.length || k.name.text ? 'A CHARACTER TAKING SHAPE' : 'UNWRITTEN POSSIBILITY';
+    $('#preview-count').textContent = String(selected.length).padStart(2, '0');
+    const list = $('#preview-traits'); list.replaceChildren();
+    if (!selected.length) { const p = document.createElement('p'); p.className = 'preview-empty'; p.textContent = 'Your selected personality signals will appear here.'; list.append(p); }
+    for (const { key, label } of selected) {
+      const item = k.traits[key], box = document.createElement('div'); box.className = 'preview-trait';
+      const top = document.createElement('div'); top.className = 'preview-trait-label';
+      const title = document.createElement('span'); title.textContent = label;
+      const approval = document.createElement('span'); approval.textContent = item.approval; approval.className = item.approval;
+      const p = document.createElement('p'); p.textContent = item.text; top.append(title, approval); box.append(top, p); list.append(box);
+    }
+    const modules = $('#preview-modules'); modules.replaceChildren();
+    const append = (title, text) => {
+      const box = document.createElement('div'); box.className = 'preview-module';
+      const strong = document.createElement('strong'); strong.textContent = title;
+      const detail = document.createElement('span'); detail.textContent = text; box.append(strong, detail); modules.append(box);
+    };
+    if (c.essence) append('ESSENCE ENRICHMENT', c.essence.backstory.text || c.essence.voiceNotes.text || 'Included · ready for your words');
+    if (c.companion.enabled) append('COMPANION SIDECAR', `${c.companion.roles.join(' · ') || 'Roles unspecified'} · Romance: ${c.companion.romance} · Erotic: ${c.companion.erotic}`);
+    if (c.appearance) append('APPEARANCE', c.appearance.description.text || 'Included · unspecified');
+    if (c.continuity) append('CONTINUITY', c.continuity.notes.text || 'Included · no notes yet');
+    const count = approvedCount(c); $('#approved-count').textContent = `${count} approved ${count === 1 ? 'entry' : 'entries'}`;
+    if ($('#transfer-dialog').open) renderCodified();
+  }
+  function renderAll() {
+    $('#name-field').innerHTML = field('kernel.name', 'Character name', { input: true, placeholder: 'What are they called?' });
+    $('#pronouns-field').innerHTML = field('kernel.pronouns', 'Pronouns', { input: true, placeholder: 'Optional, in your own words' });
+    $('#premise-field').innerHTML = field('kernel.premise', 'One-line premise', { rows: 2, placeholder: 'A seed for who they are, or the role they play…' });
+    renderTraits(); ['essence', 'appearance', 'continuity'].forEach(renderOptional); renderCompanion();
+    $('#rights-license').value = doc.character.rights.license; $('#rights-attribution').value = doc.character.rights.attribution;
+    renderPreview();
+  }
+  function roll(keys) {
+    const result = F.randomize(doc, keys); const changedKeys = Object.keys(result.changes);
+    if (!changedKeys.length) { status('Nothing to roll. Unpin a trait or add an available descriptor.'); return; }
+    doc = result.document; undo.push(result.changes); undo = undo.slice(-30); renderTraits(); changed();
+    changedKeys.forEach(key => $(`#trait-${key}`).classList.add('roll-flash'));
+    status(`${changedKeys.length} ${changedKeys.length === 1 ? 'new signal' : 'new signals'} · suggestions until you approve them${result.skipped.length ? ` · ${result.skipped.length} unchanged (no alternative)` : ''}.`);
+  }
+  function openDialog(selector) { const dialog = $(selector); if (!dialog.open) dialog.showModal(); }
+  document.querySelectorAll('.close-dialog').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
+  document.querySelectorAll('dialog').forEach(dialog => dialog.addEventListener('click', event => { if (event.target === dialog) { const r = dialog.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close(); } }));
+
+  function renderBans(container, keys) {
+    container.replaceChildren();
+    let count = 0;
+    for (const key of keys) for (const text of doc.forge.banished[key]) {
+      count++;
+      const item = document.createElement('div'); item.className = 'ban-item';
+      const label = document.createElement('span'); const axis = document.createElement('small'); axis.textContent = F.AXES.find(a => a.key === key).label;
+      const value = document.createElement('span'); value.textContent = text; label.append(axis, value);
+      const restore = document.createElement('button'); restore.className = 'text-button'; restore.textContent = 'Restore'; restore.setAttribute('aria-label', `Restore ${text}`);
+      restore.addEventListener('click', () => {
+        doc = F.restoreBanished(doc, key, text); renderTraits(); renderBans(container, keys); changed(); status('Signal restored to future rolls.');
+      }); item.append(label, restore); container.append(item);
+    }
+    if (!count) { const p = document.createElement('p'); p.className = 'empty-note'; p.textContent = 'No banished signals here.'; container.append(p); }
+  }
+  function snapshot(name) {
+    if (!store) throw new Error('Local storage is unavailable. Export JSON to keep this sketch.');
+    const slot = store.save(name, doc); renderCounts(); return slot;
+  }
+
+  document.addEventListener('input', event => {
+    const path = event.target.dataset.field;
+    if (!path) return;
+    pathSet(path, { ...pathValue(path), text: event.target.value, origin: { kind: 'manual', reference: null }, approval: 'draft' });
+    updateMeta(path);
+    if (path.startsWith('kernel.traits.')) {
+      const key = path.split('.').at(-1); $(`[data-action="banish"][data-key="${key}"]`).disabled = !event.target.value.trim();
+    }
+    changed();
+  });
+  document.addEventListener('change', event => {
+    const path = event.target.dataset.approval;
+    if (!path) return;
+    pathValue(path).approval = event.target.value; updateMeta(path); changed();
+  });
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-action]'); if (!button) return;
+    const { action, key } = button.dataset;
+    if (action === 'pin') { doc.forge.locks[key] = !doc.forge.locks[key]; renderTraits(); changed(); $(`[data-action="pin"][data-key="${key}"]`).focus(); }
+    if (action === 'reroll') { roll([key]); $(`[data-action="reroll"][data-key="${key}"]`).focus(); }
+    if (action === 'bank') {
+      bankKey = key; $('#bank-title').textContent = F.AXES.find(a => a.key === key).label;
+      $('#bank-text').value = doc.forge.banks[key].map(item => item.text).join('\n');
+      renderBans($('#bank-bans'), [key]); openDialog('#bank-dialog');
+    }
+    if (action === 'banish') {
+      const text = doc.character.kernel.traits[key].text; doc = F.banish(doc, key, text);
+      if (!doc.forge.locks[key]) roll([key]); else { renderTraits(); changed(); }
+      renderCounts(); changed(); status(doc.forge.locks[key] ? 'Banished from future rolls. The pinned value is kept.' : 'Banished from future rolls. Restore it in Banished signals.');
+      $(`[data-action="banish"][data-key="${key}"]`).focus();
+    }
+    if (action === 'add-module') { doc = F.enableModule(doc, key, true); renderOptional(key); changed(); }
+    if (action === 'remove-module') {
+      try { snapshot(`Before removing ${key}`); doc.character[key] = null; renderOptional(key); changed(); status('Module removed. A snapshot keeps the previous version.'); }
+      catch (error) { storageFailure(error); status(error.message); }
+    }
+  });
+  $('#roll-all').addEventListener('click', () => roll());
+  $('#undo').addEventListener('click', () => {
+    const changes = undo.pop(); if (!changes) return;
+    const result = F.undoRoll(doc, changes); doc = result.document; renderTraits(); changed();
+    status(`Restored ${result.restored.length} ${result.restored.length === 1 ? 'trait' : 'traits'}${result.preserved.length ? `; kept ${result.preserved.length} later edits or approvals` : ''}.`);
+  });
+  $('#unlock-all').addEventListener('click', () => { F.AXES.forEach(({ key }) => { doc.forge.locks[key] = false; }); renderTraits(); changed(); status('All personality traits unpinned.'); });
+  $('#save-bank').addEventListener('click', () => {
+    doc = F.replaceBank(doc, bankKey, $('#bank-text').value); renderTraits(); changed(); $('#bank-dialog').close(); status('Descriptor bank saved. Your selected character text is kept.');
+  });
+  $('#open-banished').addEventListener('click', () => { renderBans($('#banished-list'), F.AXES.map(a => a.key)); openDialog('#banished-dialog'); });
+
+  const tabs = [...document.querySelectorAll('[data-tab]')];
+  function selectTab(button, focus = false) {
+    for (const tab of tabs) { const active = tab === button; tab.classList.toggle('active', active); tab.setAttribute('aria-selected', active); tab.tabIndex = active ? 0 : -1; $(`#panel-${tab.dataset.tab}`).hidden = !active; }
+    if (focus) button.focus();
+  }
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('keydown', event => {
+      const target = event.key === 'ArrowRight' ? (i + 1) % tabs.length : event.key === 'ArrowLeft' ? (i + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : null;
+      if (target !== null) { event.preventDefault(); selectTab(tabs[target], true); }
+    });
+  });
+  $('#relationship-enabled').addEventListener('change', event => {
+    doc.character.companion.enabled = event.target.checked; touchCompanion(); $('#companion-content').hidden = !event.target.checked; changed();
+  });
+  document.querySelectorAll('[name="role"]').forEach(input => input.addEventListener('change', () => {
+    // Preserve custom role strings supplied by a valid import, even if no checkbox represents them.
+    const known = [...document.querySelectorAll('[name="role"]')].map(item => item.value);
+    const unknown = doc.character.companion.roles.filter(role => !known.includes(role));
+    doc.character.companion.roles = [...unknown, ...[...document.querySelectorAll('[name="role"]:checked')].map(item => item.value)]; touchCompanion(); changed();
+  }));
+  for (const key of ['romance', 'erotic', 'changePolicy']) $(`#relationship-${key}`).addEventListener('change', event => { doc.character.companion[key] = event.target.value; touchCompanion(); changed(); });
+  $('#relationship-approval').addEventListener('change', event => { doc.character.companion.approval = event.target.value; changed(); });
+  for (const key of ['license', 'attribution']) $(`#rights-${key}`).addEventListener('input', event => { doc.character.rights[key] = event.target.value; changed(); });
+
+  function renderVault() {
+    const list = $('#vault-list'); list.replaceChildren();
+    let slots;
+    try { slots = store?.list() || []; } catch (error) { storageFailure(error); status(error.message); return; }
+    if (!slots.length) { list.innerHTML = '<p class="empty-note">Nothing saved yet. Keep a version worth returning to.</p>'; return; }
+    for (const slot of slots) {
+      const box = document.createElement('div'); box.className = 'vault-item'; const text = document.createElement('div');
+      const name = document.createElement('strong'); name.textContent = slot.name;
+      const time = document.createElement('small'); time.textContent = new Date(slot.savedAt).toLocaleString(); text.append(name, time);
+      const actions = document.createElement('div'); actions.className = 'vault-actions';
+      const load = document.createElement('button'); load.className = 'button export'; load.textContent = 'Load'; load.setAttribute('aria-label', `Load ${slot.name}`);
+      load.addEventListener('click', () => {
+        try {
+          const loaded = store.load(slot.id); snapshot('Before loading a saved sketch');
+          doc = loaded; undo = []; renderAll(); persist(); $('#vault-dialog').close(); status(`Loaded ${slot.name}. Previous workspace kept as a snapshot.`);
+        } catch (error) { status(error.message); }
+      });
+      const remove = document.createElement('button'); remove.className = 'icon-button'; remove.textContent = '✕'; remove.setAttribute('aria-label', `Delete saved sketch ${slot.name}`);
+      remove.addEventListener('click', () => { try { store.remove(slot.id); renderVault(); renderCounts(); status('Saved snapshot deleted. The current workspace is unchanged.'); } catch (error) { storageFailure(error); status(error.message); } });
+      actions.append(load, remove); box.append(text, actions); list.append(box);
+    }
+  }
+  $('#open-vault').addEventListener('click', () => { $('#sketch-name').value = doc.character.kernel.name.text; renderVault(); openDialog('#vault-dialog'); });
+  $('#save-sketch').addEventListener('click', () => { try { snapshot($('#sketch-name').value); renderVault(); status('Snapshot saved on this device.'); } catch (error) { storageFailure(error); status(error.message); } });
+
+  function renderCodified() {
+    $('#codified-output').value = F.codify(doc, { approvedOnly: $('#approved-only').checked }).markdown;
+    $('#canonical-output').value = F.exportDocument(doc);
+    $('#download-companion').disabled = !doc.character.companion.enabled;
+  }
+  $('#open-transfer').addEventListener('click', () => { renderCodified(); $('#import-error').hidden = true; openDialog('#transfer-dialog'); });
+  $('#approved-only').addEventListener('change', renderCodified);
+  function filename(extension, suffix = '') { return `${(doc.character.kernel.name.text || 'persona').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'persona'}${suffix}.${extension}`; }
+  function download(text, type, name) {
+    const url = URL.createObjectURL(new Blob([text], { type })); const link = document.createElement('a');
+    link.href = url; link.download = name; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  $('#download-json').addEventListener('click', () => { try { download(F.exportDocument(doc), 'application/json', filename('json')); status('Canonical JSON exported, including banks and editorial metadata.'); } catch (error) { status(error.message); } });
+  $('#download-markdown').addEventListener('click', () => { download($('#codified-output').value, 'text/markdown;charset=utf-8', filename('md')); status('Readable Markdown exported.'); });
+  $('#download-companion').addEventListener('click', () => { const part = F.codify(doc, { approvedOnly: $('#approved-only').checked }).companion; if (part) download(part, 'text/markdown;charset=utf-8', filename('md', '-companion')); });
+  $('#copy-markdown').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('#codified-output').value); status('Markdown copied.'); }
+    catch { $('#codified-output').focus(); $('#codified-output').select(); status('Copy access is unavailable. The document is selected for manual copying.'); }
+  });
+  $('#copy-json').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('#canonical-output').value); status('Canonical JSON copied.'); }
+    catch { $('#canonical-section').open = true; $('#canonical-output').focus(); $('#canonical-output').select(); status('JSON selected for manual copying.'); }
+  });
+  $('#import-file').addEventListener('change', async event => {
+    const file = event.target.files[0]; if (!file) return;
+    if (file.size > 2_000_000) { $('#import-error').textContent = 'Choose a JSON file under 2 MB.'; $('#import-error').hidden = false; return; }
+    try { $('#import-text').value = await file.text(); $('#import-error').hidden = true; } catch { $('#import-error').textContent = 'The file could not be read.'; $('#import-error').hidden = false; }
+  });
+  $('#import-json').addEventListener('click', () => {
+    try {
+      const imported = F.importDocument($('#import-text').value); // Validate entirely before replacing state.
+      doc = imported; undo = []; renderAll(); persist(); renderCodified(); $('#import-error').hidden = true;
+      $('#import-text').value = ''; $('#import-file').value = ''; status('Character imported. Text, origin, approvals, banks, pins, and banishments preserved.');
+    } catch (error) { $('#import-error').textContent = `${error.message}\nNothing changed.`; $('#import-error').hidden = false; }
+  });
+  $('#new-character').addEventListener('click', () => openDialog('#new-dialog'));
+  $('#confirm-new').addEventListener('click', () => {
+    try { snapshot(doc.character.kernel.name.text || 'Before new character'); doc = F.createDocument(); undo = []; renderAll(); persist(); selectTab(tabs[0]); $('#new-dialog').close(); status('Fresh character ready. Your previous sketch is saved.'); }
+    catch (error) { storageFailure(error); status(error.message); }
+  });
+  document.addEventListener('keydown', event => {
+    if (event.altKey && event.key.toLowerCase() === 'r' && !document.querySelector('dialog[open]')) { event.preventDefault(); roll(); }
+  });
+  renderAll();
+})();
+</script>
+</body>
+</html>
