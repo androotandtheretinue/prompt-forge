@@ -269,21 +269,33 @@
   $('#open-vault').addEventListener('click', () => { $('#sketch-name').value = doc.character.kernel.name.text; renderVault(); openDialog('#vault-dialog'); });
   $('#save-sketch').addEventListener('click', () => { try { snapshot($('#sketch-name').value); renderVault(); status('Snapshot saved on this device.'); } catch (error) { storageFailure(error); status(error.message); } });
 
+  let downloadUrls = [];
   function renderCodified() {
-    $('#codified-output').value = F.codify(doc, { approvedOnly: $('#approved-only').checked }).markdown;
-    $('#canonical-output').value = F.exportDocument(doc);
-    $('#download-companion').disabled = !doc.character.companion.enabled;
+    const parts = F.codify(doc, { approvedOnly: $('#approved-only').checked });
+    const json = F.exportDocument(doc);
+    $('#codified-output').value = parts.markdown;
+    $('#canonical-output').value = json;
+    const oldUrls = downloadUrls; downloadUrls = [];
+    // Native download links keep the user's click attached to the download.
+    // Revoke old links after pending browser downloads have had time to start.
+    setTimeout(() => oldUrls.forEach(url => URL.revokeObjectURL(url)), 1000);
+    for (const [selector, text, type, name] of [
+      ['#download-json', json, 'application/json', filename('json')],
+      ['#download-markdown', parts.markdown, 'text/markdown;charset=utf-8', filename('md')],
+      ['#download-companion', parts.companion, 'text/markdown;charset=utf-8', filename('md', '-companion')]
+    ]) {
+      const link = $(selector); link.setAttribute('aria-disabled', String(text === null));
+      if (text === null) { link.removeAttribute('href'); link.tabIndex = -1; continue; }
+      const url = URL.createObjectURL(new Blob([text], { type })); downloadUrls.push(url);
+      link.href = url; link.download = name; link.tabIndex = 0;
+    }
   }
   $('#open-transfer').addEventListener('click', () => { renderCodified(); $('#import-error').hidden = true; openDialog('#transfer-dialog'); });
   $('#approved-only').addEventListener('change', renderCodified);
   function filename(extension, suffix = '') { return `${(doc.character.kernel.name.text || 'persona').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'persona'}${suffix}.${extension}`; }
-  function download(text, type, name) {
-    const url = URL.createObjectURL(new Blob([text], { type })); const link = document.createElement('a');
-    link.href = url; link.download = name; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-  $('#download-json').addEventListener('click', () => { try { download(F.exportDocument(doc), 'application/json', filename('json')); status('Canonical JSON exported, including banks and editorial metadata.'); } catch (error) { status(error.message); } });
-  $('#download-markdown').addEventListener('click', () => { download($('#codified-output').value, 'text/markdown;charset=utf-8', filename('md')); status('Readable Markdown exported.'); });
-  $('#download-companion').addEventListener('click', () => { const part = F.codify(doc, { approvedOnly: $('#approved-only').checked }).companion; if (part) download(part, 'text/markdown;charset=utf-8', filename('md', '-companion')); });
+  for (const selector of ['#download-json', '#download-markdown', '#download-companion']) $(selector).addEventListener('click', event => {
+    if (event.currentTarget.getAttribute('aria-disabled') === 'true') event.preventDefault();
+  });
   $('#copy-markdown').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText($('#codified-output').value); status('Markdown copied.'); }
     catch { $('#codified-output').focus(); $('#codified-output').select(); status('Copy access is unavailable. The document is selected for manual copying.'); }

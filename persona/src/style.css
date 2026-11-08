@@ -295,3 +295,5 @@ footer{gap:15px;margin-top:30px;font-size:7px;line-height:1.8}
 
 
 @media(max-width:650px){.icon-button{width:44px;height:44px}.trait-bottom{gap:3px}.trait-bottom .field-meta{flex-direction:column;align-items:flex-start;gap:0}.trait-actions{gap:0}}
+
+a.button{text-decoration:none}.button[aria-disabled=true]{opacity:.35;cursor:default}

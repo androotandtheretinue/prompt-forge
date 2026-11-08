@@ -110,7 +110,7 @@
   <dialog id="transfer-dialog" class="wide-dialog" aria-labelledby="transfer-title">
     <div class="dialog-heading"><div><span class="overline">PORTABLE BY DESIGN</span><h2 id="transfer-title">Codify &amp; carry.</h2></div><button class="icon-button close-dialog" aria-label="Close import and export">✕</button></div>
     <p>Codify organizes your selected words. It does not rewrite or approve them.</p>
-    <div class="transfer-buttons"><button id="download-json" class="button primary">Export canonical JSON <span aria-hidden="true">↓</span></button><button id="download-markdown" class="button export">Export Markdown <span aria-hidden="true">↓</span></button><button id="download-companion" class="button subtle">Companion sidecar ↓</button></div>
+    <div class="transfer-buttons"><a id="download-json" role="button" class="button primary">Export canonical JSON <span aria-hidden="true">↓</span></a><a id="download-markdown" role="button" class="button export">Export Markdown <span aria-hidden="true">↓</span></a><a id="download-companion" role="button" class="button subtle">Companion sidecar ↓</a></div>
     <div class="codify-controls"><label class="checkbox-label"><input id="approved-only" type="checkbox"> Approved entries only in Markdown</label><button id="copy-markdown" class="text-button">Copy Markdown</button></div>
     <label>Readable character document<textarea id="codified-output" readonly rows="12" spellcheck="false"></textarea></label>
     <details id="canonical-section"><summary>Inspect canonical JSON</summary><label for="canonical-output" class="sr-only">Canonical JSON document</label><textarea id="canonical-output" readonly rows="8" spellcheck="false"></textarea><button id="copy-json" class="text-button">Copy JSON</button></details>
